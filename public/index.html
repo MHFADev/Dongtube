@@ -1767,14 +1767,22 @@
       let url = `${API_BASE}${path}`;
       
       // cURL
-      let curlCmd = `curl -X ${method}`;
-      if (method === 'GET' && Object.keys(params).length > 0) {
-        url += `?${new URLSearchParams(params)}`;
-        curlCmd += ` "${url}"`;
-      } else if (method === 'POST' && Object.keys(params).length > 0) {
-        curlCmd += ` "${API_BASE}${path}" \\\n  -H "Content-Type: application/json" \\\n  -d '${JSON.stringify(params, null, 2)}'`;
+      let curlCmd = '';
+      if (method === 'GET') {
+        if (Object.keys(params).length > 0) {
+          url += `?${new URLSearchParams(params)}`;
+          curlCmd = `curl "${url}"`;
+        } else {
+          curlCmd = `curl "${API_BASE}${path}"`;
+        }
+      } else if (method === 'POST') {
+        if (Object.keys(params).length > 0) {
+          curlCmd = `curl -X POST "${API_BASE}${path}" \\\n  -H "Content-Type: application/json" \\\n  -d '${JSON.stringify(params, null, 2)}'`;
+        } else {
+          curlCmd = `curl -X POST "${API_BASE}${path}"`;
+        }
       } else {
-        curlCmd += ` "${API_BASE}${path}"`;
+        curlCmd = `curl -X ${method} "${API_BASE}${path}"`;
       }
       document.getElementById(`code-curl-${epId}`).innerHTML = highlightSyntax(curlCmd, 'curl');
 
