@@ -1351,27 +1351,47 @@
     let allCategories = [];
 
     function highlightSyntax(code, lang) {
-      // Escape HTML first
-      let highlighted = code
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
+      let highlighted = code;
       
       if (lang === 'curl') {
-        // Highlight curl command
+        // Escape HTML entities in the code
         highlighted = highlighted
-          .replace(/^(curl)/gm, '<span class="syntax-keyword">$1</span>')
-          .replace(/(-X|-H|-d|--data|--header)/g, '<span class="syntax-keyword">$1</span>')
-          .replace(/(GET|POST|PUT|DELETE|PATCH)/g, '<span class="syntax-method">$1</span>')
-          .replace(/(https?:\/\/[^\s'"\\]+)/g, '<span class="syntax-url">$1</span>')
-          .replace(/('([^'\\]|\\.)*')/g, '<span class="syntax-string">$1</span>')
-          .replace(/("([^"\\]|\\.)*")/g, '<span class="syntax-string">$1</span>')
-          .replace(/(Content-Type|application\/json)/g, '<span class="syntax-property">$1</span>');
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+        
+        // Highlight curl command - order matters!
+        highlighted = highlighted
+          // URLs first (before strings)
+          .replace(/(https?:\/\/[^\s"']+)/g, '<span class="syntax-url">$1</span>')
+          // Strings (with quotes)
+          .replace(/(&quot;|")([^"]*?)(&quot;|")/g, '<span class="syntax-string">&quot;$2&quot;</span>')
+          .replace(/('([^']*?)')/g, '<span class="syntax-string">$1</span>')
+          // curl keyword
+          .replace(/^(curl)\b/gm, '<span class="syntax-keyword">$1</span>')
+          // Options
+          .replace(/\s(-X|-H|-d|--data|--header)\b/g, ' <span class="syntax-keyword">$1</span>')
+          // HTTP methods
+          .replace(/\b(GET|POST|PUT|DELETE|PATCH)\b/g, '<span class="syntax-method">$1</span>')
+          // Content types
+          .replace(/\b(Content-Type|application\/json)\b/g, '<span class="syntax-property">$1</span>');
+          
       } else if (lang === 'js') {
-        // Highlight JavaScript
+        // Escape HTML entities
+        highlighted = highlighted
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+        
+        // Highlight JavaScript - order matters!
         highlighted = highlighted
           // Comments first
           .replace(/(\/\/.*$)/gm, '<span class="syntax-comment">$1</span>')
+          // URLs (before strings)
+          .replace(/(https?:\/\/[^\s'"]+)/g, '<span class="syntax-url">$1</span>')
+          // Strings (single and double quotes)
+          .replace(/('(?:[^'\\]|\\.)*?')/g, '<span class="syntax-string">$1</span>')
+          .replace(/("(?:[^"\\]|\\.)*?")/g, '<span class="syntax-string">$1</span>')
           // Keywords
           .replace(/\b(const|let|var|function|async|await|return|import|from|new|if|else|for|while|try|catch)\b/g, '<span class="syntax-keyword">$1</span>')
           // Methods
@@ -1380,33 +1400,35 @@
           .replace(/\b(console|JSON|URLSearchParams)\b/g, '<span class="syntax-function">$1</span>')
           // Properties
           .replace(/\b(method|headers|body|params)\b/g, '<span class="syntax-property">$1</span>')
-          // Strings (handle both single and double quotes)
-          .replace(/('([^'\\]|\\.)*')/g, '<span class="syntax-string">$1</span>')
-          .replace(/("([^"\\]|\\.)*")/g, '<span class="syntax-string">$1</span>')
           // Numbers
           .replace(/\b(\d+)\b/g, '<span class="syntax-number">$1</span>')
-          // URLs
-          .replace(/(https?:\/\/[^\s'"]+)/g, '<span class="syntax-url">$1</span>')
           // Operators
-          .replace(/(=&gt;)/g, '<span class="syntax-operator">$1</span>');
+          .replace(/=&gt;/g, '<span class="syntax-operator">=&gt;</span>');
+          
       } else if (lang === 'python') {
-        // Highlight Python
+        // Escape HTML entities
+        highlighted = highlighted
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+        
+        // Highlight Python - order matters!
         highlighted = highlighted
           // Comments first
           .replace(/(#.*$)/gm, '<span class="syntax-comment">$1</span>')
+          // URLs (before strings)
+          .replace(/(https?:\/\/[^\s'"]+)/g, '<span class="syntax-url">$1</span>')
+          // Strings (single and double quotes)
+          .replace(/('(?:[^'\\]|\\.)*?')/g, '<span class="syntax-string">$1</span>')
+          .replace(/("(?:[^"\\]|\\.)*?")/g, '<span class="syntax-string">$1</span>')
           // Keywords
           .replace(/\b(import|from|def|class|return|if|else|elif|for|while|try|except|with|as|pass|break|continue)\b/g, '<span class="syntax-keyword">$1</span>')
           // Functions
           .replace(/\b(requests|print|get|post|json)\b/g, '<span class="syntax-function">$1</span>')
           // Properties
           .replace(/\b(params|data|json)\b(?=\s*=)/g, '<span class="syntax-property">$1</span>')
-          // Strings (handle both single and double quotes)
-          .replace(/('([^'\\]|\\.)*')/g, '<span class="syntax-string">$1</span>')
-          .replace(/("([^"\\]|\\.)*")/g, '<span class="syntax-string">$1</span>')
           // Numbers
-          .replace(/\b(\d+)\b/g, '<span class="syntax-number">$1</span>')
-          // URLs
-          .replace(/(https?:\/\/[^\s'"]+)/g, '<span class="syntax-url">$1</span>');
+          .replace(/\b(\d+)\b/g, '<span class="syntax-number">$1</span>');
       }
       
       return highlighted;
