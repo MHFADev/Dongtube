@@ -25,21 +25,6 @@
       --success: #00FF88;
       --error: #FF4444;
       
-      /* Category Colors */
-      --cat-social-from: #3B82F6;
-      --cat-social-to: #1D4ED8;
-      --cat-anime-from: #EC4899;
-      --cat-anime-to: #9333EA;
-      --cat-news-from: #EF4444;
-      --cat-news-to: #F97316;
-      --cat-image-from: #10B981;
-      --cat-image-to: #14B8A6;
-      --cat-search-from: #F59E0B;
-      --cat-search-to: #FBBF24;
-      --cat-random-from: #8B5CF6;
-      --cat-random-to: #EC4899;
-      --cat-other-from: #6B7280;
-      --cat-other-to: #4B5563;
       
       /* Syntax Highlighting */
       --syntax-keyword: #60A5FA;
@@ -204,108 +189,35 @@
 
     .category-btn {
       padding: 10px 18px;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
+      background: rgba(255, 165, 0, 0.05);
+      border: 1px solid rgba(255, 165, 0, 0.2);
+      color: rgba(255, 165, 0, 0.8);
       border-radius: 8px;
       font-size: 0.8125rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       white-space: nowrap;
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      position: relative;
+      overflow: hidden;
     }
 
-    .category-btn:hover {
-      border-color: var(--primary);
-      color: var(--text);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(255, 165, 0, 0.15);
+    .category-btn:hover:not(.active) {
+      background: rgba(255, 165, 0, 0.1);
+      border-color: rgba(255, 165, 0, 0.4);
+      color: var(--primary);
+      transform: translateY(-1px);
     }
 
     .category-btn.active {
       background: var(--primary);
       border-color: var(--primary);
       color: var(--bg-dark);
-    }
-
-    .category-btn[data-category="Social Media"]:not(.active) {
-      border-color: var(--cat-social-from);
-      color: var(--cat-social-from);
-    }
-
-    .category-btn[data-category="Social Media"].active {
-      background: linear-gradient(135deg, var(--cat-social-from), var(--cat-social-to));
-      border-color: transparent;
-      color: white;
-    }
-
-    .category-btn[data-category="Anime"]:not(.active) {
-      border-color: var(--cat-anime-from);
-      color: var(--cat-anime-from);
-    }
-
-    .category-btn[data-category="Anime"].active {
-      background: linear-gradient(135deg, var(--cat-anime-from), var(--cat-anime-to));
-      border-color: transparent;
-      color: white;
-    }
-
-    .category-btn[data-category="News"]:not(.active) {
-      border-color: var(--cat-news-from);
-      color: var(--cat-news-from);
-    }
-
-    .category-btn[data-category="News"].active {
-      background: linear-gradient(135deg, var(--cat-news-from), var(--cat-news-to));
-      border-color: transparent;
-      color: white;
-    }
-
-    .category-btn[data-category="Image Processing"]:not(.active) {
-      border-color: var(--cat-image-from);
-      color: var(--cat-image-from);
-    }
-
-    .category-btn[data-category="Image Processing"].active {
-      background: linear-gradient(135deg, var(--cat-image-from), var(--cat-image-to));
-      border-color: transparent;
-      color: white;
-    }
-
-    .category-btn[data-category="Search & Tools"]:not(.active) {
-      border-color: var(--cat-search-from);
-      color: var(--cat-search-from);
-    }
-
-    .category-btn[data-category="Search & Tools"].active {
-      background: linear-gradient(135deg, var(--cat-search-from), var(--cat-search-to));
-      border-color: transparent;
-      color: white;
-    }
-
-    .category-btn[data-category="Random & Fun"]:not(.active) {
-      border-color: var(--cat-random-from);
-      color: var(--cat-random-from);
-    }
-
-    .category-btn[data-category="Random & Fun"].active {
-      background: linear-gradient(135deg, var(--cat-random-from), var(--cat-random-to));
-      border-color: transparent;
-      color: white;
-    }
-
-    .category-btn[data-category="Other"]:not(.active) {
-      border-color: var(--cat-other-from);
-      color: var(--cat-other-from);
-    }
-
-    .category-btn[data-category="Other"].active {
-      background: linear-gradient(135deg, var(--cat-other-from), var(--cat-other-to));
-      border-color: transparent;
-      color: white;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(255, 165, 0, 0.25);
     }
 
     .category-badge {
@@ -317,49 +229,10 @@
       font-size: 0.7rem;
       font-weight: 600;
       margin-left: 8px;
-      transition: all 0.3s ease;
-    }
-
-    .category-badge[data-category="Social Media"] {
-      background: linear-gradient(135deg, var(--cat-social-from), var(--cat-social-to));
-      border: 1px solid var(--cat-social-from);
-      color: white;
-    }
-
-    .category-badge[data-category="Anime"] {
-      background: linear-gradient(135deg, var(--cat-anime-from), var(--cat-anime-to));
-      border: 1px solid var(--cat-anime-from);
-      color: white;
-    }
-
-    .category-badge[data-category="News"] {
-      background: linear-gradient(135deg, var(--cat-news-from), var(--cat-news-to));
-      border: 1px solid var(--cat-news-from);
-      color: white;
-    }
-
-    .category-badge[data-category="Image Processing"] {
-      background: linear-gradient(135deg, var(--cat-image-from), var(--cat-image-to));
-      border: 1px solid var(--cat-image-from);
-      color: white;
-    }
-
-    .category-badge[data-category="Search & Tools"] {
-      background: linear-gradient(135deg, var(--cat-search-from), var(--cat-search-to));
-      border: 1px solid var(--cat-search-from);
-      color: white;
-    }
-
-    .category-badge[data-category="Random & Fun"] {
-      background: linear-gradient(135deg, var(--cat-random-from), var(--cat-random-to));
-      border: 1px solid var(--cat-random-from);
-      color: white;
-    }
-
-    .category-badge[data-category="Other"] {
-      background: linear-gradient(135deg, var(--cat-other-from), var(--cat-other-to));
-      border: 1px solid var(--cat-other-from);
-      color: white;
+      background: rgba(255, 165, 0, 0.1);
+      border: 1px solid rgba(255, 165, 0, 0.3);
+      color: var(--primary);
+      transition: all 0.2s ease;
     }
 
     /* Endpoints */
