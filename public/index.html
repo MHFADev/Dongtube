@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dongtube APIs</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #FFA500;
+      --primary-light: #FFB733;
+      --secondary: #FFD700;
+      --bg-dark: #0D0D0D;
+      --bg-darker: #080808;
+      --bg-card: #1A1A1A;
+      --text: #FFFFFF;
+      --text-muted: #888888;
+      --border: #2A2A2A;
+      --success: #00FF88;
+      --error: #FF4444;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 60px 24px;
+    }
+
+    /* Header */
+    .header {
+      margin-bottom: 60px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .brand-title {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+
+    .brand-title span {
+      color: var(--primary);
+    }
+
+    .version {
+      background: var(--primary);
+      color: var(--bg-dark);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .header p {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin-bottom: 24px;
+    }
+
+    .header-links {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .header-links a {
+      padding: 10px 20px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .header-links a:hover {
+      border-color: var(--primary);
+      background: rgba(255, 165, 0, 0.05);
+    }
+
+    /* Stats */
+    .stats-container {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+
+    .stats {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 16px 24px;
+      border-radius: 12px;
+    }
+
+    .stats-number {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .stats-label {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    /* Filters Section */
+    .filters-section {
+      margin-bottom: 32px;
+    }
+
+    .search {
+      margin-bottom: 20px;
+    }
+
+    .search-input {
+      width: 100%;
+      max-width: 600px;
+      padding: 14px 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 0.9375rem;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: var(--bg-darker);
+    }
+
+    .search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* Category Filters */
+    .category-filters {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-label {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .category-btn {
+      padding: 10px 18px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 8px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .category-btn:hover {
+      border-color: var(--primary);
+      color: var(--text);
+    }
+
+    .category-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--bg-dark);
+    }
+
+    .category-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: rgba(255, 165, 0, 0.1);
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+
+    /* Endpoints */
+    .endpoints {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 80px;
+    }
+
+    .endpoint {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .endpoint:hover {
+      border-color: #3A3A3A;
+    }
+
+    .endpoint.active {
+      border-color: var(--primary);
+    }
+
+    .endpoint-header {
+      display: grid;
+      grid-template-columns: 100px 1fr auto;
+      align-items: center;
+      gap: 16px;
+      padding: 20px 24px;
+      cursor: pointer;
+      user-select: none;
+      min-height: 88px;
+    }
+
+    .method { 
+      padding: 6px 14px;
+      background: rgba(255, 165, 0, 0.1);
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-align: center;
+      width: 100px;
+      flex-shrink: 0;
+    }
+
+    .endpoint-info {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .endpoint-title-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 4px;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .endpoint-path {
+      font-family: 'SF Mono', 'Menlo', monospace;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .endpoint-desc {  
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      width: 100%;
+    }
+
+    .endpoint-arrow {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      transition: transform 0.2s;
+      flex-shrink: 0;
+      width: 20px;
+      text-align: center;
+    }
+
+    .endpoint.active .endpoint-arrow {
+      transform: rotate(180deg);
+    }
+
+    /* Endpoint Body */
+    .endpoint-body {
+      display: none;
+      padding: 24px;
+      border-top: 1px solid var(--border);
+      background: var(--bg-darker);
+    }
+
+    .endpoint.active .endpoint-body {
+      display: block;
+    }
+
+    .methods-switch {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .method-btn {
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 6px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .method-btn:hover {
+      border-color: var(--primary);
+      color: var(--text);
+    }
+
+    .method-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--bg-dark);
+    }
+
+    .param {
+      margin-bottom: 20px;
+    }
+
+    .param-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .required {
+      color: var(--error);
+      margin-left: 4px;
+    }
+
+    .param-hint {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .param-input {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.875rem;
+      font-family: 'SF Mono', monospace;
+      transition: all 0.2s;
+    }
+
+    .param-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: var(--bg-dark);
+    }
+
+    .execute-btn {
+      padding: 12px 32px;
+      background: var(--primary);
+      border: none;
+      border-radius: 8px;
+      color: var(--bg-dark);
+      font-size: 0.875rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .execute-btn:hover:not(:disabled) {
+      background: var(--primary-light);
+    }
+
+    .execute-btn:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+
+    .execute-btn:disabled {
+      background: var(--border);
+      color: var(--text-muted);
+      cursor: not-allowed;
+    }
+
+    .execute-btn.loading::after {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      top: 50%;
+      left: 50%;
+      margin-left: -8px;
+      margin-top: -8px;
+      border: 2px solid var(--bg-dark);
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    /* Results */
+    .result {
+      display: none;
+      margin-top: 28px;
+    }
+
+    .result.show {
+      display: block;
+    }
+
+    .result-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+
+    .result-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      max-height: 500px;
+      overflow: auto;
+      font-family: 'SF Mono', monospace;
+      font-size: 0.8125rem;
+      line-height: 1.6;
+    }
+
+    .code-example {
+      background: var(--bg-darker);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+      position: relative;
+    }
+
+    .code-example-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .code-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .code-tab {
+      padding: 6px 12px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .code-tab.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--bg-dark);
+    }
+
+    .code-content {
+      display: none;
+    }
+
+    .code-content.active {
+      display: block;
+    }
+
+    .code-block {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 14px;
+      font-family: 'SF Mono', monospace;
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+      overflow-x: auto;
+      position: relative;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      padding: 6px 12px;
+      background: var(--bg-darker);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 4px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .copy-btn.copied {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--bg-dark);
+    }
+
+    .result-meta {
+      padding-bottom: 16px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    .result-meta strong {
+      color: var(--text);
+    }
+
+    .result-box img,
+    .result-box video {
+      max-width: 100%;
+      border-radius: 8px;
+      margin-top: 16px;
+    }
+
+    .result-box pre {
+      color: var(--text-muted);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* Status Table */
+    .status-table-wrap {
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    .status-table-wrap h4 {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+    }
+
+    .status-table {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .status-table th {
+      background: var(--bg-card);
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .status-table td {
+      padding: 12px 16px;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .status-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .status-code {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .status-icon {
+      font-size: 1rem;
+    }
+
+    .status-icon.ok { color: var(--success); }
+    .status-icon.err { color: var(--error); }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 40px 0;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      margin: 0 auto 16px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-muted);
+    }
+
+    /* Scrollbar */
+    .result-box::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    .result-box::-webkit-scrollbar-track {
+      background: var(--bg-darker);
+    }
+
+    .result-box::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    .result-box::-webkit-scrollbar-thumb:hover {
+      background: #3A3A3A;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container {
+        padding: 40px 16px;
+      }
+
+      .brand-title {
+        font-size: 1.75rem;
+      }
+
+      .header p {
+        font-size: 0.9375rem;
+      }
+
+      .stats-container {
+        flex-direction: column;
+      }
+
+      .stats {
+        width: 100%;
+      }
+
+      .category-filters {
+        gap: 8px;
+      }
+
+      .category-btn {
+        padding: 8px 14px;
+        font-size: 0.75rem;
+      }
+
+      .endpoint-header {
+        grid-template-columns: 80px 1fr auto;
+        padding: 16px;
+        gap: 12px;
+        min-height: 80px;
+      }
+
+      .endpoint-body {
+        padding: 20px 16px;
+      }
+
+      .method {
+        width: 80px;
+        font-size: 0.6875rem;
+        padding: 5px 10px;
+      }
+
+      .endpoint-path {
+        font-size: 0.875rem;
+      }
+
+      .endpoint-desc {
+        font-size: 0.8125rem;
+      }
+    }
+      
+    @media (max-width: 480px) {
+      .endpoint-header {
+        grid-template-columns: 70px 1fr 20px;
+        gap: 8px;
+        padding: 12px;
+      }
+      
+      .method {
+        width: 70px;
+        font-size: 0.625rem;
+        padding: 4px 8px;
+      }
+      
+      .endpoint-path {
+        font-size: 0.8125rem;
+      }
+      
+      .endpoint-desc {
+        font-size: 0.75rem;
+      }
+
+      .category-btn {
+        padding: 6px 12px;
+        font-size: 0.7rem;
+      }
+
+      .filter-label {
+        width: 100%;
+        margin-bottom: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="brand">
+        <h1 class="brand-title">Dongtube<span>.</span></h1>
+        <span class="version">v2.0</span>
+      </div>
+      <p>Interactive API documentation with real-time testing capabilities for developers.</p>
+      <div class="header-links">
+        <a href="https://whatsapp.com/channel/0029Vb91qeW17Emm4TVqu53K" target="_blank">WhatsApp Channel</a>
+        <a href="https://wa.me/6283143961588" target="_blank">Contact Admin</a>
+      </div>
+    </header>
+
+    <div class="stats-container">
+      <div class="stats">
+        <div class="stats-number" id="totalEndpoints">0</div>
+        <div class="stats-label">total endpoints</div>
+      </div>
+      <div class="stats">
+        <div class="stats-number" id="totalCategories">0</div>
+        <div class="stats-label">categories</div>
+      </div>
+    </div>
+
+    <div class="filters-section">
+      <div class="search">
+        <input type="text" class="search-input" id="searchInput" placeholder="Search endpoints by name, path, or description...">
+      </div>
+      
+      <div class="category-filters">
+        <span class="filter-label">Filter by Category:</span>
+        <button class="category-btn active" data-category="all" onclick="filterByCategory('all')">
+          All
+        </button>
+        <div id="categoryButtons"></div>
+      </div>
+    </div>
+
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Loading endpoints...</p>
+    </div>
+
+    <div id="endpointsContainer" class="endpoints"></div>
+
+    <footer class="footer">
+      © 2025 Dongtube APIs. All rights reserved.
+    </footer>
+  </div>
+
+  <script>
+    const API_BASE = window.location.origin;
+    let allEndpoints = [];
+    let renderedEndpoints = [];
+    let currentCategory = 'all';
+    let currentSearch = '';
+
+    // Function to determine category based on path
+    function determineCategory(path, name, description) {
+      const pathLower = path.toLowerCase();
+      const nameLower = (name || '').toLowerCase();
+      const descLower = (description || '').toLowerCase();
+      
+      // Social Media & Downloads
+      if (pathLower.includes('/tiktok') || pathLower.includes('/instagram') || 
+          pathLower.includes('/facebook') || pathLower.includes('/youtube') ||
+          pathLower.includes('/xiaohongshu') || pathLower.includes('/snackvideo') ||
+          pathLower.includes('/story')) {
+        return 'Social Media';
+      }
+      
+      // Anime
+      if (pathLower.includes('/anime') || pathLower.includes('/mal') || 
+          pathLower.includes('/anilist') || pathLower.includes('/neko') ||
+          pathLower.includes('/waifu') || pathLower.includes('/oploverz') ||
+          pathLower.includes('/anichin') || nameLower.includes('anime')) {
+        return 'Anime';
+      }
+      
+      // News
+      if (pathLower.includes('/news') || pathLower.includes('/kompas') ||
+          nameLower.includes('news') || descLower.includes('news')) {
+        return 'News';
+      }
+      
+      // Image Processing
+      if (pathLower.includes('/image') || pathLower.includes('/ideogram') ||
+          pathLower.includes('/brat') || pathLower.includes('/maker') ||
+          pathLower.includes('/enhance')) {
+        return 'Image Processing';
+      }
+      
+      // Search & Tools
+      if (pathLower.includes('/search') || pathLower.includes('/apk') ||
+          pathLower.includes('/lyrics') || pathLower.includes('/wikipedia')) {
+        return 'Search & Tools';
+      }
+      
+      // Random & Fun
+      if (pathLower.includes('/random') || pathLower.includes('/meme') ||
+          pathLower.includes('/r/')) {
+        return 'Random & Fun';
+      }
+      
+      // Default
+      return 'Other';
+    }
+
+    async function loadEndpoints() {
+      try {
+        const res = await fetch(`${API_BASE}/api/docs`);
+        const data = await res.json();
+        
+        if (data.success) {
+          // Add category to each endpoint
+          allEndpoints = data.endpoints.map(ep => ({
+            ...ep,
+            category: determineCategory(ep.path, ep.name, ep.description)
+          }));
+          
+          // Get unique categories
+          const categories = [...new Set(allEndpoints.map(ep => ep.category))].sort();
+          
+          // Render category buttons
+          renderCategoryButtons(categories);
+          
+          // Update stats
+          document.getElementById('totalEndpoints').textContent = allEndpoints.length;
+          document.getElementById('totalCategories').textContent = categories.length;
+          
+          // Render endpoints
+          renderEndpoints(allEndpoints);
+        }
+      } catch (err) {
+        console.error('Error:', err);
+        document.getElementById('loading').innerHTML = '<p style="color: var(--error);">Failed to load endpoints.</p>';
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+      }
+    }
+
+    function renderCategoryButtons(categories) {
+      const container = document.getElementById('categoryButtons');
+      container.innerHTML = categories.map(cat => `
+        <button class="category-btn" data-category="${cat}" onclick="filterByCategory('${cat}')">
+          ${cat}
+        </button>
+      `).join('');
+    }
+
+    function filterByCategory(category) {
+      currentCategory = category;
+      
+      // Update active button
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.category === category) {
+          btn.classList.add('active');
+        }
+      });
+      
+      // Filter and render
+      applyFilters();
+    }
+
+    function applyFilters() {
+      let filtered = allEndpoints;
+      
+      // Apply category filter
+      if (currentCategory !== 'all') {
+        filtered = filtered.filter(ep => ep.category === currentCategory);
+      }
+      
+      // Apply search filter
+      if (currentSearch) {
+        const q = currentSearch.toLowerCase();
+        filtered = filtered.filter(ep => 
+          ep.name.toLowerCase().includes(q) ||
+          ep.path.toLowerCase().includes(q) ||
+          (ep.description && ep.description.toLowerCase().includes(q)) ||
+          (ep.category && ep.category.toLowerCase().includes(q))
+        );
+      }
+      
+      renderEndpoints(filtered);
+    }
+
+    function renderEndpoints(endpoints) {
+      const container = document.getElementById('endpointsContainer');
+      
+      if (endpoints.length === 0) {
+        container.innerHTML = '<div class="no-results">No endpoints found</div>';
+        renderedEndpoints = [];
+        return;
+      }
+
+      // Store rendered endpoints for lookup
+      renderedEndpoints = endpoints;
+
+      container.innerHTML = endpoints.map((ep, idx) => {
+        const methods = ep.method.split(',').map(m => m.trim());
+        const id = `ep-${idx}`;
+        
+        return `
+          <div class="endpoint" id="${id}">
+            <div class="endpoint-header" onclick="toggle('${id}')">
+              <div class="method">${ep.method}</div>
+              <div class="endpoint-info">
+                <div class="endpoint-title-row">
+                  <div class="endpoint-path" title="${ep.path}">${ep.path}</div>
+                  <span class="category-badge">${ep.category}</span>
+                </div>
+                <div class="endpoint-desc" title="${ep.description || ep.name}">${ep.description || ep.name}</div>
+              </div>
+              <div class="endpoint-arrow">▼</div>
+            </div>
+            <div class="endpoint-body">
+              <div class="methods-switch">
+                ${methods.map(m => `
+                  <button class="method-btn ${m === methods[0] ? 'active' : ''}" 
+                          onclick="selectMethod('${id}', '${m}')" 
+                          data-method="${m}">${m}</button>
+                `).join('')}
+              </div>
+
+              ${ep.params && ep.params.length > 0 ? ep.params.map(p => `
+                <div class="param">
+                  <div class="param-label">
+                    ${p.name}${p.required ? '<span class="required">*</span>' : ''}
+                  </div>
+                  <div class="param-hint">${p.description || ''}</div>
+                  <input type="text" class="param-input" data-param="${p.name}" 
+                         placeholder="${p.placeholder || p.name}" 
+                         oninput="updateCodeExamples('${id}')">
+                </div>
+              `).join('') : '<p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 16px;">No parameters required</p>'}
+              
+              <button class="execute-btn" onclick="execute('${id}', '${ep.path}', ${ep.responseBinary || false})">
+                Execute
+              </button>
+
+              <div class="code-example">
+                <div class="code-example-title">Code Examples</div>
+                <div class="code-tabs">
+                  <button class="code-tab active" onclick="switchTab('${id}', 'curl')">cURL</button>
+                  <button class="code-tab" onclick="switchTab('${id}', 'js')">JavaScript</button>
+                  <button class="code-tab" onclick="switchTab('${id}', 'python')">Python</button>
+                </div>
+                <div class="code-content active" data-tab="curl" data-ep="${id}">
+                  <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode('${id}', 'curl')">Copy</button>
+                    <pre id="code-curl-${id}"></pre>
+                  </div>
+                </div>
+                <div class="code-content" data-tab="js" data-ep="${id}">
+                  <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode('${id}', 'js')">Copy</button>
+                    <pre id="code-js-${id}"></pre>
+                  </div>
+                </div>
+                <div class="code-content" data-tab="python" data-ep="${id}">
+                  <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode('${id}', 'python')">Copy</button>
+                    <pre id="code-python-${id}"></pre>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="result" id="result-${id}">
+                <div class="result-label">Response</div>
+                <div class="result-box" id="result-content-${id}"></div>
+              </div>
+              
+              <div class="status-table-wrap">
+                <h4>Status Codes</h4>
+                <table class="status-table">
+                  <thead>
+                    <tr>
+                      <th>Code</th>
+                      <th>Description</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><div class="status-code"><span class="status-icon ok">✓</span>200</div></td>
+                      <td>Request successful</td>
+                    </tr>
+                    <tr>
+                      <td><div class="status-code"><span class="status-icon err">✕</span>400</div></td>
+                      <td>Bad request - invalid parameters</td>
+                    </tr>
+                    <tr>
+                      <td><div class="status-code"><span class="status-icon err">✕</span>500</div></td>
+                      <td>Internal server error</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Update code examples for all endpoints
+      endpoints.forEach((ep, idx) => {
+        updateCodeExamples(`ep-${idx}`);
+      });
+    }
+
+    function toggle(id) {
+      const el = document.getElementById(id);
+      el.classList.toggle('active');
+    }
+
+    function selectMethod(epId, method) {
+      const el = document.getElementById(epId);
+      el.querySelectorAll('.method-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.method === method) {
+          btn.classList.add('active');
+        }
+      });
+      updateCodeExamples(epId);
+    }
+
+    function switchTab(epId, lang) {
+      const el = document.getElementById(epId);
+      el.querySelectorAll('.code-tab').forEach(tab => tab.classList.remove('active'));
+      el.querySelectorAll('.code-content').forEach(content => content.classList.remove('active'));
+      
+      el.querySelector(`.code-tab[onclick*="'${lang}'"]`).classList.add('active');
+      el.querySelector(`.code-content[data-tab="${lang}"]`).classList.add('active');
+    }
+
+    async function copyCode(epId, lang) {
+      const code = document.getElementById(`code-${lang}-${epId}`).textContent;
+      await navigator.clipboard.writeText(code);
+      
+      const btn = event.target;
+      const orig = btn.textContent;
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = orig;
+        btn.classList.remove('copied');
+      }, 2000);
+    }
+
+    function updateCodeExamples(epId) {
+      const el = document.getElementById(epId);
+      const activeBtn = el.querySelector('.method-btn.active');
+      const method = activeBtn ? activeBtn.dataset.method : 'GET';
+      
+      const params = {};
+      el.querySelectorAll('.param-input').forEach(input => {
+        if (input.value.trim()) {
+          params[input.dataset.param] = input.value.trim();
+        }
+      });
+
+      // Get endpoint from rendered endpoints using the index
+      const epIndex = parseInt(epId.replace('ep-', ''));
+      const endpoint = renderedEndpoints[epIndex];
+      if (!endpoint) return;
+
+      const path = endpoint.path;
+      let url = `${API_BASE}${path}`;
+      
+      // cURL
+      let curlCmd = `curl -X ${method}`;
+      if (method === 'GET' && Object.keys(params).length > 0) {
+        url += `?${new URLSearchParams(params)}`;
+        curlCmd += ` "${url}"`;
+      } else if (method === 'POST' && Object.keys(params).length > 0) {
+        curlCmd += ` "${API_BASE}${path}" \\\n  -H "Content-Type: application/json" \\\n  -d '${JSON.stringify(params, null, 2)}'`;
+      } else {
+        curlCmd += ` "${API_BASE}${path}"`;
+      }
+      document.getElementById(`code-curl-${epId}`).textContent = curlCmd;
+
+      // JavaScript
+      let jsCode = `fetch('${API_BASE}${path}'`;
+      if (method === 'GET' && Object.keys(params).length > 0) {
+        jsCode = `const params = new URLSearchParams(${JSON.stringify(params)});\nfetch('${API_BASE}${path}?' + params`;
+      } else if (method === 'POST' && Object.keys(params).length > 0) {
+        jsCode = `fetch('${API_BASE}${path}', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify(${JSON.stringify(params, null, 4)})\n}`;
+      }
+      jsCode += `)\n  .then(res => res.json())\n  .then(data => console.log(data));`;
+      document.getElementById(`code-js-${epId}`).textContent = jsCode;
+
+      // Python
+      let pyCode = `import requests\n\n`;
+      if (method === 'GET') {
+        if (Object.keys(params).length > 0) {
+          pyCode += `params = ${JSON.stringify(params, null, 2)}\n`;
+          pyCode += `response = requests.get('${API_BASE}${path}', params=params)`;
+        } else {
+          pyCode += `response = requests.get('${API_BASE}${path}')`;
+        }
+      } else {
+        if (Object.keys(params).length > 0) {
+          pyCode += `data = ${JSON.stringify(params, null, 2)}\n`;
+          pyCode += `response = requests.post('${API_BASE}${path}', json=data)`;
+        } else {
+          pyCode += `response = requests.post('${API_BASE}${path}')`;
+        }
+      }
+      pyCode += `\nprint(response.json())`;
+      document.getElementById(`code-python-${epId}`).textContent = pyCode;
+    }
+
+    async function execute(id, path, isBinary) {
+      const el = document.getElementById(id);
+      const resultEl = document.getElementById(`result-${id}`);
+      const contentEl = document.getElementById(`result-content-${id}`);
+      
+      const activeBtn = el.querySelector('.method-btn.active');
+      const method = activeBtn ? activeBtn.dataset.method : 'GET';
+      
+      const params = {};
+      el.querySelectorAll('.param-input').forEach(input => {
+        if (input.value.trim()) {
+          params[input.dataset.param] = input.value.trim();
+        }
+      });
+
+      let url = `${API_BASE}${path}`;
+      
+      if (isBinary || path.includes('/random/')) {
+        url += `${url.includes('?') ? '&' : '?'}_t=${Date.now()}`;
+      }
+      
+      if (method === 'GET' && Object.keys(params).length > 0) {
+        url += `${url.includes('?') ? '&' : '?'}${new URLSearchParams(params)}`;
+      }
+
+      resultEl.classList.add('show');
+      contentEl.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading...</p></div>';
+
+      try {
+        const opts = { method, headers: {}, cache: 'no-store' };
+        
+        if (method !== 'GET' && Object.keys(params).length > 0) {
+          opts.headers['Content-Type'] = 'application/json';
+          opts.body = JSON.stringify(params);
+        }
+
+        const res = await fetch(url, opts);
+        const contentType = res.headers.get('content-type');
+
+        if (isBinary || (contentType && contentType.includes('image'))) {
+          const blob = await res.blob();
+          const imgUrl = URL.createObjectURL(blob);
+          contentEl.innerHTML = `
+            <div class="result-meta">
+              <strong>Method:</strong> ${method}<br>
+              <strong>Status:</strong> ${res.status} ${res.statusText}<br>
+              <strong>URL:</strong> ${url}
+            </div>
+            <img src="${imgUrl}" onload="URL.revokeObjectURL(this.src)">
+          `;
+        } else if (contentType && contentType.includes('video')) {
+          const blob = await res.blob();
+          const vidUrl = URL.createObjectURL(blob);
+          contentEl.innerHTML = `
+            <div class="result-meta">
+              <strong>Method:</strong> ${method}<br>
+              <strong>Status:</strong> ${res.status} ${res.statusText}<br>
+              <strong>URL:</strong> ${url}
+            </div>
+            <video controls><source src="${vidUrl}" type="${contentType}"></video>
+          `;
+        } else {
+          const data = await res.json();
+          contentEl.innerHTML = `
+            <div class="result-meta">
+              <strong>Method:</strong> ${method}<br>
+              <strong>Status:</strong> ${res.status} ${res.statusText}<br>
+              <strong>URL:</strong> ${url}
+            </div>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+          `;
+        }
+      } catch (err) {
+        contentEl.innerHTML = `<div class="result-meta"><strong>ERROR</strong></div><pre>${err.message}</pre>`;
+      }
+    }
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      currentSearch = e.target.value;
+      applyFilters();
+    });
+
+    loadEndpoints();
+  </script>
+</body>
+</html>
