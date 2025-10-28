@@ -141,18 +141,13 @@
       color: var(--text-muted);
     }
 
-    /* Filters Section */
-    .filters-section {
+    /* Search Section */
+    .search-section {
       margin-bottom: 32px;
-    }
-
-    .search {
-      margin-bottom: 20px;
     }
 
     .search-input {
       width: 100%;
-      max-width: 600px;
       padding: 14px 20px;
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -173,66 +168,138 @@
       color: var(--text-muted);
     }
 
-    /* Category Filters */
-    .category-filters {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
+    /* Content Grid */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 32px;
+      margin-bottom: 60px;
     }
 
-    .filter-label {
-      font-size: 0.875rem;
-      color: var(--text-muted);
-      font-weight: 600;
+    /* Sidebar */
+    .sidebar {
+      position: sticky;
+      top: 24px;
+      height: fit-content;
+      max-height: calc(100vh - 100px);
+      overflow-y: auto;
     }
 
-    .category-btn {
-      padding: 10px 18px;
-      background: rgba(255, 165, 0, 0.05);
-      border: 1px solid rgba(255, 165, 0, 0.2);
-      color: rgba(255, 165, 0, 0.8);
-      border-radius: 8px;
-      font-size: 0.8125rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-      white-space: nowrap;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .category-btn:hover:not(.active) {
-      background: rgba(255, 165, 0, 0.1);
-      border-color: rgba(255, 165, 0, 0.4);
-      color: var(--primary);
-      transform: translateY(-1px);
-    }
-
-    .category-btn.active {
-      background: var(--primary);
-      border-color: var(--primary);
-      color: var(--bg-dark);
+    .sidebar-header {
+      font-size: 0.75rem;
       font-weight: 700;
-      box-shadow: 0 4px 12px rgba(255, 165, 0, 0.25);
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
     }
 
-    .category-badge {
-      display: inline-flex;
-      align-items: center;
+    .category-nav {
+      display: flex;
+      flex-direction: column;
       gap: 4px;
+    }
+
+    .category-item {
+      padding: 10px 14px;
+      background: transparent;
+      border: none;
+      border-left: 2px solid transparent;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: left;
+      border-radius: 0 6px 6px 0;
+      font-family: inherit;
+    }
+
+    .category-item:hover {
+      background: rgba(255, 165, 0, 0.05);
+      color: var(--text);
+      border-left-color: rgba(255, 165, 0, 0.3);
+    }
+
+    .category-item.active {
+      background: rgba(255, 165, 0, 0.1);
+      border-left-color: var(--primary);
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .category-count {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-left: 6px;
+    }
+
+    .sidebar::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .sidebar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+      background: rgba(255, 165, 0, 0.2);
+      border-radius: 2px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 165, 0, 0.4);
+    }
+
+    /* Endpoints Grouped */
+    .endpoints-grouped {
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+    }
+
+    .category-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      scroll-margin-top: 24px;
+    }
+
+    .category-section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid rgba(255, 165, 0, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .category-section-count {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--primary);
+      background: rgba(255, 165, 0, 0.1);
       padding: 4px 10px;
       border-radius: 6px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      margin-left: 8px;
-      background: rgba(255, 165, 0, 0.1);
-      border: 1px solid rgba(255, 165, 0, 0.3);
-      color: var(--primary);
-      transition: all 0.2s ease;
+    }
+
+    .endpoint-list {
+      list-style: none;
+      counter-reset: endpoint-counter;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .endpoint-list-item {
+      counter-increment: endpoint-counter;
+      position: relative;
     }
 
     /* Endpoints */
@@ -240,7 +307,6 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
-      margin-bottom: 80px;
     }
 
     .endpoint {
@@ -261,26 +327,36 @@
 
     .endpoint-header {
       display: grid;
-      grid-template-columns: 100px 1fr auto;
+      grid-template-columns: 40px 90px 1fr auto;
       align-items: center;
-      gap: 16px;
-      padding: 20px 24px;
+      gap: 12px;
+      padding: 16px 20px;
       cursor: pointer;
       user-select: none;
-      min-height: 88px;
+    }
+
+    .endpoint-number {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: var(--primary);
+      font-family: 'SF Mono', monospace;
+    }
+
+    .endpoint-number::before {
+      content: counter(endpoint-counter) ".";
     }
 
     .method { 
-      padding: 6px 14px;
+      padding: 5px 12px;
       background: rgba(255, 165, 0, 0.1);
       border: 1px solid var(--primary);
       color: var(--primary);
       border-radius: 6px;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       font-weight: 700;
       letter-spacing: 0.5px;
       text-align: center;
-      width: 100px;
+      width: 90px;
       flex-shrink: 0;
     }
 
@@ -293,8 +369,6 @@
       display: flex;
       align-items: center;
       margin-bottom: 4px;
-      flex-wrap: wrap;
-      gap: 4px;
     }
 
     .endpoint-path {
@@ -745,6 +819,40 @@
     }
 
     /* Responsive */
+    @media (max-width: 900px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+
+      .sidebar {
+        position: static;
+        max-height: none;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px;
+      }
+
+      .category-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .category-item {
+        border-left: none;
+        border-bottom: 2px solid transparent;
+        border-radius: 6px;
+        padding: 8px 12px;
+      }
+
+      .category-item.active {
+        border-bottom-color: var(--primary);
+        border-left-color: transparent;
+      }
+    }
+
     @media (max-width: 768px) {
       .container {
         padding: 40px 16px;
@@ -766,20 +874,10 @@
         width: 100%;
       }
 
-      .category-filters {
-        gap: 8px;
-      }
-
-      .category-btn {
-        padding: 8px 14px;
-        font-size: 0.75rem;
-      }
-
       .endpoint-header {
-        grid-template-columns: 80px 1fr auto;
-        padding: 16px;
-        gap: 12px;
-        min-height: 80px;
+        grid-template-columns: 30px 70px 1fr auto;
+        padding: 14px 16px;
+        gap: 8px;
       }
 
       .endpoint-body {
@@ -787,9 +885,13 @@
       }
 
       .method {
-        width: 80px;
-        font-size: 0.6875rem;
-        padding: 5px 10px;
+        width: 70px;
+        font-size: 0.65rem;
+        padding: 4px 8px;
+      }
+
+      .endpoint-number {
+        font-size: 0.8rem;
       }
 
       .endpoint-path {
@@ -799,19 +901,31 @@
       .endpoint-desc {
         font-size: 0.8125rem;
       }
+
+      .category-section {
+        padding: 16px;
+      }
+
+      .category-section-title {
+        font-size: 1rem;
+      }
     }
       
     @media (max-width: 480px) {
       .endpoint-header {
-        grid-template-columns: 70px 1fr 20px;
-        gap: 8px;
+        grid-template-columns: 25px 65px 1fr 20px;
+        gap: 6px;
         padding: 12px;
       }
       
       .method {
-        width: 70px;
-        font-size: 0.625rem;
-        padding: 4px 8px;
+        width: 65px;
+        font-size: 0.6rem;
+        padding: 3px 6px;
+      }
+
+      .endpoint-number {
+        font-size: 0.75rem;
       }
       
       .endpoint-path {
@@ -820,16 +934,6 @@
       
       .endpoint-desc {
         font-size: 0.75rem;
-      }
-
-      .category-btn {
-        padding: 6px 12px;
-        font-size: 0.7rem;
-      }
-
-      .filter-label {
-        width: 100%;
-        margin-bottom: 8px;
       }
     }
   </style>
@@ -859,18 +963,8 @@
       </div>
     </div>
 
-    <div class="filters-section">
-      <div class="search">
-        <input type="text" class="search-input" id="searchInput" placeholder="Search endpoints by name, path, or description...">
-      </div>
-      
-      <div class="category-filters">
-        <span class="filter-label">Filter by Category:</span>
-        <button class="category-btn active" data-category="all" onclick="filterByCategory('all')">
-          All
-        </button>
-        <div id="categoryButtons"></div>
-      </div>
+    <div class="search-section">
+      <input type="text" class="search-input" id="searchInput" placeholder="Search endpoints by name, path, or description...">
     </div>
 
     <div id="loading" class="loading">
@@ -878,7 +972,16 @@
       <p>Loading endpoints...</p>
     </div>
 
-    <div id="endpointsContainer" class="endpoints"></div>
+    <div class="content-grid">
+      <aside class="sidebar">
+        <div class="sidebar-header">Categories</div>
+        <nav class="category-nav" id="categoryNav"></nav>
+      </aside>
+      
+      <main class="main-content">
+        <div id="endpointsContainer" class="endpoints-grouped"></div>
+      </main>
+    </div>
 
     <footer class="footer">
       © 2025 Dongtube APIs. All rights reserved.
@@ -892,19 +995,7 @@
     let currentCategory = 'all';
     let currentSearch = '';
 
-    const categoryEmojis = {
-      'Social Media': '📱',
-      'Anime': '🎌',
-      'News': '📰',
-      'Image Processing': '🖼️',
-      'Search & Tools': '🔍',
-      'Random & Fun': '🎲',
-      'Other': '⚙️'
-    };
-
-    function getCategoryEmoji(category) {
-      return categoryEmojis[category] || '⚙️';
-    }
+    let allCategories = [];
 
     function highlightSyntax(code, lang) {
       let highlighted = code;
@@ -1001,17 +1092,17 @@
           }));
           
           // Get unique categories
-          const categories = [...new Set(allEndpoints.map(ep => ep.category))].sort();
+          allCategories = [...new Set(allEndpoints.map(ep => ep.category))].sort();
           
-          // Render category buttons
-          renderCategoryButtons(categories);
+          // Render category navigation
+          renderCategoryNav(allCategories);
           
           // Update stats
           document.getElementById('totalEndpoints').textContent = allEndpoints.length;
-          document.getElementById('totalCategories').textContent = categories.length;
+          document.getElementById('totalCategories').textContent = allCategories.length;
           
           // Render endpoints
-          renderEndpoints(allEndpoints);
+          renderGroupedEndpoints();
         }
       } catch (err) {
         console.error('Error:', err);
@@ -1021,38 +1112,47 @@
       }
     }
 
-    function renderCategoryButtons(categories) {
-      const container = document.getElementById('categoryButtons');
-      container.innerHTML = categories.map(cat => `
-        <button class="category-btn" data-category="${cat}" onclick="filterByCategory('${cat}')">
-          <span>${getCategoryEmoji(cat)}</span>
-          <span>${cat}</span>
+    function renderCategoryNav(categories) {
+      const nav = document.getElementById('categoryNav');
+      const getCategoryCount = (cat) => allEndpoints.filter(ep => ep.category === cat).length;
+      
+      nav.innerHTML = `
+        <button class="category-item active" data-category="all" onclick="filterByCategory('all')">
+          All<span class="category-count">(${allEndpoints.length})</span>
         </button>
-      `).join('');
+        ${categories.map(cat => `
+          <button class="category-item" data-category="${cat}" onclick="filterByCategory('${cat}')">
+            ${cat}<span class="category-count">(${getCategoryCount(cat)})</span>
+          </button>
+        `).join('')}
+      `;
     }
 
     function filterByCategory(category) {
       currentCategory = category;
       
-      // Update active button
-      document.querySelectorAll('.category-btn').forEach(btn => {
+      // Update active state
+      document.querySelectorAll('.category-item').forEach(btn => {
         btn.classList.remove('active');
         if (btn.dataset.category === category) {
           btn.classList.add('active');
         }
       });
       
+      // Scroll to category if not 'all'
+      if (category !== 'all') {
+        const section = document.getElementById(`category-${category.replace(/\s+/g, '-')}`);
+        if (section) {
+          section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+      
       // Filter and render
-      applyFilters();
+      renderGroupedEndpoints();
     }
 
-    function applyFilters() {
+    function getFilteredEndpoints() {
       let filtered = allEndpoints;
-      
-      // Apply category filter
-      if (currentCategory !== 'all') {
-        filtered = filtered.filter(ep => ep.category === currentCategory);
-      }
       
       // Apply search filter
       if (currentSearch) {
@@ -1065,130 +1165,158 @@
         );
       }
       
-      renderEndpoints(filtered);
+      return filtered;
     }
 
-    function renderEndpoints(endpoints) {
+    function renderGroupedEndpoints() {
       const container = document.getElementById('endpointsContainer');
+      const filtered = getFilteredEndpoints();
       
-      if (endpoints.length === 0) {
+      if (filtered.length === 0) {
         container.innerHTML = '<div class="no-results">No endpoints found</div>';
         renderedEndpoints = [];
         return;
       }
 
-      // Store rendered endpoints for lookup
-      renderedEndpoints = endpoints;
+      // Group endpoints by category
+      const categoriesToShow = currentCategory === 'all' 
+        ? allCategories 
+        : [currentCategory];
+      
+      const grouped = categoriesToShow.map(cat => ({
+        name: cat,
+        items: filtered.filter(ep => ep.category === cat)
+      })).filter(group => group.items.length > 0);
 
-      container.innerHTML = endpoints.map((ep, idx) => {
-        const methods = ep.method.split(',').map(m => m.trim());
-        const id = `ep-${idx}`;
-        
+      // Store all rendered endpoints for lookup
+      renderedEndpoints = [];
+      grouped.forEach(group => {
+        renderedEndpoints.push(...group.items);
+      });
+
+      // Render grouped sections
+      container.innerHTML = grouped.map((group, groupIdx) => {
+        const categoryId = `category-${group.name.replace(/\s+/g, '-')}`;
         return `
-          <div class="endpoint" id="${id}">
-            <div class="endpoint-header" onclick="toggle('${id}')">
-              <div class="method">${ep.method}</div>
-              <div class="endpoint-info">
-                <div class="endpoint-title-row">
-                  <div class="endpoint-path" title="${ep.path}">${ep.path}</div>
-                  <span class="category-badge" data-category="${ep.category}">
-                    <span>${getCategoryEmoji(ep.category)}</span>
-                    <span>${ep.category}</span>
-                  </span>
-                </div>
-                <div class="endpoint-desc" title="${ep.description || ep.name}">${ep.description || ep.name}</div>
-              </div>
-              <div class="endpoint-arrow">▼</div>
-            </div>
-            <div class="endpoint-body">
-              <div class="methods-switch">
-                ${methods.map(m => `
-                  <button class="method-btn ${m === methods[0] ? 'active' : ''}" 
-                          onclick="selectMethod('${id}', '${m}')" 
-                          data-method="${m}">${m}</button>
-                `).join('')}
-              </div>
+          <section class="category-section" id="${categoryId}">
+            <h2 class="category-section-title">
+              ${group.name}
+              <span class="category-section-count">${group.items.length}</span>
+            </h2>
+            <ol class="endpoint-list">
+              ${group.items.map((ep, idx) => {
+                const methods = ep.method.split(',').map(m => m.trim());
+                const globalIdx = renderedEndpoints.indexOf(ep);
+                const id = `ep-${globalIdx}`;
+                
+                return `
+                  <li class="endpoint-list-item">
+                    <div class="endpoint" id="${id}">
+                      <div class="endpoint-header" onclick="toggle('${id}')">
+                        <div class="endpoint-number"></div>
+                        <div class="method">${ep.method}</div>
+                        <div class="endpoint-info">
+                          <div class="endpoint-title-row">
+                            <div class="endpoint-path" title="${ep.path}">${ep.path}</div>
+                          </div>
+                          <div class="endpoint-desc" title="${ep.description || ep.name}">${ep.description || ep.name}</div>
+                        </div>
+                        <div class="endpoint-arrow">▼</div>
+                      </div>
+                      <div class="endpoint-body">
+                        <div class="methods-switch">
+                          ${methods.map(m => `
+                            <button class="method-btn ${m === methods[0] ? 'active' : ''}" 
+                                    onclick="selectMethod('${id}', '${m}')" 
+                                    data-method="${m}">${m}</button>
+                          `).join('')}
+                        </div>
 
-              ${ep.params && ep.params.length > 0 ? ep.params.map(p => `
-                <div class="param">
-                  <div class="param-label">
-                    ${p.name}${p.required ? '<span class="required">*</span>' : ''}
-                  </div>
-                  <div class="param-hint">${p.description || ''}</div>
-                  <input type="text" class="param-input" data-param="${p.name}" 
-                         placeholder="${p.placeholder || p.name}" 
-                         oninput="updateCodeExamples('${id}')">
-                </div>
-              `).join('') : '<p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 16px;">No parameters required</p>'}
-              
-              <button class="execute-btn" onclick="execute('${id}', '${ep.path}', ${ep.responseBinary || false})">
-                Execute
-              </button>
+                        ${ep.params && ep.params.length > 0 ? ep.params.map(p => `
+                          <div class="param">
+                            <div class="param-label">
+                              ${p.name}${p.required ? '<span class="required">*</span>' : ''}
+                            </div>
+                            <div class="param-hint">${p.description || ''}</div>
+                            <input type="text" class="param-input" data-param="${p.name}" 
+                                   placeholder="${p.placeholder || p.name}" 
+                                   oninput="updateCodeExamples('${id}')">
+                          </div>
+                        `).join('') : '<p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 16px;">No parameters required</p>'}
+                        
+                        <button class="execute-btn" onclick="execute('${id}', '${ep.path}', ${ep.responseBinary || false})">
+                          Execute
+                        </button>
 
-              <div class="code-example">
-                <div class="code-example-title">Code Examples</div>
-                <div class="code-tabs">
-                  <button class="code-tab active" onclick="switchTab('${id}', 'curl')">cURL</button>
-                  <button class="code-tab" onclick="switchTab('${id}', 'js')">JavaScript</button>
-                  <button class="code-tab" onclick="switchTab('${id}', 'python')">Python</button>
-                </div>
-                <div class="code-content active" data-tab="curl" data-ep="${id}">
-                  <div class="code-block">
-                    <button class="copy-btn" onclick="copyCode('${id}', 'curl')">Copy</button>
-                    <pre id="code-curl-${id}"></pre>
-                  </div>
-                </div>
-                <div class="code-content" data-tab="js" data-ep="${id}">
-                  <div class="code-block">
-                    <button class="copy-btn" onclick="copyCode('${id}', 'js')">Copy</button>
-                    <pre id="code-js-${id}"></pre>
-                  </div>
-                </div>
-                <div class="code-content" data-tab="python" data-ep="${id}">
-                  <div class="code-block">
-                    <button class="copy-btn" onclick="copyCode('${id}', 'python')">Copy</button>
-                    <pre id="code-python-${id}"></pre>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="result" id="result-${id}">
-                <div class="result-label">Response</div>
-                <div class="result-box" id="result-content-${id}"></div>
-              </div>
-              
-              <div class="status-table-wrap">
-                <h4>Status Codes</h4>
-                <table class="status-table">
-                  <thead>
-                    <tr>
-                      <th>Code</th>
-                      <th>Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td><div class="status-code"><span class="status-icon ok">✓</span>200</div></td>
-                      <td>Request successful</td>
-                    </tr>
-                    <tr>
-                      <td><div class="status-code"><span class="status-icon err">✕</span>400</div></td>
-                      <td>Bad request - invalid parameters</td>
-                    </tr>
-                    <tr>
-                      <td><div class="status-code"><span class="status-icon err">✕</span>500</div></td>
-                      <td>Internal server error</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
+                        <div class="code-example">
+                          <div class="code-example-title">Code Examples</div>
+                          <div class="code-tabs">
+                            <button class="code-tab active" onclick="switchTab('${id}', 'curl')">cURL</button>
+                            <button class="code-tab" onclick="switchTab('${id}', 'js')">JavaScript</button>
+                            <button class="code-tab" onclick="switchTab('${id}', 'python')">Python</button>
+                          </div>
+                          <div class="code-content active" data-tab="curl" data-ep="${id}">
+                            <div class="code-block">
+                              <button class="copy-btn" onclick="copyCode('${id}', 'curl')">Copy</button>
+                              <pre id="code-curl-${id}"></pre>
+                            </div>
+                          </div>
+                          <div class="code-content" data-tab="js" data-ep="${id}">
+                            <div class="code-block">
+                              <button class="copy-btn" onclick="copyCode('${id}', 'js')">Copy</button>
+                              <pre id="code-js-${id}"></pre>
+                            </div>
+                          </div>
+                          <div class="code-content" data-tab="python" data-ep="${id}">
+                            <div class="code-block">
+                              <button class="copy-btn" onclick="copyCode('${id}', 'python')">Copy</button>
+                              <pre id="code-python-${id}"></pre>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div class="result" id="result-${id}">
+                          <div class="result-label">Response</div>
+                          <div class="result-box" id="result-content-${id}"></div>
+                        </div>
+                        
+                        <div class="status-table-wrap">
+                          <h4>Status Codes</h4>
+                          <table class="status-table">
+                            <thead>
+                              <tr>
+                                <th>Code</th>
+                                <th>Description</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <td><div class="status-code"><span class="status-icon ok">✓</span>200</div></td>
+                                <td>Request successful</td>
+                              </tr>
+                              <tr>
+                                <td><div class="status-code"><span class="status-icon err">✕</span>400</div></td>
+                                <td>Bad request - invalid parameters</td>
+                              </tr>
+                              <tr>
+                                <td><div class="status-code"><span class="status-icon err">✕</span>500</div></td>
+                                <td>Internal server error</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                `;
+              }).join('')}
+            </ol>
+          </section>
         `;
       }).join('');
 
       // Update code examples for all endpoints
-      endpoints.forEach((ep, idx) => {
+      renderedEndpoints.forEach((ep, idx) => {
         updateCodeExamples(`ep-${idx}`);
       });
     }
@@ -1374,7 +1502,7 @@
 
     document.getElementById('searchInput').addEventListener('input', (e) => {
       currentSearch = e.target.value;
-      applyFilters();
+      renderGroupedEndpoints();
     });
 
     loadEndpoints();
