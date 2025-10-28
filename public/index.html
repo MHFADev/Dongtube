@@ -24,6 +24,31 @@
       --border: #2A2A2A;
       --success: #00FF88;
       --error: #FF4444;
+      
+      /* Category Colors */
+      --cat-social-from: #3B82F6;
+      --cat-social-to: #1D4ED8;
+      --cat-anime-from: #EC4899;
+      --cat-anime-to: #9333EA;
+      --cat-news-from: #EF4444;
+      --cat-news-to: #F97316;
+      --cat-image-from: #10B981;
+      --cat-image-to: #14B8A6;
+      --cat-search-from: #F59E0B;
+      --cat-search-to: #FBBF24;
+      --cat-random-from: #8B5CF6;
+      --cat-random-to: #EC4899;
+      --cat-other-from: #6B7280;
+      --cat-other-to: #4B5563;
+      
+      /* Syntax Highlighting */
+      --syntax-keyword: #60A5FA;
+      --syntax-string: #34D399;
+      --syntax-number: #FB923C;
+      --syntax-comment: #6B7280;
+      --syntax-operator: #FCD34D;
+      --syntax-url: #C084FC;
+      --syntax-function: #A78BFA;
     }
 
     body {
@@ -186,13 +211,18 @@
       font-size: 0.8125rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.3s ease;
       white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .category-btn:hover {
       border-color: var(--primary);
       color: var(--text);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 165, 0, 0.15);
     }
 
     .category-btn.active {
@@ -201,16 +231,135 @@
       color: var(--bg-dark);
     }
 
+    .category-btn[data-category="Social Media"]:not(.active) {
+      border-color: var(--cat-social-from);
+      color: var(--cat-social-from);
+    }
+
+    .category-btn[data-category="Social Media"].active {
+      background: linear-gradient(135deg, var(--cat-social-from), var(--cat-social-to));
+      border-color: transparent;
+      color: white;
+    }
+
+    .category-btn[data-category="Anime"]:not(.active) {
+      border-color: var(--cat-anime-from);
+      color: var(--cat-anime-from);
+    }
+
+    .category-btn[data-category="Anime"].active {
+      background: linear-gradient(135deg, var(--cat-anime-from), var(--cat-anime-to));
+      border-color: transparent;
+      color: white;
+    }
+
+    .category-btn[data-category="News"]:not(.active) {
+      border-color: var(--cat-news-from);
+      color: var(--cat-news-from);
+    }
+
+    .category-btn[data-category="News"].active {
+      background: linear-gradient(135deg, var(--cat-news-from), var(--cat-news-to));
+      border-color: transparent;
+      color: white;
+    }
+
+    .category-btn[data-category="Image Processing"]:not(.active) {
+      border-color: var(--cat-image-from);
+      color: var(--cat-image-from);
+    }
+
+    .category-btn[data-category="Image Processing"].active {
+      background: linear-gradient(135deg, var(--cat-image-from), var(--cat-image-to));
+      border-color: transparent;
+      color: white;
+    }
+
+    .category-btn[data-category="Search & Tools"]:not(.active) {
+      border-color: var(--cat-search-from);
+      color: var(--cat-search-from);
+    }
+
+    .category-btn[data-category="Search & Tools"].active {
+      background: linear-gradient(135deg, var(--cat-search-from), var(--cat-search-to));
+      border-color: transparent;
+      color: white;
+    }
+
+    .category-btn[data-category="Random & Fun"]:not(.active) {
+      border-color: var(--cat-random-from);
+      color: var(--cat-random-from);
+    }
+
+    .category-btn[data-category="Random & Fun"].active {
+      background: linear-gradient(135deg, var(--cat-random-from), var(--cat-random-to));
+      border-color: transparent;
+      color: white;
+    }
+
+    .category-btn[data-category="Other"]:not(.active) {
+      border-color: var(--cat-other-from);
+      color: var(--cat-other-from);
+    }
+
+    .category-btn[data-category="Other"].active {
+      background: linear-gradient(135deg, var(--cat-other-from), var(--cat-other-to));
+      border-color: transparent;
+      color: white;
+    }
+
     .category-badge {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
       padding: 4px 10px;
-      background: rgba(255, 165, 0, 0.1);
-      border: 1px solid var(--primary);
-      color: var(--primary);
       border-radius: 6px;
       font-size: 0.7rem;
       font-weight: 600;
       margin-left: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .category-badge[data-category="Social Media"] {
+      background: linear-gradient(135deg, var(--cat-social-from), var(--cat-social-to));
+      border: 1px solid var(--cat-social-from);
+      color: white;
+    }
+
+    .category-badge[data-category="Anime"] {
+      background: linear-gradient(135deg, var(--cat-anime-from), var(--cat-anime-to));
+      border: 1px solid var(--cat-anime-from);
+      color: white;
+    }
+
+    .category-badge[data-category="News"] {
+      background: linear-gradient(135deg, var(--cat-news-from), var(--cat-news-to));
+      border: 1px solid var(--cat-news-from);
+      color: white;
+    }
+
+    .category-badge[data-category="Image Processing"] {
+      background: linear-gradient(135deg, var(--cat-image-from), var(--cat-image-to));
+      border: 1px solid var(--cat-image-from);
+      color: white;
+    }
+
+    .category-badge[data-category="Search & Tools"] {
+      background: linear-gradient(135deg, var(--cat-search-from), var(--cat-search-to));
+      border: 1px solid var(--cat-search-from);
+      color: white;
+    }
+
+    .category-badge[data-category="Random & Fun"] {
+      background: linear-gradient(135deg, var(--cat-random-from), var(--cat-random-to));
+      border: 1px solid var(--cat-random-from);
+      color: white;
+    }
+
+    .category-badge[data-category="Other"] {
+      background: linear-gradient(135deg, var(--cat-other-from), var(--cat-other-to));
+      border: 1px solid var(--cat-other-from);
+      color: white;
     }
 
     /* Endpoints */
@@ -521,6 +670,42 @@
       color: var(--text-muted);
       overflow-x: auto;
       position: relative;
+    }
+
+    .code-block pre {
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Syntax Highlighting */
+    .syntax-keyword {
+      color: var(--syntax-keyword);
+      font-weight: 600;
+    }
+
+    .syntax-string {
+      color: var(--syntax-string);
+    }
+
+    .syntax-number {
+      color: var(--syntax-number);
+    }
+
+    .syntax-comment {
+      color: var(--syntax-comment);
+      font-style: italic;
+    }
+
+    .syntax-operator {
+      color: var(--syntax-operator);
+    }
+
+    .syntax-url {
+      color: var(--syntax-url);
+    }
+
+    .syntax-function {
+      color: var(--syntax-function);
     }
 
     .copy-btn {
@@ -834,6 +1019,51 @@
     let currentCategory = 'all';
     let currentSearch = '';
 
+    const categoryEmojis = {
+      'Social Media': '📱',
+      'Anime': '🎌',
+      'News': '📰',
+      'Image Processing': '🖼️',
+      'Search & Tools': '🔍',
+      'Random & Fun': '🎲',
+      'Other': '⚙️'
+    };
+
+    function getCategoryEmoji(category) {
+      return categoryEmojis[category] || '⚙️';
+    }
+
+    function highlightSyntax(code, lang) {
+      let highlighted = code;
+      
+      if (lang === 'curl') {
+        highlighted = highlighted
+          .replace(/(curl|https?:\/\/[^\s'"]+)/g, '<span class="syntax-url">$1</span>')
+          .replace(/(-X|-H|-d|--data)/g, '<span class="syntax-keyword">$1</span>')
+          .replace(/('([^']*)'|"([^"]*)")/g, '<span class="syntax-string">$1</span>');
+      } else if (lang === 'js') {
+        highlighted = highlighted
+          .replace(/(https?:\/\/[^\s'"]+)/g, '<span class="syntax-url">$1</span>')
+          .replace(/\b(const|let|var|function|async|await|return|import|from|fetch|then|catch|new|if|else|for|while)\b/g, '<span class="syntax-keyword">$1</span>')
+          .replace(/\b(console|JSON|URLSearchParams)\b/g, '<span class="syntax-function">$1</span>')
+          .replace(/\b(\d+)\b/g, '<span class="syntax-number">$1</span>')
+          .replace(/('([^']*)'|"([^"]*)")/g, '<span class="syntax-string">$1</span>')
+          .replace(/(=>|\.|\(|\)|{|}|\[|\]|,|;)/g, '<span class="syntax-operator">$1</span>')
+          .replace(/(\/\/.*$)/gm, '<span class="syntax-comment">$1</span>');
+      } else if (lang === 'python') {
+        highlighted = highlighted
+          .replace(/(https?:\/\/[^\s'"]+)/g, '<span class="syntax-url">$1</span>')
+          .replace(/\b(import|from|def|class|return|if|else|elif|for|while|try|except|with|as|pass|break|continue)\b/g, '<span class="syntax-keyword">$1</span>')
+          .replace(/\b(requests|print)\b/g, '<span class="syntax-function">$1</span>')
+          .replace(/\b(\d+)\b/g, '<span class="syntax-number">$1</span>')
+          .replace(/('([^']*)'|"([^"]*)")/g, '<span class="syntax-string">$1</span>')
+          .replace(/(=|\.|\(|\)|{|}|\[|\]|,|:)/g, '<span class="syntax-operator">$1</span>')
+          .replace(/(#.*$)/gm, '<span class="syntax-comment">$1</span>');
+      }
+      
+      return highlighted;
+    }
+
     // Function to determine category based on path
     function determineCategory(path, name, description) {
       const pathLower = path.toLowerCase();
@@ -922,7 +1152,8 @@
       const container = document.getElementById('categoryButtons');
       container.innerHTML = categories.map(cat => `
         <button class="category-btn" data-category="${cat}" onclick="filterByCategory('${cat}')">
-          ${cat}
+          <span>${getCategoryEmoji(cat)}</span>
+          <span>${cat}</span>
         </button>
       `).join('');
     }
@@ -987,7 +1218,10 @@
               <div class="endpoint-info">
                 <div class="endpoint-title-row">
                   <div class="endpoint-path" title="${ep.path}">${ep.path}</div>
-                  <span class="category-badge">${ep.category}</span>
+                  <span class="category-badge" data-category="${ep.category}">
+                    <span>${getCategoryEmoji(ep.category)}</span>
+                    <span>${ep.category}</span>
+                  </span>
                 </div>
                 <div class="endpoint-desc" title="${ep.description || ep.name}">${ep.description || ep.name}</div>
               </div>
