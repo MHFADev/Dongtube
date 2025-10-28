@@ -406,10 +406,22 @@
       padding: 24px;
       border-top: 1px solid var(--border);
       background: var(--bg-darker);
+      max-width: 100%;
     }
 
     .endpoint.active .endpoint-body {
       display: block;
+    }
+    
+    /* Make endpoint body more compact and readable */
+    .endpoint-body > * {
+      max-width: 900px;
+    }
+    
+    @media (max-width: 1200px) {
+      .endpoint-body > * {
+        max-width: 100%;
+      }
     }
 
     .methods-switch {
@@ -610,49 +622,88 @@
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 14px;
-      font-family: 'SF Mono', monospace;
+      padding: 16px 16px 16px 16px;
+      font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
       font-size: 0.8125rem;
-      line-height: 1.6;
-      color: var(--text-muted);
+      line-height: 1.7;
+      color: var(--text);
       overflow-x: auto;
       position: relative;
+      max-width: 100%;
     }
 
     .code-block pre {
       margin: 0;
       padding: 0;
+      white-space: pre;
+      word-wrap: normal;
+      overflow-x: auto;
+    }
+    
+    /* Better scrollbar for code blocks */
+    .code-block::-webkit-scrollbar {
+      height: 8px;
+    }
+    
+    .code-block::-webkit-scrollbar-track {
+      background: var(--bg-darker);
+      border-radius: 4px;
+    }
+    
+    .code-block::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+    
+    .code-block::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 165, 0, 0.3);
     }
 
-    /* Syntax Highlighting */
+    /* Syntax Highlighting - Enhanced Colors */
     .syntax-keyword {
-      color: var(--syntax-keyword);
+      color: #FF79C6;
       font-weight: 600;
     }
 
     .syntax-string {
-      color: var(--syntax-string);
+      color: #50FA7B;
     }
 
     .syntax-number {
-      color: var(--syntax-number);
+      color: #FFB86C;
     }
 
     .syntax-comment {
-      color: var(--syntax-comment);
+      color: #6272A4;
       font-style: italic;
     }
 
     .syntax-operator {
-      color: var(--syntax-operator);
+      color: #F1FA8C;
     }
 
     .syntax-url {
-      color: var(--syntax-url);
+      color: #8BE9FD;
+      text-decoration: underline;
+      text-decoration-color: rgba(139, 233, 253, 0.3);
     }
 
     .syntax-function {
-      color: var(--syntax-function);
+      color: #BD93F9;
+      font-weight: 500;
+    }
+    
+    .syntax-method {
+      color: #FF79C6;
+      font-weight: 600;
+    }
+    
+    .syntax-property {
+      color: #F8F8F2;
+    }
+    
+    .syntax-punctuation {
+      color: #F8F8F2;
     }
 
     .copy-btn {
@@ -1068,31 +1119,62 @@
     let allCategories = [];
 
     function highlightSyntax(code, lang) {
-      let highlighted = code;
+      // Escape HTML first
+      let highlighted = code
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
       
       if (lang === 'curl') {
+        // Highlight curl command
         highlighted = highlighted
-          .replace(/(curl|https?:\/\/[^\s'"]+)/g, '<span class="syntax-url">$1</span>')
-          .replace(/(-X|-H|-d|--data)/g, '<span class="syntax-keyword">$1</span>')
-          .replace(/('([^']*)'|"([^"]*)")/g, '<span class="syntax-string">$1</span>');
+          .replace(/^(curl)/gm, '<span class="syntax-keyword">$1</span>')
+          .replace(/(-X|-H|-d|--data|--header)/g, '<span class="syntax-keyword">$1</span>')
+          .replace(/(GET|POST|PUT|DELETE|PATCH)/g, '<span class="syntax-method">$1</span>')
+          .replace(/(https?:\/\/[^\s'"\\]+)/g, '<span class="syntax-url">$1</span>')
+          .replace(/('([^'\\]|\\.)*')/g, '<span class="syntax-string">$1</span>')
+          .replace(/("([^"\\]|\\.)*")/g, '<span class="syntax-string">$1</span>')
+          .replace(/(Content-Type|application\/json)/g, '<span class="syntax-property">$1</span>');
       } else if (lang === 'js') {
+        // Highlight JavaScript
         highlighted = highlighted
-          .replace(/(https?:\/\/[^\s'"]+)/g, '<span class="syntax-url">$1</span>')
-          .replace(/\b(const|let|var|function|async|await|return|import|from|fetch|then|catch|new|if|else|for|while)\b/g, '<span class="syntax-keyword">$1</span>')
+          // Comments first
+          .replace(/(\/\/.*$)/gm, '<span class="syntax-comment">$1</span>')
+          // Keywords
+          .replace(/\b(const|let|var|function|async|await|return|import|from|new|if|else|for|while|try|catch)\b/g, '<span class="syntax-keyword">$1</span>')
+          // Methods
+          .replace(/\b(fetch|then|catch|log|stringify|parse)\b/g, '<span class="syntax-method">$1</span>')
+          // Built-in objects
           .replace(/\b(console|JSON|URLSearchParams)\b/g, '<span class="syntax-function">$1</span>')
+          // Properties
+          .replace(/\b(method|headers|body|params)\b/g, '<span class="syntax-property">$1</span>')
+          // Strings (handle both single and double quotes)
+          .replace(/('([^'\\]|\\.)*')/g, '<span class="syntax-string">$1</span>')
+          .replace(/("([^"\\]|\\.)*")/g, '<span class="syntax-string">$1</span>')
+          // Numbers
           .replace(/\b(\d+)\b/g, '<span class="syntax-number">$1</span>')
-          .replace(/('([^']*)'|"([^"]*)")/g, '<span class="syntax-string">$1</span>')
-          .replace(/(=>|\.|\(|\)|{|}|\[|\]|,|;)/g, '<span class="syntax-operator">$1</span>')
-          .replace(/(\/\/.*$)/gm, '<span class="syntax-comment">$1</span>');
-      } else if (lang === 'python') {
-        highlighted = highlighted
+          // URLs
           .replace(/(https?:\/\/[^\s'"]+)/g, '<span class="syntax-url">$1</span>')
+          // Operators
+          .replace(/(=&gt;)/g, '<span class="syntax-operator">$1</span>');
+      } else if (lang === 'python') {
+        // Highlight Python
+        highlighted = highlighted
+          // Comments first
+          .replace(/(#.*$)/gm, '<span class="syntax-comment">$1</span>')
+          // Keywords
           .replace(/\b(import|from|def|class|return|if|else|elif|for|while|try|except|with|as|pass|break|continue)\b/g, '<span class="syntax-keyword">$1</span>')
-          .replace(/\b(requests|print)\b/g, '<span class="syntax-function">$1</span>')
+          // Functions
+          .replace(/\b(requests|print|get|post|json)\b/g, '<span class="syntax-function">$1</span>')
+          // Properties
+          .replace(/\b(params|data|json)\b(?=\s*=)/g, '<span class="syntax-property">$1</span>')
+          // Strings (handle both single and double quotes)
+          .replace(/('([^'\\]|\\.)*')/g, '<span class="syntax-string">$1</span>')
+          .replace(/("([^"\\]|\\.)*")/g, '<span class="syntax-string">$1</span>')
+          // Numbers
           .replace(/\b(\d+)\b/g, '<span class="syntax-number">$1</span>')
-          .replace(/('([^']*)'|"([^"]*)")/g, '<span class="syntax-string">$1</span>')
-          .replace(/(=|\.|\(|\)|{|}|\[|\]|,|:)/g, '<span class="syntax-operator">$1</span>')
-          .replace(/(#.*$)/gm, '<span class="syntax-comment">$1</span>');
+          // URLs
+          .replace(/(https?:\/\/[^\s'"]+)/g, '<span class="syntax-url">$1</span>');
       }
       
       return highlighted;
@@ -1417,7 +1499,9 @@
     }
 
     async function copyCode(epId, lang) {
-      const code = document.getElementById(`code-${lang}-${epId}`).textContent;
+      // Get plain text from the element (strips HTML tags)
+      const codeElement = document.getElementById(`code-${lang}-${epId}`);
+      const code = codeElement.innerText || codeElement.textContent;
       await navigator.clipboard.writeText(code);
       
       const btn = event.target;
@@ -1460,7 +1544,7 @@
       } else {
         curlCmd += ` "${API_BASE}${path}"`;
       }
-      document.getElementById(`code-curl-${epId}`).textContent = curlCmd;
+      document.getElementById(`code-curl-${epId}`).innerHTML = highlightSyntax(curlCmd, 'curl');
 
       // JavaScript
       let jsCode = `fetch('${API_BASE}${path}'`;
@@ -1470,7 +1554,7 @@
         jsCode = `fetch('${API_BASE}${path}', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify(${JSON.stringify(params, null, 4)})\n}`;
       }
       jsCode += `)\n  .then(res => res.json())\n  .then(data => console.log(data));`;
-      document.getElementById(`code-js-${epId}`).textContent = jsCode;
+      document.getElementById(`code-js-${epId}`).innerHTML = highlightSyntax(jsCode, 'js');
 
       // Python
       let pyCode = `import requests\n\n`;
@@ -1490,7 +1574,7 @@
         }
       }
       pyCode += `\nprint(response.json())`;
-      document.getElementById(`code-python-${epId}`).textContent = pyCode;
+      document.getElementById(`code-python-${epId}`).innerHTML = highlightSyntax(pyCode, 'python');
     }
 
     async function execute(id, path, isBinary) {
