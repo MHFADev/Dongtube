@@ -936,6 +936,73 @@
         font-size: 0.75rem;
       }
     }
+
+    /* Banner Styles */
+    .banner-container {
+      width: 100%;
+      margin-bottom: 40px;
+      overflow: hidden;
+      border-radius: 16px;
+      position: relative;
+    }
+
+    .banner-img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(255, 165, 0, 0.15);
+      animation: bannerFadeIn 1.2s ease-out, bannerFloat 6s ease-in-out infinite;
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+
+    .banner-img:hover {
+      transform: scale(1.02) translateY(-4px);
+      box-shadow: 0 12px 48px rgba(255, 165, 0, 0.25);
+    }
+
+    @keyframes bannerFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes bannerFloat {
+      0%, 100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-8px);
+      }
+    }
+
+    /* Responsive Banner */
+    @media (max-width: 768px) {
+      .banner-container {
+        margin-bottom: 32px;
+        border-radius: 12px;
+      }
+      
+      .banner-img {
+        border-radius: 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .banner-container {
+        margin-bottom: 24px;
+        border-radius: 8px;
+      }
+      
+      .banner-img {
+        border-radius: 8px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -951,7 +1018,10 @@
         <a href="https://wa.me/6283143961588" target="_blank">Contact Admin</a>
       </div>
     </header>
-<img></img>
+    
+    <div class="banner-container">
+      <img src="/asset/banner.jpg" alt="Dongtube Banner" class="banner-img">
+    </div>
     <div class="stats-container">
       <div class="stats">
         <div class="stats-number" id="totalEndpoints">0</div>

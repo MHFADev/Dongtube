@@ -23,6 +23,7 @@ app.use((req, res, next) => {
 
 // Static files
 app.use(express.static(path.join(__dirname, "public")));
+app.use('/asset', express.static(path.join(__dirname, "asset")));
 
 // Cache
 const cache = new Map();
