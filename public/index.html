@@ -11,6 +11,11 @@
       padding: 0;
       box-sizing: border-box;
     }
+    
+    html, body {
+      max-width: 100%;
+      overflow-x: hidden;
+    }
 
     :root {
       --primary: #FFA500;
@@ -48,6 +53,8 @@
       max-width: 1200px;
       margin: 0 auto;
       padding: 60px 24px;
+      width: 100%;
+      overflow-x: hidden;
     }
 
     /* Header */
@@ -566,6 +573,8 @@
       font-family: 'SF Mono', monospace;
       font-size: 0.8125rem;
       line-height: 1.6;
+      word-break: break-word;
+      overflow-wrap: break-word;
     }
 
     .code-example {
@@ -575,6 +584,8 @@
       padding: 16px;
       margin-top: 16px;
       position: relative;
+      max-width: 100%;
+      overflow: hidden;
     }
 
     .code-example-title {
@@ -590,6 +601,7 @@
       display: flex;
       gap: 8px;
       margin-bottom: 12px;
+      flex-wrap: wrap;
     }
 
     .code-tab {
@@ -630,14 +642,17 @@
       overflow-x: auto;
       position: relative;
       max-width: 100%;
+      word-break: break-word;
+      overflow-wrap: break-word;
     }
 
     .code-block pre {
       margin: 0;
       padding: 0;
-      white-space: pre;
-      word-wrap: normal;
-      overflow-x: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      max-width: 100%;
     }
     
     /* Better scrollbar for code blocks */
@@ -932,7 +947,7 @@
       }
 
       .endpoint-body {
-        padding: 20px 16px;
+        padding: 16px 12px;
       }
 
       .method {
@@ -947,6 +962,7 @@
 
       .endpoint-path {
         font-size: 0.875rem;
+        word-break: break-all;
       }
 
       .endpoint-desc {
@@ -960,31 +976,247 @@
       .category-section-title {
         font-size: 1rem;
       }
-    }
       
-    @media (max-width: 480px) {
-      .endpoint-header {
-        grid-template-columns: 25px 65px 1fr 20px;
-        gap: 6px;
+      /* Mobile-specific code block improvements */
+      .code-block {
         padding: 12px;
-      }
-      
-      .method {
-        width: 65px;
-        font-size: 0.6rem;
-        padding: 3px 6px;
-      }
-
-      .endpoint-number {
         font-size: 0.75rem;
+        line-height: 1.5;
       }
       
-      .endpoint-path {
+      .code-example {
+        padding: 12px;
+        margin-top: 12px;
+      }
+      
+      .code-tabs {
+        gap: 6px;
+        margin-bottom: 10px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      .code-tab {
+        padding: 6px 10px;
+        font-size: 0.7rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      
+      .copy-btn {
+        font-size: 0.7rem;
+        padding: 4px 8px;
+      }
+      
+      /* Better param inputs on mobile */
+      .param {
+        margin-bottom: 16px;
+      }
+      
+      .param-input {
+        font-size: 0.875rem;
+        padding: 10px 12px;
+      }
+      
+      .param-label {
         font-size: 0.8125rem;
       }
       
-      .endpoint-desc {
+      .param-hint {
         font-size: 0.75rem;
+      }
+      
+      /* Methods switch buttons */
+      .methods-switch {
+        gap: 6px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+      }
+      
+      .method-btn {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+      }
+      
+      /* Execute button */
+      .execute-btn {
+        padding: 10px 24px;
+        font-size: 0.8125rem;
+        width: 100%;
+      }
+      
+      /* Result box */
+      .result-box {
+        padding: 12px;
+        font-size: 0.75rem;
+      }
+      
+      /* Status table */
+      .status-table th,
+      .status-table td {
+        padding: 8px 10px;
+        font-size: 0.75rem;
+      }
+    }
+      
+    @media (max-width: 480px) {
+      .container {
+        padding: 24px 12px;
+      }
+      
+      .brand-title {
+        font-size: 1.5rem;
+      }
+      
+      .header p {
+        font-size: 0.875rem;
+      }
+      
+      .endpoint-header {
+        grid-template-columns: 22px 60px 1fr 18px;
+        gap: 6px;
+        padding: 10px 12px;
+      }
+      
+      .method {
+        width: 60px;
+        font-size: 0.55rem;
+        padding: 3px 5px;
+      }
+
+      .endpoint-number {
+        font-size: 0.7rem;
+      }
+      
+      .endpoint-path {
+        font-size: 0.75rem;
+        word-break: break-all;
+      }
+      
+      .endpoint-desc {
+        font-size: 0.7rem;
+      }
+      
+      .endpoint-body {
+        padding: 12px 10px;
+      }
+      
+      /* Ultra mobile code blocks */
+      .code-block {
+        padding: 10px;
+        font-size: 0.7rem;
+        line-height: 1.4;
+      }
+      
+      .code-example {
+        padding: 10px;
+      }
+      
+      .code-example-title {
+        font-size: 0.7rem;
+        margin-bottom: 8px;
+      }
+      
+      .code-tabs {
+        gap: 4px;
+        margin-bottom: 8px;
+      }
+      
+      .code-tab {
+        padding: 5px 8px;
+        font-size: 0.65rem;
+      }
+      
+      .copy-btn {
+        font-size: 0.65rem;
+        padding: 4px 6px;
+        top: 6px;
+        right: 6px;
+      }
+      
+      /* Params */
+      .param {
+        margin-bottom: 12px;
+      }
+      
+      .param-input {
+        font-size: 0.8125rem;
+        padding: 8px 10px;
+      }
+      
+      .param-label {
+        font-size: 0.75rem;
+        margin-bottom: 6px;
+      }
+      
+      .param-hint {
+        font-size: 0.7rem;
+        margin-bottom: 6px;
+      }
+      
+      /* Buttons */
+      .methods-switch {
+        gap: 4px;
+        margin-bottom: 12px;
+      }
+      
+      .method-btn {
+        padding: 5px 10px;
+        font-size: 0.7rem;
+      }
+      
+      .execute-btn {
+        padding: 9px 20px;
+        font-size: 0.75rem;
+      }
+      
+      /* Result */
+      .result {
+        margin-top: 16px;
+      }
+      
+      .result-label {
+        font-size: 0.7rem;
+        margin-bottom: 8px;
+      }
+      
+      .result-box {
+        padding: 10px;
+        font-size: 0.7rem;
+        max-height: 300px;
+      }
+      
+      /* Status table */
+      .status-table-wrap {
+        margin-top: 16px;
+        padding-top: 16px;
+      }
+      
+      .status-table-wrap h4 {
+        font-size: 0.7rem;
+        margin-bottom: 10px;
+      }
+      
+      .status-table th,
+      .status-table td {
+        padding: 6px 8px;
+        font-size: 0.7rem;
+      }
+      
+      /* Category section */
+      .category-section {
+        padding: 12px;
+      }
+      
+      .category-section-title {
+        font-size: 0.9rem;
+        margin-bottom: 12px;
+        padding-bottom: 10px;
+      }
+      
+      .category-section-count {
+        font-size: 0.75rem;
+        padding: 3px 8px;
       }
     }
 
