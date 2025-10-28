@@ -872,8 +872,50 @@ body {
   to { opacity: 1; }
 }
 
-/* Responsive */
+/* Responsive Design */
+
+/* Large Tablets and Small Desktops */
+@media (max-width: 1024px) {
+  body {
+    padding: 15px;
+    padding-top: 50px;
+  }
+
+  .container {
+    max-width: 600px;
+  }
+
+  .main-card {
+    padding: 35px 25px;
+  }
+
+  .footer {
+    margin-top: 50px;
+    padding: 35px 20px 20px;
+  }
+
+  .footer-content {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 25px;
+  }
+}
+
+/* Tablets */
 @media (max-width: 768px) {
+  body {
+    padding: 12px;
+    padding-top: 40px;
+  }
+
+  .container {
+    max-width: 100%;
+  }
+
+  .main-card {
+    padding: 30px 22px;
+    border-radius: 18px;
+  }
+
   .logo {
     width: 100px;
     height: 100px;
@@ -882,30 +924,134 @@ body {
 
   .title {
     font-size: 2rem;
+    letter-spacing: 0.3px;
   }
   
+  .stats-bar {
+    padding: 18px 20px;
+    border-radius: 12px;
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
+  }
+
+  .stat-value {
+    font-size: 1.6rem;
+  }
+
+  .history-toggle-btn {
+    padding: 9px 18px;
+    font-size: 0.8rem;
+  }
+
+  .url-input {
+    padding: 13px 16px;
+    font-size: 0.85rem;
+  }
+
+  .btn-download {
+    padding: 13px 24px;
+    font-size: 0.85rem;
+  }
+
   .notification {
-    width: 300px;
+    width: 320px;
+    padding: 18px;
   }
   
   .action-buttons {
     flex-wrap: wrap;
+    gap: 8px;
   }
   
   .btn-action {
-    flex: 1 1 calc(50% - 5px);
+    flex: 1 1 calc(50% - 4px);
     min-width: 120px;
+    padding: 11px;
+    font-size: 0.8rem;
+  }
+
+  .quality-selector {
+    padding: 14px;
+  }
+
+  .quality-label {
+    font-size: 0.8rem;
+  }
+
+  .quality-btn {
+    padding: 7px 18px;
+    font-size: 0.8rem;
+    min-width: 55px;
+  }
+
+  .btn-download-video {
+    padding: 15px;
+    font-size: 0.95rem;
+  }
+
+  .history-section {
+    padding: 22px;
+    border-radius: 12px;
+  }
+
+  .history-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .btn-clear-history {
+    padding: 7px 14px;
+    font-size: 0.75rem;
+  }
+
+  .video-preview-content {
+    width: 92%;
+  }
+
+  .video-preview-close {
+    top: -45px;
+    width: 38px;
+    height: 38px;
+    font-size: 1.4rem;
+  }
+
+  .footer {
+    margin-top: 45px;
+    padding: 32px 18px 18px;
+  }
+
+  .footer-content {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 22px;
+  }
+
+  .footer-section h4 {
+    font-size: 0.95rem;
+    margin-bottom: 12px;
+  }
+
+  .footer-section p,
+  .footer-section ul li {
+    font-size: 0.8rem;
   }
 }
 
+/* Mobile Landscape & Large Phones */
 @media (max-width: 600px) {
+  body {
+    padding: 10px;
+    padding-top: 35px;
+  }
+
   .main-card {
-    padding: 30px 20px;
+    padding: 28px 18px;
+    border-radius: 16px;
   }
 
   .brand {
     gap: 18px;
-    margin-bottom: 30px;
+    margin-bottom: 28px;
   }
 
   .logo {
@@ -915,35 +1061,166 @@ body {
   }
 
   .title {
-    font-size: 1.8rem;
+    font-size: 1.9rem;
   }
 
   .input-card {
     flex-direction: column;
+    gap: 8px;
+  }
+
+  .url-input {
+    padding: 12px 15px;
+    font-size: 0.85rem;
   }
 
   .btn-download {
     width: 100%;
+    padding: 12px 20px;
+    font-size: 0.85rem;
   }
   
   .stats-bar {
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
     text-align: center;
+    padding: 16px 18px;
   }
   
   .stat-item {
     width: 100%;
+    align-items: center;
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
+  }
+
+  .stat-value {
+    font-size: 1.6rem;
   }
   
   .history-toggle-btn {
     width: 100%;
+    padding: 10px 18px;
+    font-size: 0.8rem;
+  }
+
+  .thumbnail {
+    border-radius: 10px;
+    margin-bottom: 16px;
+  }
+
+  .video-title {
+    font-size: 1rem;
+    margin-bottom: 7px;
+  }
+
+  .author {
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+  }
+
+  .stats {
+    font-size: 0.8rem;
+    gap: 10px;
+  }
+
+  .quality-selector {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .quality-label {
+    text-align: center;
+    font-size: 0.8rem;
+  }
+
+  .quality-buttons {
+    justify-content: center;
+  }
+
+  .quality-btn {
+    flex: 1;
+    padding: 8px 16px;
+    font-size: 0.8rem;
+  }
+
+  .action-buttons {
+    gap: 8px;
+  }
+
+  .btn-action {
+    flex: 1 1 calc(50% - 4px);
+    padding: 10px;
+    font-size: 0.8rem;
+  }
+
+  .btn-download-video {
+    padding: 14px;
+    font-size: 0.9rem;
+  }
+
+  .history-section {
+    padding: 20px 16px;
+  }
+
+  .history-header {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .history-header h3 {
+    font-size: 1.05rem;
+    text-align: center;
+  }
+
+  .btn-clear-history {
+    width: 100%;
+    padding: 8px 16px;
+  }
+
+  .history-item {
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .history-info {
+    width: 100%;
+  }
+
+  .history-title {
+    font-size: 0.85rem;
+  }
+
+  .history-time {
+    font-size: 0.72rem;
+  }
+
+  .history-redownload {
+    width: 100%;
+    padding: 10px;
+    font-size: 1.1rem;
   }
   
   .notification {
-    width: calc(100% - 40px);
-    left: 20px;
-    right: 20px;
+    width: calc(100% - 24px);
+    left: 12px;
+    right: 12px;
+    top: 12px;
+    padding: 16px;
+  }
+
+  .notification-title {
+    font-size: 0.9rem;
+  }
+
+  .notification-message {
+    font-size: 0.8rem;
   }
   
   .video-preview-content {
@@ -951,48 +1228,396 @@ body {
   }
   
   .video-preview-close {
-    top: -50px;
+    top: -48px;
+    width: 36px;
+    height: 36px;
+    font-size: 1.3rem;
+  }
+
+  .video-player {
+    border-radius: 12px;
   }
 
   .footer {
     margin-top: 40px;
-    padding: 30px 20px 15px;
+    padding: 28px 16px 16px;
   }
 
   .footer-content {
     grid-template-columns: 1fr;
-    gap: 25px;
+    gap: 24px;
+  }
+
+  .footer-section {
+    text-align: center;
+  }
+
+  .footer-section h4 {
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+  }
+
+  .footer-section p,
+  .footer-section ul li {
+    font-size: 0.78rem;
+  }
+
+  .footer-section ul li {
+    padding-left: 0;
+  }
+
+  .footer-section ul li::before {
+    display: none;
   }
 
   .footer-bottom p {
     font-size: 0.75rem;
   }
+
+  .loading {
+    padding: 25px;
+  }
+
+  .spinner {
+    width: 45px;
+    height: 45px;
+    margin-bottom: 12px;
+  }
+
+  .loading p {
+    font-size: 0.85rem;
+  }
+
+  .error-card {
+    padding: 25px 16px;
+  }
+
+  .error-icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+  }
+
+  .error-card p {
+    font-size: 0.9rem;
+    margin-bottom: 18px;
+  }
+
+  .btn-retry {
+    padding: 11px 22px;
+    font-size: 0.85rem;
+  }
 }
 
+/* Small Mobile Phones */
 @media (max-width: 400px) {
+  body {
+    padding: 8px;
+    padding-top: 30px;
+  }
+
+  .main-card {
+    padding: 24px 15px;
+    border-radius: 14px;
+  }
+
+  .brand {
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
   .logo {
     width: 80px;
     height: 80px;
+    border-width: 2px;
   }
 
   .title {
-    font-size: 1.6rem;
+    font-size: 1.7rem;
   }
-  
+
+  .stats-bar {
+    padding: 14px 15px;
+  }
+
+  .stat-label {
+    font-size: 0.65rem;
+  }
+
+  .stat-value {
+    font-size: 1.4rem;
+  }
+
+  .history-toggle-btn {
+    padding: 9px 16px;
+    font-size: 0.75rem;
+  }
+
+  .url-input {
+    padding: 11px 14px;
+    font-size: 0.8rem;
+    border-radius: 10px;
+  }
+
+  .btn-download {
+    padding: 11px 18px;
+    font-size: 0.8rem;
+    border-radius: 10px;
+  }
+
+  .thumbnail {
+    border-radius: 8px;
+    margin-bottom: 14px;
+  }
+
+  .video-title {
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+  }
+
+  .author {
+    font-size: 0.8rem;
+    margin-bottom: 7px;
+  }
+
+  .stats {
+    font-size: 0.75rem;
+    gap: 8px;
+  }
+
+  .quality-selector {
+    padding: 10px;
+    border-radius: 8px;
+  }
+
+  .quality-label {
+    font-size: 0.75rem;
+  }
+
+  .quality-btn {
+    padding: 7px 14px;
+    font-size: 0.75rem;
+    min-width: 50px;
+    border-radius: 6px;
+  }
+
   .action-buttons {
     flex-direction: column;
+    gap: 6px;
   }
   
   .btn-action {
     flex: 1 1 100%;
     width: 100%;
+    padding: 10px;
+    font-size: 0.78rem;
+    border-radius: 8px;
   }
-  
-  .stat-value {
+
+  .btn-download-video {
+    padding: 13px;
+    font-size: 0.88rem;
+    border-radius: 10px;
+  }
+
+  .history-section {
+    padding: 18px 14px;
+    border-radius: 10px;
+  }
+
+  .history-header h3 {
+    font-size: 1rem;
+  }
+
+  .btn-clear-history {
+    padding: 7px 14px;
+    font-size: 0.7rem;
+  }
+
+  .history-item {
+    padding: 12px;
+    border-radius: 8px;
+  }
+
+  .history-title {
+    font-size: 0.82rem;
+  }
+
+  .history-time {
+    font-size: 0.7rem;
+  }
+
+  .history-redownload {
+    padding: 9px;
+    font-size: 1rem;
+    border-radius: 6px;
+  }
+
+  .notification {
+    padding: 14px;
+    border-radius: 10px;
+  }
+
+  .notification-title {
+    font-size: 0.85rem;
+  }
+
+  .notification-message {
+    font-size: 0.75rem;
+  }
+
+  .notification-close {
+    width: 28px;
+    height: 28px;
+    font-size: 1.3rem;
+  }
+
+  .video-preview-close {
+    top: -45px;
+    width: 34px;
+    height: 34px;
+    font-size: 1.2rem;
+  }
+
+  .video-player {
+    border-radius: 10px;
+  }
+
+  .footer {
+    margin-top: 35px;
+    padding: 24px 14px 14px;
+  }
+
+  .footer-content {
+    gap: 20px;
+  }
+
+  .footer-section h4 {
+    font-size: 0.88rem;
+    margin-bottom: 9px;
+  }
+
+  .footer-section p,
+  .footer-section ul li {
+    font-size: 0.75rem;
+  }
+
+  .footer-bottom {
+    padding-top: 16px;
+  }
+
+  .footer-bottom p {
+    font-size: 0.7rem;
+  }
+
+  .loading {
+    padding: 22px 14px;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 10px;
+  }
+
+  .loading p {
+    font-size: 0.8rem;
+  }
+
+  .error-card {
+    padding: 22px 14px;
+  }
+
+  .error-icon {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+  }
+
+  .error-card p {
+    font-size: 0.85rem;
+    margin-bottom: 16px;
+  }
+
+  .btn-retry {
+    padding: 10px 20px;
+    font-size: 0.8rem;
+    border-radius: 10px;
+  }
+}
+
+/* Extra Small Devices */
+@media (max-width: 350px) {
+  body {
+    padding: 6px;
+    padding-top: 25px;
+  }
+
+  .main-card {
+    padding: 20px 12px;
+  }
+
+  .logo {
+    width: 70px;
+    height: 70px;
+  }
+
+  .title {
     font-size: 1.5rem;
   }
-  
-  .history-section {
-    padding: 20px 15px;
+
+  .stat-value {
+    font-size: 1.3rem;
+  }
+
+  .video-title {
+    font-size: 0.9rem;
+  }
+
+  .quality-btn,
+  .btn-action {
+    font-size: 0.72rem;
+    padding: 8px 12px;
+  }
+
+  .footer-section h4 {
+    font-size: 0.85rem;
+  }
+
+  .footer-section p,
+  .footer-section ul li {
+    font-size: 0.72rem;
+  }
+}
+
+/* Landscape Orientation Adjustments */
+@media (max-height: 500px) and (orientation: landscape) {
+  body {
+    padding-top: 20px;
+  }
+
+  .main-card {
+    padding: 20px;
+  }
+
+  .brand {
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .logo {
+    width: 70px;
+    height: 70px;
+  }
+
+  .title {
+    font-size: 1.6rem;
+  }
+
+  .stats-bar {
+    padding: 12px 18px;
+  }
+
+  .footer {
+    margin-top: 30px;
+    padding: 20px 15px 12px;
   }
 }
