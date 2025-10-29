@@ -2728,12 +2728,71 @@ print(data)`;
 
     loadEndpoints();
 
+    // ========== MOBILE MENU TOGGLE ==========
+    function toggleMobileMenu() {
+      const hamburgerMenu = document.getElementById('hamburgerMenu');
+      const mobileMenu = document.getElementById('mobileMenu');
+      const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+      const body = document.body;
+
+      hamburgerMenu.classList.toggle('active');
+      mobileMenu.classList.toggle('active');
+      mobileMenuOverlay.classList.toggle('active');
+
+      // Prevent body scroll when menu is open
+      if (mobileMenu.classList.contains('active')) {
+        body.style.overflow = 'hidden';
+      } else {
+        body.style.overflow = 'auto';
+      }
+
+      // Sync category nav to mobile menu
+      syncCategoriesToMobile();
+    }
+
+    function syncCategoriesToMobile() {
+      const desktopCategories = document.getElementById('categoryNav');
+      const mobileCategories = document.getElementById('mobileCategories');
+      
+      if (desktopCategories && mobileCategories) {
+        mobileCategories.innerHTML = desktopCategories.innerHTML;
+        
+        // Re-attach click events to mobile category items
+        const mobileCategoryItems = mobileCategories.querySelectorAll('.category-item');
+        mobileCategoryItems.forEach(item => {
+          item.addEventListener('click', () => {
+            // Close mobile menu after selecting category
+            toggleMobileMenu();
+          });
+        });
+      }
+    }
+
+    // Close mobile menu on window resize if it's open and screen is large
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 1100) {
+        const mobileMenu = document.getElementById('mobileMenu');
+        const hamburgerMenu = document.getElementById('hamburgerMenu');
+        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+        
+        if (mobileMenu.classList.contains('active')) {
+          mobileMenu.classList.remove('active');
+          hamburgerMenu.classList.remove('active');
+          mobileMenuOverlay.classList.remove('active');
+          document.body.style.overflow = 'auto';
+        }
+      }
+    });
+
     // ========== MUSIC PLAYER & VINYL ANIMATION ==========
     const bgMusic = document.getElementById('bgMusic');
     const vinylDisc = document.getElementById('vinylDisc');
+    const vinylDiscMobile = document.getElementById('vinylDiscMobile');
     const playPauseBtn = document.getElementById('playPauseBtn');
     const playPauseIcon = document.getElementById('playPauseIcon');
+    const playPauseIconMobile = document.getElementById('playPauseIconMobile');
     const volumeSlider = document.getElementById('volumeSlider');
+    const volumeSliderMobile = document.getElementById('volumeSliderMobile');
     
     let isPlaying = false;
 
@@ -2742,13 +2801,17 @@ print(data)`;
     function togglePlayPause() {
       if (isPlaying) {
         bgMusic.pause();
-        vinylDisc.classList.remove('spinning');
-        playPauseIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+        if (vinylDisc) vinylDisc.classList.remove('spinning');
+        if (vinylDiscMobile) vinylDiscMobile.classList.remove('spinning');
+        if (playPauseIcon) playPauseIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+        if (playPauseIconMobile) playPauseIconMobile.innerHTML = '<path d="M8 5v14l11-7z"/>';
         isPlaying = false;
       } else {
         bgMusic.play().then(() => {
-          vinylDisc.classList.add('spinning');
-          playPauseIcon.innerHTML = '<path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>';
+          if (vinylDisc) vinylDisc.classList.add('spinning');
+          if (vinylDiscMobile) vinylDiscMobile.classList.add('spinning');
+          if (playPauseIcon) playPauseIcon.innerHTML = '<path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>';
+          if (playPauseIconMobile) playPauseIconMobile.innerHTML = '<path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>';
           isPlaying = true;
         }).catch(err => {
           console.error('Failed to play audio:', err);
@@ -2759,11 +2822,16 @@ print(data)`;
 
     function changeVolume(value) {
       bgMusic.volume = value / 100;
+      // Sync both volume sliders
+      if (volumeSlider) volumeSlider.value = value;
+      if (volumeSliderMobile) volumeSliderMobile.value = value;
     }
 
     bgMusic.addEventListener('ended', () => {
-      vinylDisc.classList.remove('spinning');
-      playPauseIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+      if (vinylDisc) vinylDisc.classList.remove('spinning');
+      if (vinylDiscMobile) vinylDiscMobile.classList.remove('spinning');
+      if (playPauseIcon) playPauseIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+      if (playPauseIconMobile) playPauseIconMobile.innerHTML = '<path d="M8 5v14l11-7z"/>';
       isPlaying = false;
     });
 
