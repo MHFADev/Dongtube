@@ -14,10 +14,15 @@ function initThreeJS() {
   camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
   camera.position.z = 50;
   
-  // Renderer
-  renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  // Renderer - optimized for low-end devices
+  renderer = new THREE.WebGLRenderer({ 
+    canvas, 
+    alpha: true, 
+    antialias: false,
+    powerPreference: 'low-power'
+  });
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
   
   // Create floating 3D objects
   particles = [];
@@ -35,8 +40,8 @@ function initThreeJS() {
     opacity: 0.3
   });
   
-  // Create 20 random floating objects
-  for (let i = 0; i < 20; i++) {
+  // Create 19 random floating objects (reduced by 5% for better performance)
+  for (let i = 0; i < 19; i++) {
     const geometry = geometries[Math.floor(Math.random() * geometries.length)];
     const mesh = new THREE.Mesh(geometry, material);
     
@@ -66,19 +71,28 @@ function initThreeJS() {
     particles.push(mesh);
   }
   
-  // Handle window resize
+  // Handle window resize with debounce for better performance
+  let resizeTimeout;
   window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }, 150);
   });
   
   // Start animation
   animate();
 }
 
+let isAnimating = true;
+let animationFrameId;
+
 function animate() {
-  requestAnimationFrame(animate);
+  if (!isAnimating) return;
+  
+  animationFrameId = requestAnimationFrame(animate);
   
   // Animate each particle
   particles.forEach(particle => {
@@ -105,6 +119,19 @@ function animate() {
   
   renderer.render(scene, camera);
 }
+
+// Pause animation when tab is not visible (save CPU/GPU resources)
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    isAnimating = false;
+    if (animationFrameId) {
+      cancelAnimationFrame(animationFrameId);
+    }
+  } else {
+    isAnimating = true;
+    animate();
+  }
+});
 
 // Initialize Three.js when page loads
 window.addEventListener('load', () => {
