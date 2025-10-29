@@ -61,16 +61,17 @@ The website has been optimized for low-end devices (RAM 2-4GB) with comprehensiv
 
 ## Media Preview Feature (Oct 29, 2025)
 - **Automatic media detection**: Extracts image, video, and audio URLs from JSON responses
-- **Smart preview rendering**: 
-  - Images: Direct display with responsive styling
-  - Videos: HTML5 video player with controls
-  - Audio: HTML5 audio player with controls
+- **Smart preview rendering with priority-based content-type detection**:
+  - Audio (Priority 1): HTML5 audio player - detects audio/mpeg, audio/wav
+  - Video (Priority 2): HTML5 video player - detects video/mp4, video/* 
+  - Images (Priority 3): Direct display with responsive styling
 - **Response parsing**: `extractMediaUrls()` function scans response objects recursively
   - Detects URLs based on key names (image, thumbnail, video, audio, download, etc.)
-  - Validates file extensions (.jpg, .png, .mp4, .mp3, .m4a, etc.)
+  - Validates file extensions (.jpg, .png, .mp4, .mp3, .m4a, .wav, .opus, etc.)
   - Removes duplicate URLs
-- **Enhanced UX**: Users can preview media before using endpoints in their code
-- **Supports all media endpoints**: TikTok, Instagram, YouTube, Spotify, random images, etc.
+- **Enhanced UX**: Users can test and preview media directly in API docs before using endpoints in their code
+- **Supports all media endpoints**: TikTok, Instagram, YouTube, Spotify, TTS (Text-to-Speech), random images, etc.
+- **Bug fix**: Fixed TTS endpoint preview - audio now displays correctly with prioritized content-type checking
 
 ## Background Music (Oct 29, 2025)
 - **Auto-play background music**: Plays music.opus file on page load

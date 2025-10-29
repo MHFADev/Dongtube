@@ -3054,31 +3054,9 @@ print(data)`;
         }
 
         const res = await fetch(url, opts);
-        const contentType = res.headers.get('content-type');
+        const contentType = res.headers.get('content-type') || '';
 
-        if (isBinary || (contentType && contentType.includes('image'))) {
-          const blob = await res.blob();
-          const imgUrl = URL.createObjectURL(blob);
-          contentEl.innerHTML = `
-            <div class="result-meta">
-              <strong>Method:</strong> ${method}<br>
-              <strong>Status:</strong> ${res.status} ${res.statusText}<br>
-              <strong>URL:</strong> ${url}
-            </div>
-            <img src="${imgUrl}" onload="URL.revokeObjectURL(this.src)">
-          `;
-        } else if (contentType && contentType.includes('video')) {
-          const blob = await res.blob();
-          const vidUrl = URL.createObjectURL(blob);
-          contentEl.innerHTML = `
-            <div class="result-meta">
-              <strong>Method:</strong> ${method}<br>
-              <strong>Status:</strong> ${res.status} ${res.statusText}<br>
-              <strong>URL:</strong> ${url}
-            </div>
-            <video controls style="max-width: 100%; border-radius: 8px;"><source src="${vidUrl}" type="${contentType}"></video>
-          `;
-        } else if (contentType && (contentType.includes('audio') || contentType.includes('mpeg') || contentType.includes('mp3'))) {
+        if (contentType.includes('audio') || contentType.includes('mpeg') || contentType.includes('wav')) {
           const blob = await res.blob();
           const audioUrl = URL.createObjectURL(blob);
           contentEl.innerHTML = `
@@ -3091,6 +3069,28 @@ print(data)`;
               <div style="margin-bottom: 8px; font-size: 0.875rem; color: var(--text); font-weight: 600;">🎵 Audio Preview</div>
               <audio controls style="width: 100%;" src="${audioUrl}"></audio>
             </div>
+          `;
+        } else if (contentType.includes('video')) {
+          const blob = await res.blob();
+          const vidUrl = URL.createObjectURL(blob);
+          contentEl.innerHTML = `
+            <div class="result-meta">
+              <strong>Method:</strong> ${method}<br>
+              <strong>Status:</strong> ${res.status} ${res.statusText}<br>
+              <strong>URL:</strong> ${url}
+            </div>
+            <video controls style="max-width: 100%; border-radius: 8px;"><source src="${vidUrl}" type="${contentType}"></video>
+          `;
+        } else if (isBinary || contentType.includes('image')) {
+          const blob = await res.blob();
+          const imgUrl = URL.createObjectURL(blob);
+          contentEl.innerHTML = `
+            <div class="result-meta">
+              <strong>Method:</strong> ${method}<br>
+              <strong>Status:</strong> ${res.status} ${res.statusText}<br>
+              <strong>URL:</strong> ${url}
+            </div>
+            <img src="${imgUrl}" onload="URL.revokeObjectURL(this.src)">
           `;
         } else {
           const data = await res.json();
