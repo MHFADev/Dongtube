@@ -126,7 +126,8 @@ export const checkVIPAccess = async (req, res, next) => {
       if (!pathMatches) return false;
       
       if (endpoint.method && endpoint.method !== 'ALL') {
-        return endpoint.method.toUpperCase() === requestMethod.toUpperCase();
+        const allowedMethods = endpoint.method.toUpperCase().split(',').map(m => m.trim());
+        return allowedMethods.includes(requestMethod.toUpperCase());
       }
       
       return true;
