@@ -110,6 +110,16 @@
     .header {
       margin-bottom: 60px;
       animation: fadeInUp 0.6s ease-out;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .header-content {
+      flex: 1;
+      min-width: 300px;
     }
 
     .brand {
@@ -1463,25 +1473,428 @@
         border-radius: 8px;
       }
     }
+
+    /* Music Player Styles */
+    .music-player {
+      background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-darker) 100%);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+      animation: fadeInUp 0.6s ease-out 0.4s backwards;
+      position: relative;
+    }
+
+    .music-player::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 165, 0, 0.1) 0%, transparent 70%);
+      animation: musicGlow 3s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes musicGlow {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.6; }
+    }
+
+    .vinyl-container {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      flex-shrink: 0;
+      z-index: 2;
+    }
+
+    .vinyl-disc {
+      width: 80px;
+      height: 80px;
+      background: radial-gradient(circle at center, #1a1a1a 0%, #0d0d0d 30%, #1a1a1a 31%, #0d0d0d 32%, #2a2a2a 70%, #0d0d0d 100%);
+      border-radius: 50%;
+      position: relative;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(0, 0, 0, 0.8);
+      transition: transform 0.3s ease;
+    }
+
+    .vinyl-disc::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 20px;
+      height: 20px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(255, 165, 0, 0.5);
+    }
+
+    .vinyl-disc::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 6px;
+      height: 6px;
+      background: var(--bg-dark);
+      border-radius: 50%;
+    }
+
+    .vinyl-disc.spinning {
+      animation: vinylSpin 2s linear infinite;
+    }
+
+    @keyframes vinylSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .vinyl-grooves {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-radial-gradient(circle at center, transparent 0px, transparent 2px, rgba(255, 255, 255, 0.02) 2px, rgba(255, 255, 255, 0.02) 4px);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .player-controls {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .player-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .player-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0;
+    }
+
+    .player-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .control-buttons {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .control-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid var(--primary);
+      background: var(--bg-dark);
+      color: var(--primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .control-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    .control-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 0;
+      height: 0;
+      background: var(--primary);
+      border-radius: 50%;
+      transition: width 0.3s ease, height 0.3s ease;
+    }
+
+    .control-btn:hover::before {
+      width: 100%;
+      height: 100%;
+    }
+
+    .control-btn:hover {
+      background: var(--primary);
+      color: var(--bg-dark);
+      transform: scale(1.1);
+      box-shadow: 0 4px 20px rgba(255, 165, 0, 0.4);
+    }
+
+    .control-btn svg,
+    .control-btn span {
+      position: relative;
+      z-index: 1;
+    }
+
+    .volume-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      max-width: 150px;
+    }
+
+    .volume-icon {
+      width: 16px;
+      height: 16px;
+      fill: var(--text-muted);
+    }
+
+    .volume-slider {
+      flex: 1;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      appearance: none;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .volume-slider::-webkit-slider-thumb {
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      background: var(--primary);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .volume-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.3);
+      box-shadow: 0 0 10px rgba(255, 165, 0, 0.6);
+    }
+
+    .volume-slider::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      background: var(--primary);
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+    }
+
+    .tts-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .tts-btn {
+      padding: 6px 12px;
+      background: rgba(255, 165, 0, 0.1);
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tts-btn svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+    }
+
+    .tts-btn:hover {
+      background: var(--primary);
+      color: var(--bg-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 165, 0, 0.3);
+    }
+
+    .tts-btn.active {
+      background: var(--primary);
+      color: var(--bg-dark);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @media (max-width: 1100px) {
+      .header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .music-player {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .vinyl-container {
+        width: 60px;
+        height: 60px;
+      }
+
+      .vinyl-disc {
+        width: 60px;
+        height: 60px;
+      }
+
+      .player-title {
+        font-size: 0.8rem;
+      }
+
+      .player-subtitle {
+        font-size: 0.7rem;
+      }
+
+      .control-btn {
+        width: 36px;
+        height: 36px;
+      }
+
+      .control-btn svg {
+        width: 14px;
+        height: 14px;
+      }
+
+      .tts-btn {
+        padding: 5px 10px;
+        font-size: 0.7rem;
+      }
+
+      .volume-control {
+        max-width: 120px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .music-player {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .player-controls {
+        width: 100%;
+      }
+
+      .control-buttons {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .volume-control {
+        max-width: 100%;
+      }
+
+      .tts-controls {
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <header class="header">
-      <div class="brand">
-        <h1 class="brand-title">Dongtube<span>.</span></h1>
-        <span class="version">v2.0</span>
+      <div class="header-content">
+        <div class="brand">
+          <h1 class="brand-title">Dongtube<span>.</span></h1>
+          <span class="version">v2.0</span>
+        </div>
+        <p>Interactive API documentation with real-time testing capabilities for developers.</p>
+        <div class="header-links">
+          <a href="https://whatsapp.com/channel/0029Vb91qeW17Emm4TVqu53K" target="_blank">WhatsApp Channel</a>
+          <a href="https://wa.me/6283143961588" target="_blank">Contact Admin</a>
+        </div>
       </div>
-      <p>Interactive API documentation with real-time testing capabilities for developers.</p>
-      <div class="header-links">
-        <a href="https://whatsapp.com/channel/0029Vb91qeW17Emm4TVqu53K" target="_blank">WhatsApp Channel</a>
-        <a href="https://wa.me/6283143961588" target="_blank">Contact Admin</a>
+
+      <div class="music-player">
+      <div class="vinyl-container">
+        <div class="vinyl-disc" id="vinylDisc">
+          <div class="vinyl-grooves"></div>
+        </div>
+      </div>
+      
+      <div class="player-controls">
+        <div class="player-info">
+          <div>
+            <h3 class="player-title">Background Music</h3>
+            <p class="player-subtitle">Dongtube Theme</p>
+          </div>
+        </div>
+        
+        <div class="control-buttons">
+          <button class="control-btn" id="playPauseBtn" onclick="togglePlayPause()">
+            <svg id="playPauseIcon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+          </button>
+          
+          <div class="volume-control">
+            <svg class="volume-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+            </svg>
+            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="70" oninput="changeVolume(this.value)">
+          </div>
+        </div>
+
+        <div class="tts-controls">
+          <button class="tts-btn" id="ttsBtn" onclick="speakPageContent()">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+            </svg>
+            <span id="ttsText">Read</span>
+          </button>
+          <button class="tts-btn" id="stopTtsBtn" onclick="stopSpeaking()" style="display: none;">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 6h12v12H6z"/>
+            </svg>
+            <span>Stop</span>
+          </button>
+        </div>
+      </div>
+
+      <audio id="bgMusic" loop>
+        <source src="/asset/music.opus" type="audio/ogg">
+        Your browser does not support the audio element.
+      </audio>
       </div>
     </header>
     
     <div class="banner-container">
       <img src="/asset/banner.jpg" alt="Dongtube Banner" class="banner-img">
     </div>
+
     <div class="stats-container">
       <div class="stats">
         <div class="stats-number" id="totalEndpoints">0</div>
@@ -2048,6 +2461,144 @@ print(data)`;
     });
 
     loadEndpoints();
+
+    // ========== MUSIC PLAYER & VINYL ANIMATION ==========
+    const bgMusic = document.getElementById('bgMusic');
+    const vinylDisc = document.getElementById('vinylDisc');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const playPauseIcon = document.getElementById('playPauseIcon');
+    const volumeSlider = document.getElementById('volumeSlider');
+    
+    let isPlaying = false;
+
+    bgMusic.volume = 0.7;
+
+    function togglePlayPause() {
+      if (isPlaying) {
+        bgMusic.pause();
+        vinylDisc.classList.remove('spinning');
+        playPauseIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+        isPlaying = false;
+      } else {
+        bgMusic.play().then(() => {
+          vinylDisc.classList.add('spinning');
+          playPauseIcon.innerHTML = '<path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>';
+          isPlaying = true;
+        }).catch(err => {
+          console.error('Failed to play audio:', err);
+          alert('Failed to play audio. Please interact with the page first.');
+        });
+      }
+    }
+
+    function changeVolume(value) {
+      bgMusic.volume = value / 100;
+    }
+
+    bgMusic.addEventListener('ended', () => {
+      vinylDisc.classList.remove('spinning');
+      playPauseIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+      isPlaying = false;
+    });
+
+    // ========== TEXT-TO-SPEECH (Web Speech API + Google TTS) ==========
+    let speechSynthesis = window.speechSynthesis;
+    let currentUtterance = null;
+    let isSpeaking = false;
+    let ttsMode = 'browser';
+
+    function speakPageContent() {
+      const ttsBtn = document.getElementById('ttsBtn');
+      const ttsText = document.getElementById('ttsText');
+      const stopTtsBtn = document.getElementById('stopTtsBtn');
+
+      if (isSpeaking) {
+        stopSpeaking();
+        return;
+      }
+
+      const brandTitle = document.querySelector('.brand-title');
+      const headerDesc = document.querySelector('.header p');
+      const totalEndpoints = document.getElementById('totalEndpoints').textContent;
+      
+      const textToSpeak = `Welcome to ${brandTitle ? brandTitle.textContent : 'Dongtube'}. ${headerDesc ? headerDesc.textContent : ''} This API has ${totalEndpoints} total endpoints available for you to use.`;
+
+      if ('speechSynthesis' in window) {
+        currentUtterance = new SpeechSynthesisUtterance(textToSpeak);
+        
+        const voices = speechSynthesis.getVoices();
+        const googleVoice = voices.find(voice => 
+          voice.name.includes('Google') || 
+          voice.name.includes('Chrome')
+        );
+        
+        if (googleVoice) {
+          currentUtterance.voice = googleVoice;
+        }
+        
+        currentUtterance.rate = 1.0;
+        currentUtterance.pitch = 1.0;
+        currentUtterance.volume = 1.0;
+        currentUtterance.lang = 'en-US';
+
+        currentUtterance.onstart = () => {
+          isSpeaking = true;
+          ttsBtn.classList.add('active');
+          ttsText.textContent = 'Speaking...';
+          stopTtsBtn.style.display = 'flex';
+        };
+
+        currentUtterance.onend = () => {
+          isSpeaking = false;
+          ttsBtn.classList.remove('active');
+          ttsText.textContent = 'Read Page';
+          stopTtsBtn.style.display = 'none';
+        };
+
+        currentUtterance.onerror = (event) => {
+          console.error('Speech synthesis error:', event);
+          isSpeaking = false;
+          ttsBtn.classList.remove('active');
+          ttsText.textContent = 'Read Page';
+          stopTtsBtn.style.display = 'none';
+        };
+
+        speechSynthesis.speak(currentUtterance);
+      } else {
+        alert('Text-to-Speech is not supported in your browser.');
+      }
+    }
+
+    function stopSpeaking() {
+      if (speechSynthesis && isSpeaking) {
+        speechSynthesis.cancel();
+        isSpeaking = false;
+        
+        const ttsBtn = document.getElementById('ttsBtn');
+        const ttsText = document.getElementById('ttsText');
+        const stopTtsBtn = document.getElementById('stopTtsBtn');
+        
+        ttsBtn.classList.remove('active');
+        ttsText.textContent = 'Read Page';
+        stopTtsBtn.style.display = 'none';
+      }
+    }
+
+    if ('speechSynthesis' in window) {
+      speechSynthesis.addEventListener('voiceschanged', () => {
+        const voices = speechSynthesis.getVoices();
+        console.log('Available voices:', voices.map(v => v.name));
+      });
+    }
+
+    window.addEventListener('beforeunload', () => {
+      if (isSpeaking) {
+        stopSpeaking();
+      }
+      if (isPlaying) {
+        bgMusic.pause();
+      }
+    });
   </script>
 </body>
 </html>
