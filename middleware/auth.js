@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { User, VIPEndpoint } from '../models/index.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dongtube-secret-key-change-in-production-2025';
+const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES = '7d';
 
 export const generateToken = (user) => {

@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from "express";
 import chalk from "chalk";
 import path from "path";
@@ -8,6 +9,19 @@ import { initDatabase } from "./models/index.js";
 import authRoutes from "./routes/auth.js";
 import adminRoutes from "./routes/admin.js";
 import { checkVIPAccess, optionalAuth } from "./middleware/auth.js";
+
+if (!process.env.JWT_SECRET) {
+  console.error(chalk.bgRed.white('\n ✗ FATAL: JWT_SECRET environment variable is required but not set! \n'));
+  console.error(chalk.yellow('\n📝 Instructions to fix this:'));
+  console.error(chalk.yellow('   1. Go to the "Secrets" tab in Replit (Tools > Secrets)'));
+  console.error(chalk.yellow('   2. Add a new secret with key: JWT_SECRET'));
+  console.error(chalk.yellow('   3. For the value, use a secure random string like:'));
+  console.error(chalk.cyan('      bceb46bd7eaa9c68cb865ed242912bbab4fd5e2023f431ba5337f02d3d5b591943c883cdd607bcc912a7bc88a610794ff1853bb55ec3e5c5844afcf7796d4225'));
+  console.error(chalk.yellow('\n   Or generate a new one with:'));
+  console.error(chalk.cyan('      node -e "console.log(require(\'crypto\').randomBytes(64).toString(\'hex\'))"'));
+  console.error(chalk.yellow('\n   4. Restart the Repl\n'));
+  process.exit(1);
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

@@ -1,6 +1,7 @@
 import sequelize from '../config/database.js';
 import User from './User.js';
 import VIPEndpoint from './VIPEndpoint.js';
+import crypto from 'crypto';
 
 const initDatabase = async () => {
   try {
@@ -13,13 +14,21 @@ const initDatabase = async () => {
     const adminExists = await User.findOne({ where: { role: 'admin' } });
     if (!adminExists) {
       const bcrypt = await import('bcryptjs');
-      const hashedPassword = await bcrypt.hash('admin123', 12);
+      const randomPassword = crypto.randomBytes(16).toString('hex');
+      const hashedPassword = await bcrypt.hash(randomPassword, 12);
       await User.create({
         email: 'admin@dongtube.com',
         password: hashedPassword,
         role: 'admin'
       });
-      console.log('✓ Default admin created: admin@dongtube.com / admin123');
+      console.log('\n' + '='.repeat(70));
+      console.log('✓ ADMIN ACCOUNT CREATED');
+      console.log('='.repeat(70));
+      console.log('  Email:    admin@dongtube.com');
+      console.log('  Password: ' + randomPassword);
+      console.log('='.repeat(70));
+      console.log('⚠️  IMPORTANT: Save this password now! It will not be shown again.');
+      console.log('='.repeat(70) + '\n');
     }
     
     return true;
