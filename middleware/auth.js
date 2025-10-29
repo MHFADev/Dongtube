@@ -16,6 +16,24 @@ export const generateToken = (user) => {
   );
 };
 
+const checkAndDowngradeExpiredVIP = async (user) => {
+  if (user.role === 'vip' && user.vipExpiresAt) {
+    const now = new Date();
+    const expiryDate = new Date(user.vipExpiresAt);
+    
+    if (expiryDate < now) {
+      await user.update({
+        role: 'user',
+        vipExpiresAt: null
+      });
+      user.role = 'user';
+      user.vipExpiresAt = null;
+      return true;
+    }
+  }
+  return false;
+};
+
 export const authenticate = async (req, res, next) => {
   try {
     const token = req.cookies?.token || req.headers.authorization?.split(' ')[1];
@@ -29,7 +47,7 @@ export const authenticate = async (req, res, next) => {
 
     const decoded = jwt.verify(token, JWT_SECRET);
     const user = await User.findByPk(decoded.id, {
-      attributes: ['id', 'email', 'role', 'lastLogin']
+      attributes: ['id', 'email', 'role', 'vipExpiresAt', 'lastLogin']
     });
 
     if (!user) {
@@ -38,6 +56,8 @@ export const authenticate = async (req, res, next) => {
         error: 'User not found'
       });
     }
+
+    await checkAndDowngradeExpiredVIP(user);
 
     req.user = user;
     next();
@@ -132,7 +152,7 @@ export const checkVIPAccess = async (req, res, next) => {
 
     const decoded = jwt.verify(token, JWT_SECRET);
     const user = await User.findByPk(decoded.id, {
-      attributes: ['id', 'email', 'role']
+      attributes: ['id', 'email', 'role', 'vipExpiresAt']
     });
 
     if (!user) {
@@ -141,6 +161,8 @@ export const checkVIPAccess = async (req, res, next) => {
         error: 'User not found'
       });
     }
+
+    const wasDowngraded = await checkAndDowngradeExpiredVIP(user);
 
     if (user.role !== 'vip' && user.role !== 'admin') {
       return res.status(403).json({
@@ -200,9 +222,10 @@ export const optionalAuth = async (req, res, next) => {
     if (token) {
       const decoded = jwt.verify(token, JWT_SECRET);
       const user = await User.findByPk(decoded.id, {
-        attributes: ['id', 'email', 'role']
+        attributes: ['id', 'email', 'role', 'vipExpiresAt']
       });
       if (user) {
+        await checkAndDowngradeExpiredVIP(user);
         req.user = user;
       }
     }
