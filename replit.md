@@ -6,6 +6,35 @@ Dongtube API is a modular Express.js server that provides a unified interface fo
 
 Preferred communication style: Simple, everyday language.
 
+# Recent Performance Optimizations (Oct 2025)
+
+The website has been optimized for low-end devices (RAM 2-4GB) with the following improvements:
+
+## Three.js Animation Optimizations
+- Reduced particle count from 20 to 19 (5% reduction as requested)
+- Disabled antialiasing for better GPU performance
+- Capped pixel ratio to 1.5 for low-end devices
+- Set renderer to low-power mode
+- Auto-pause animation when browser tab is hidden (saves CPU/GPU)
+- Debounced window resize events (150ms delay)
+
+## CSS & Rendering Optimizations
+- Added `prefers-reduced-motion` support - disables all animations for users who prefer reduced motion
+- Reduced backdrop-filter blur from 20px to 10px
+- Completely removed backdrop-filter on mobile devices (<768px)
+- Increased background opacity from 0.85 to 0.95 to reduce blur dependency
+- Added `will-change: transform` only to necessary elements
+- GPU acceleration optimized
+
+## Resource Loading Optimizations
+- Added `loading="lazy"` to all images (logo, thumbnails)
+- Added `defer` attribute to Three.js and script.js for non-blocking load
+- Async font loading with print media trick
+- Font preconnect to googleapis
+
+## Result
+Website now runs smoothly on devices with 2-4GB RAM without sacrificing visual quality (animations reduced by only 5% as requested).
+
 # System Architecture
 
 ## Route Auto-Loading System
