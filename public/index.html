@@ -3760,7 +3760,6 @@ print(data)`;
     
     let currentMediaGallery = [];
     let currentGalleryIndex = 0;
-    let audioPlayers = new Map();
     
     function renderMediaPreview(mediaUrls) {
       if (!mediaUrls || mediaUrls.length === 0) return '';
@@ -3892,33 +3891,9 @@ print(data)`;
       return `
         <div class="media-item" id="${itemId}">
           <div class="media-item-type audio">🎵 AUDIO</div>
-          <div class="media-audio-container">
-            <div class="audio-waveform">
-              ${Array(8).fill(0).map(() => '<div class="audio-bar"></div>').join('')}
-            </div>
-            <div class="custom-audio-player">
-              <div class="audio-controls">
-                <button class="audio-play-btn" onclick="toggleAudioPlay('${itemId}')">
-                  <svg id="${itemId}-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
-                </button>
-                <div class="audio-timeline">
-                  <div class="audio-progress-bar" onclick="seekAudio(event, '${itemId}')">
-                    <div class="audio-progress-fill" id="${itemId}-progress" style="width: 0%"></div>
-                  </div>
-                  <div class="audio-time">
-                    <span id="${itemId}-current">0:00</span>
-                    <span id="${itemId}-duration">0:00</span>
-                  </div>
-                </div>
-                <div class="audio-volume-control">
-                  <svg class="audio-volume-icon" viewBox="0 0 24 24">
-                    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" fill="currentColor"/>
-                  </svg>
-                  <input type="range" class="audio-volume-slider" min="0" max="100" value="70" oninput="setAudioVolume('${itemId}', this.value)">
-                </div>
-              </div>
-            </div>
-            <audio id="${itemId}-audio" src="${media.url}" preload="metadata"></audio>
+          <div style="padding: 16px; background: var(--bg-card); border-radius: 8px; border: 1px solid var(--border);">
+            <div style="margin-bottom: 8px; font-size: 0.875rem; color: var(--text); font-weight: 600;">🎵 Audio Preview</div>
+            <audio controls style="width: 100%;" src="${media.url}"></audio>
           </div>
           <div class="media-actions">
             <button class="media-action-btn download" onclick="downloadMedia('${media.url}', 'audio.mp3')">
@@ -4043,18 +4018,6 @@ print(data)`;
             ${previewHTML}
             <pre>${JSON.stringify(data, null, 2)}</pre>
           `;
-          
-          // Initialize audio players after rendering
-          if (previewHTML) {
-            setTimeout(() => {
-              const audioElements = contentEl.querySelectorAll('audio[id$="-audio"]');
-              audioElements.forEach(audio => {
-                const itemId = audio.id.replace('-audio', '');
-                audio.volume = 0.7;
-                audio.addEventListener('loadedmetadata', () => updateAudioDuration(itemId));
-              });
-            }, 100);
-          }
         }
       } catch (err) {
         contentEl.innerHTML = `<div class="result-meta"><strong>ERROR</strong></div><pre>${err.message}</pre>`;
@@ -4127,76 +4090,6 @@ print(data)`;
       thumbnails.forEach((thumb, i) => {
         thumb.classList.toggle('active', i === index);
       });
-    }
-    
-    // Audio Player Functions
-    function toggleAudioPlay(itemId) {
-      const audio = document.getElementById(`${itemId}-audio`);
-      const icon = document.getElementById(`${itemId}-icon`);
-      
-      if (!audio) return;
-      
-      if (audio.paused) {
-        // Pause all other audio players
-        audioPlayers.forEach((player, id) => {
-          if (id !== itemId && !player.paused) {
-            player.pause();
-            const otherIcon = document.getElementById(`${id}-icon`);
-            if (otherIcon) otherIcon.innerHTML = '<path d="M8 5v14l11-7z" fill="currentColor"/>';
-          }
-        });
-        
-        audio.play();
-        icon.innerHTML = '<path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" fill="currentColor"/>';
-        
-        if (!audioPlayers.has(itemId)) {
-          audio.addEventListener('timeupdate', () => updateAudioProgress(itemId));
-          audio.addEventListener('loadedmetadata', () => updateAudioDuration(itemId));
-          audio.addEventListener('ended', () => {
-            icon.innerHTML = '<path d="M8 5v14l11-7z" fill="currentColor"/>';
-          });
-          audioPlayers.set(itemId, audio);
-        }
-      } else {
-        audio.pause();
-        icon.innerHTML = '<path d="M8 5v14l11-7z" fill="currentColor"/>';
-      }
-    }
-    
-    function updateAudioProgress(itemId) {
-      const audio = document.getElementById(`${itemId}-audio`);
-      const progressFill = document.getElementById(`${itemId}-progress`);
-      const currentTime = document.getElementById(`${itemId}-current`);
-      
-      if (!audio || !progressFill || !currentTime) return;
-      
-      const progress = (audio.currentTime / audio.duration) * 100;
-      progressFill.style.width = progress + '%';
-      currentTime.textContent = formatTime(audio.currentTime);
-    }
-    
-    function updateAudioDuration(itemId) {
-      const audio = document.getElementById(`${itemId}-audio`);
-      const duration = document.getElementById(`${itemId}-duration`);
-      
-      if (!audio || !duration) return;
-      duration.textContent = formatTime(audio.duration);
-    }
-    
-    function seekAudio(event, itemId) {
-      const audio = document.getElementById(`${itemId}-audio`);
-      const progressBar = event.currentTarget;
-      
-      if (!audio) return;
-      
-      const rect = progressBar.getBoundingClientRect();
-      const percent = (event.clientX - rect.left) / rect.width;
-      audio.currentTime = percent * audio.duration;
-    }
-    
-    function setAudioVolume(itemId, volume) {
-      const audio = document.getElementById(`${itemId}-audio`);
-      if (audio) audio.volume = volume / 100;
     }
     
     function formatTime(seconds) {
