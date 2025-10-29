@@ -111,7 +111,17 @@ export const checkVIPAccess = async (req, res, next) => {
     const requestMethod = req.method;
     
     const vipEndpoint = vipEndpointsCache.find(endpoint => {
-      const pathMatches = requestPath.startsWith(endpoint.path);
+      const endpointPath = endpoint.path;
+      
+      let pathMatches = false;
+      if (requestPath === endpointPath) {
+        pathMatches = true;
+      } else if (requestPath.startsWith(endpointPath)) {
+        const charAfterPath = requestPath[endpointPath.length];
+        if (charAfterPath === '/' || charAfterPath === '?') {
+          pathMatches = true;
+        }
+      }
       
       if (!pathMatches) return false;
       
