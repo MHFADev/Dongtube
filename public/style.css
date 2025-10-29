@@ -33,12 +33,22 @@ body {
   }
 }
 
-/* Performance optimization - use GPU acceleration only for necessary elements */
-.logo,
-.btn-download,
-.btn-download-video,
-.quality-btn,
-.btn-action {
+/* CSS Containment for better performance */
+.main-card,
+.stats-bar,
+.result-card,
+.history-section,
+.notification,
+.footer {
+  contain: layout style paint;
+}
+
+/* Performance optimization - use will-change sparingly and only on hover */
+.logo:hover,
+.btn-download:hover,
+.btn-download-video:hover,
+.quality-btn:hover,
+.btn-action:hover {
   will-change: transform;
 }
 
@@ -54,14 +64,94 @@ body {
 }
 
 /* For very low-end devices, disable backdrop-filter completely */
-@media (max-width: 768px) and (max-height: 1024px) {
+@media (max-width: 768px) {
   .stats-bar,
   .main-card,
   .notification,
   .history-section,
   .footer {
-    backdrop-filter: none;
+    backdrop-filter: none !important;
   }
+}
+
+/* ============================
+   PERFORMANCE-BASED OPTIMIZATIONS
+   ============================ */
+
+/* Potato mode - максимальная оптимизация */
+body.perf-potato {
+  /* Disable all complex effects */
+}
+
+body.perf-potato *,
+body.perf-potato *::before,
+body.perf-potato *::after {
+  animation-duration: 0.2s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.15s !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+}
+
+body.perf-potato .logo::before,
+body.perf-potato .logo:hover::before {
+  display: none;
+}
+
+body.perf-potato .logo {
+  animation: none !important;
+  filter: none !important;
+}
+
+/* Low-end mode - оптимизация для 2GB RAM */
+body.perf-low {
+  /* Simplified animations */
+}
+
+body.perf-low .logo {
+  animation-duration: 6s;
+  filter: brightness(1.05);
+}
+
+body.perf-low .logo::before {
+  display: none;
+}
+
+body.perf-low .stats-bar,
+body.perf-low .main-card,
+body.perf-low .notification,
+body.perf-low .history-section,
+body.perf-low .footer {
+  backdrop-filter: none !important;
+}
+
+body.perf-low *::before,
+body.perf-low *::after {
+  animation-duration: 0.3s !important;
+  transition-duration: 0.2s !important;
+}
+
+body.perf-low .logo:hover {
+  transform: scale(1.05) !important;
+  box-shadow: 0 0 30px rgba(255, 204, 0, 0.4) !important;
+  filter: brightness(1.1) !important;
+}
+
+/* Disable expensive text shadows for low-end */
+body.perf-low .stat-value,
+body.perf-low .title {
+  text-shadow: none !important;
+}
+
+/* Simplify button hover effects */
+body.perf-low .btn-download:hover,
+body.perf-low .btn-download-video:hover {
+  box-shadow: 0 4px 15px rgba(255, 204, 0, 0.3) !important;
+}
+
+/* Medium mode - balanced */
+body.perf-medium .logo {
+  animation-duration: 5s;
 }
 
 /* Three.js Canvas Background */
