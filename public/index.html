@@ -1753,9 +1753,39 @@ data = response.json()
 print(data)`;
       }
 
-      document.getElementById(`code-curl-${id}`).textContent = curlCode;
-      document.getElementById(`code-js-${id}`).textContent = jsCode;
-      document.getElementById(`code-python-${id}`).textContent = pythonCode;
+      document.getElementById(`code-curl-${id}`).innerHTML = highlightSyntax(curlCode, 'curl');
+      document.getElementById(`code-js-${id}`).innerHTML = highlightSyntax(jsCode, 'js');
+      document.getElementById(`code-python-${id}`).innerHTML = highlightSyntax(pythonCode, 'python');
+    }
+
+    function highlightSyntax(code, lang) {
+      if (lang === 'curl') {
+        return code
+          .replace(/curl/g, '<span class="syntax-keyword">curl</span>')
+          .replace(/(-X|-H|-d)\s+/g, '<span class="syntax-keyword">$1</span> ')
+          .replace(/(POST|GET|PUT|DELETE|PATCH)/g, '<span class="syntax-method">$1</span>')
+          .replace(/(https?:\/\/[^\s"]+)/g, '<span class="syntax-url">$1</span>')
+          .replace(/(Content-Type|application\/json)/g, '<span class="syntax-property">$1</span>');
+      } else if (lang === 'js') {
+        return code
+          .replace(/\b(fetch|then|catch|log|error|stringify|parse)\b/g, '<span class="syntax-method">$1</span>')
+          .replace(/\b(const|let|var|function|async|await|return|new)\b/g, '<span class="syntax-keyword">$1</span>')
+          .replace(/\b(console|JSON|URLSearchParams)\b/g, '<span class="syntax-function">$1</span>')
+          .replace(/\b(method|headers|body|params)\b/g, '<span class="syntax-property">$1</span>')
+          .replace(/(=&gt;|=>)/g, '<span class="syntax-operator">$1</span>')
+          .replace(/(https?:\/\/[^\s'"]+)/g, '<span class="syntax-url">$1</span>')
+          .replace(/('(?:[^'\\]|\\.)*?')/g, '<span class="syntax-string">$1</span>')
+          .replace(/\b(\d+)\b/g, '<span class="syntax-number">$1</span>');
+      } else if (lang === 'python') {
+        return code
+          .replace(/\b(import|from|def|return|as)\b/g, '<span class="syntax-keyword">$1</span>')
+          .replace(/\b(requests|print|get|post|json)\b/g, '<span class="syntax-function">$1</span>')
+          .replace(/\b(url|payload|response|data|params)\b/g, '<span class="syntax-property">$1</span>')
+          .replace(/(https?:\/\/[^\s'"]+)/g, '<span class="syntax-url">$1</span>')
+          .replace(/('(?:[^'\\]|\\.)*?')/g, '<span class="syntax-string">$1</span>')
+          .replace(/(#.*$)/gm, '<span class="syntax-comment">$1</span>');
+      }
+      return code;
     }
 
     async function execute(id, path, isBinary) {
