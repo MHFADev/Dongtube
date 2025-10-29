@@ -113,6 +113,9 @@ async function startServer() {
     });
 
     app.get("/api/docs", (req, res) => {
+      res.setHeader('Cache-Control', 'public, max-age=300');
+      res.setHeader('ETag', `"endpoints-${allEndpoints.length}"`);
+      
       res.json({
         success: true,
         total: allEndpoints.length,
