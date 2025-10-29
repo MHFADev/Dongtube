@@ -423,7 +423,7 @@
       font-size: 0.875rem;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: background 0.2s ease, color 0.2s ease, border-left-color 0.2s ease, transform 0.2s ease;
       text-align: left;
       border-radius: 0 6px 6px 0;
       font-family: inherit;
@@ -440,8 +440,7 @@
       width: 2px;
       height: 0;
       background: var(--primary);
-      transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 0 8px var(--primary);
+      transition: height 0.2s ease;
     }
 
     .category-item::after {
@@ -452,8 +451,8 @@
       transform: translateY(-50%);
       width: 0;
       height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 165, 0, 0.1));
-      transition: width 0.4s ease;
+      background: linear-gradient(90deg, transparent, rgba(255, 165, 0, 0.08));
+      transition: width 0.2s ease;
     }
     
     .category-item:hover::before {
@@ -467,16 +466,15 @@
     .category-item:hover {
       background: rgba(255, 165, 0, 0.08);
       color: var(--text);
-      transform: translateX(6px) scale(1.02);
+      transform: translateX(4px);
     }
 
     .category-item.active {
-      background: rgba(255, 165, 0, 0.15);
+      background: rgba(255, 165, 0, 0.12);
       border-left-color: var(--primary);
       color: var(--primary);
       font-weight: 600;
-      transform: translateX(6px);
-      box-shadow: 0 2px 8px rgba(255, 165, 0, 0.2);
+      transform: translateX(4px);
     }
     
     .category-item.active::before {
