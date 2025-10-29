@@ -1821,9 +1821,275 @@
         width: 100%;
       }
     }
+
+    /* Hamburger Menu Styles */
+    .hamburger-menu {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      display: none;
+      width: 50px;
+      height: 50px;
+      background: var(--bg-card);
+      border: 2px solid var(--primary);
+      border-radius: 12px;
+      cursor: pointer;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      padding: 10px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 16px rgba(255, 165, 0, 0.3);
+    }
+
+    .hamburger-menu:hover {
+      background: rgba(255, 165, 0, 0.1);
+      transform: scale(1.05);
+      box-shadow: 0 6px 20px rgba(255, 165, 0, 0.5);
+    }
+
+    .hamburger-menu span {
+      display: block;
+      width: 25px;
+      height: 3px;
+      background: var(--primary);
+      border-radius: 3px;
+      transition: all 0.3s ease;
+    }
+
+    .hamburger-menu.active span:nth-child(1) {
+      transform: rotate(45deg) translate(7px, 7px);
+    }
+
+    .hamburger-menu.active span:nth-child(2) {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+
+    .hamburger-menu.active span:nth-child(3) {
+      transform: rotate(-45deg) translate(7px, -7px);
+    }
+
+    /* Mobile Menu Overlay */
+    .mobile-menu-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 998;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .mobile-menu-overlay.active {
+      display: block;
+      opacity: 1;
+    }
+
+    /* Mobile Menu Container */
+    .mobile-menu {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 90%;
+      max-width: 400px;
+      height: 100%;
+      background: var(--bg-dark);
+      border-left: 2px solid var(--primary);
+      z-index: 999;
+      overflow-y: auto;
+      transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 80px 20px 20px;
+      box-shadow: -4px 0 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .mobile-menu.active {
+      right: 0;
+    }
+
+    .mobile-menu-header {
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .mobile-menu-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+
+    .mobile-menu-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .mobile-menu .music-player {
+      margin-bottom: 24px;
+      flex-direction: column;
+      animation: fadeInUp 0.5s ease-out;
+    }
+
+    .mobile-menu .vinyl-container {
+      margin-bottom: 16px;
+    }
+
+    .mobile-menu .player-controls {
+      width: 100%;
+    }
+
+    .mobile-menu-section {
+      margin-bottom: 24px;
+    }
+
+    .mobile-menu-section-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 12px;
+    }
+
+    .mobile-menu .category-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .mobile-menu .category-item {
+      padding: 12px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      transition: all 0.3s ease;
+    }
+
+    .mobile-menu .category-item:hover {
+      background: rgba(255, 165, 0, 0.1);
+      border-color: var(--primary);
+      transform: translateX(4px);
+    }
+
+    .mobile-menu .category-item.active {
+      background: var(--primary);
+      color: var(--bg-dark);
+      border-color: var(--primary);
+    }
+
+    /* Show hamburger menu on tablet and mobile */
+    @media (max-width: 1100px) {
+      .hamburger-menu {
+        display: flex;
+      }
+
+      .header .music-player {
+        display: none;
+      }
+    }
+
+    /* Scrollbar for mobile menu */
+    .mobile-menu::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .mobile-menu::-webkit-scrollbar-track {
+      background: var(--bg-darker);
+    }
+
+    .mobile-menu::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 3px;
+    }
+
+    .mobile-menu::-webkit-scrollbar-thumb:hover {
+      background: var(--primary-light);
+    }
   </style>
 </head>
 <body>
+  <!-- Hamburger Menu Button -->
+  <div class="hamburger-menu" id="hamburgerMenu" onclick="toggleMobileMenu()">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+
+  <!-- Mobile Menu Overlay -->
+  <div class="mobile-menu-overlay" id="mobileMenuOverlay" onclick="toggleMobileMenu()"></div>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-header">
+      <h2 class="mobile-menu-title">Menu</h2>
+      <p class="mobile-menu-subtitle">Music & Navigation</p>
+    </div>
+
+    <!-- Music Player in Mobile Menu -->
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-section-title">Music Player</div>
+      <div class="music-player" id="mobileMusic">
+        <div class="vinyl-container">
+          <div class="vinyl-disc" id="vinylDiscMobile">
+            <div class="vinyl-grooves"></div>
+          </div>
+        </div>
+        
+        <div class="player-controls">
+          <div class="player-info">
+            <div>
+              <h3 class="player-title">Background Music</h3>
+              <p class="player-subtitle">Dongtube Theme</p>
+            </div>
+          </div>
+          
+          <div class="control-buttons">
+            <button class="control-btn" id="playPauseBtnMobile" onclick="togglePlayPause()">
+              <svg id="playPauseIconMobile" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </button>
+            
+            <div class="volume-control">
+              <svg class="volume-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+              </svg>
+              <input type="range" class="volume-slider" id="volumeSliderMobile" min="0" max="100" value="70" oninput="changeVolume(this.value)">
+            </div>
+          </div>
+
+          <div class="tts-controls">
+            <button class="tts-btn" id="ttsBtnMobile" onclick="speakPageContent()">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+              </svg>
+              <span>Read</span>
+            </button>
+            <button class="tts-btn" id="stopTtsBtnMobile" onclick="stopSpeaking()" style="display: none;">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 6h12v12H6z"/>
+              </svg>
+              <span>Stop</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Categories in Mobile Menu -->
+    <div class="mobile-menu-section">
+      <div class="mobile-menu-section-title">Categories</div>
+      <nav class="category-nav" id="mobileCategories"></nav>
+    </div>
+  </div>
+
   <div class="container">
     <header class="header">
       <div class="header-content">
