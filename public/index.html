@@ -1263,6 +1263,67 @@
       background: #3A3A3A;
     }
 
+    /* Premium Icon Styles */
+    .premium-icon {
+      display: inline-block;
+      margin-left: 8px;
+      font-size: 1rem;
+      color: #FFD700;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+      animation: float 3s ease-in-out infinite;
+      position: relative;
+      cursor: help;
+    }
+
+    .premium-icon::before {
+      content: '⭐';
+    }
+
+    .premium-icon:hover {
+      transform: scale(1.2) rotate(15deg);
+      text-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 30px rgba(255, 165, 0, 0.6);
+    }
+
+    /* Premium Tooltip */
+    .premium-icon::after {
+      content: 'Premium Endpoint';
+      position: absolute;
+      bottom: 120%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+      color: #000;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+      z-index: 1000;
+    }
+
+    .premium-icon:hover::after {
+      opacity: 1;
+      transform: translateX(-50%) translateY(-4px);
+    }
+
+    /* Premium Badge in Endpoint Header */
+    .endpoint-header.premium .endpoint-path {
+      color: #FFD700;
+    }
+
+    .endpoint.premium {
+      border-color: rgba(255, 215, 0, 0.3);
+    }
+
+    .endpoint.premium:hover {
+      border-color: rgba(255, 215, 0, 0.5);
+      box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2);
+    }
+
     /* Responsive */
     @media (max-width: 900px) {
       .content-grid {
@@ -3413,13 +3474,14 @@
                 
                 return `
                   <li class="endpoint-list-item">
-                    <div class="endpoint" id="${id}">
-                      <div class="endpoint-header" onclick="toggle('${id}')">
+                    <div class="endpoint ${ep.requiresVIP ? 'premium' : ''}" id="${id}">
+                      <div class="endpoint-header ${ep.requiresVIP ? 'premium' : ''}" onclick="toggle('${id}')">
                         <div class="endpoint-number"></div>
                         <div class="method">${ep.method}</div>
                         <div class="endpoint-info">
                           <div class="endpoint-title-row">
                             <div class="endpoint-path" title="${ep.path}">${ep.path}</div>
+                            ${ep.requiresVIP ? '<span class="premium-icon" title="Premium Endpoint"></span>' : ''}
                           </div>
                           <div class="endpoint-desc" title="${ep.description || ep.name}">${ep.description || ep.name}</div>
                         </div>
@@ -4047,6 +4109,55 @@ print(data)`;
       currentSearch = e.target.value;
       renderGroupedEndpoints();
     });
+
+    // ============================
+    // FETCH INTERCEPTION FOR PREMIUM ENDPOINTS
+    // ============================
+    
+    (function() {
+      const originalFetch = window.fetch;
+      
+      window.fetch = async function(...args) {
+        try {
+          const response = await originalFetch.apply(this, args);
+          
+          const clonedResponse = response.clone();
+          
+          try {
+            const data = await clonedResponse.json();
+            
+            if (data && data.vipRequired === true) {
+              console.log('Premium endpoint detected:', data);
+              
+              const errorData = {
+                endpoint: {
+                  name: data.endpoint?.name || data.message || 'Premium Endpoint',
+                  path: data.endpoint?.path || args[0] || 'Unknown path'
+                },
+                upgrade: {
+                  whatsappUrl: data.whatsappUrl || data.upgrade?.whatsappUrl || 'https://wa.me/6281234567890?text=Halo,%20saya%20ingin%20upgrade%20ke%20VIP'
+                },
+                user: data.user || null
+              };
+              
+              setTimeout(() => {
+                if (typeof showPremiumModal === 'function') {
+                  showPremiumModal(errorData);
+                }
+              }, 100);
+            }
+          } catch (parseError) {
+            // Not a JSON response or already consumed, ignore
+          }
+          
+          return response;
+        } catch (error) {
+          throw error;
+        }
+      };
+      
+      console.log('✅ Fetch interception active for premium endpoints');
+    })();
 
     loadEndpoints();
 

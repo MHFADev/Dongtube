@@ -215,15 +215,40 @@ async function startServer() {
       });
     });
 
-    app.get("/api/docs", (req, res) => {
-      res.setHeader('Cache-Control', 'public, max-age=300');
-      res.setHeader('ETag', `"endpoints-${allEndpoints.length}"`);
-      
-      res.json({
-        success: true,
-        total: allEndpoints.length,
-        endpoints: allEndpoints
-      });
+    app.get("/api/docs", async (req, res) => {
+      try {
+        res.setHeader('Cache-Control', 'public, max-age=300');
+        res.setHeader('ETag', `"endpoints-${allEndpoints.length}"`);
+        
+        const vipEndpoints = await VIPEndpoint.findAll({
+          attributes: ['path', 'method', 'requiresVIP']
+        });
+        
+        const vipMap = new Map();
+        vipEndpoints.forEach(ep => {
+          vipMap.set(ep.path, ep.requiresVIP);
+        });
+        
+        const endpointsWithVIPStatus = allEndpoints.map(ep => {
+          return {
+            ...ep,
+            requiresVIP: vipMap.get(ep.path) || false
+          };
+        });
+        
+        res.json({
+          success: true,
+          total: endpointsWithVIPStatus.length,
+          endpoints: endpointsWithVIPStatus
+        });
+      } catch (error) {
+        console.error('Error fetching VIP endpoint status:', error);
+        res.json({
+          success: true,
+          total: allEndpoints.length,
+          endpoints: allEndpoints.map(ep => ({ ...ep, requiresVIP: false }))
+        });
+      }
     });
 
     app.get("/debug/routes", (req, res) => {
