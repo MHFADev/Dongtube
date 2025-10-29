@@ -59,6 +59,26 @@ The website has been optimized for low-end devices (RAM 2-4GB) with comprehensiv
 - Preview images use existing logo.jpg asset
 - Implemented on both index.html (API docs) and download-tiktok.html
 
+## Media Preview Feature (Oct 29, 2025)
+- **Automatic media detection**: Extracts image, video, and audio URLs from JSON responses
+- **Smart preview rendering**: 
+  - Images: Direct display with responsive styling
+  - Videos: HTML5 video player with controls
+  - Audio: HTML5 audio player with controls
+- **Response parsing**: `extractMediaUrls()` function scans response objects recursively
+  - Detects URLs based on key names (image, thumbnail, video, audio, download, etc.)
+  - Validates file extensions (.jpg, .png, .mp4, .mp3, .m4a, etc.)
+  - Removes duplicate URLs
+- **Enhanced UX**: Users can preview media before using endpoints in their code
+- **Supports all media endpoints**: TikTok, Instagram, YouTube, Spotify, random images, etc.
+
+## Background Music (Oct 29, 2025)
+- **Auto-play background music**: Plays music.opus file on page load
+- **Fallback mechanism**: If browser blocks autoplay, starts on first user interaction
+- **Vinyl disc animation**: Spinning animation synced with play/pause state
+- **Volume control**: Adjustable volume slider (default: 50%)
+- **Play/Pause control**: Toggle button with visual feedback
+
 ## Result
 - Website runs smoothly on 2GB RAM phones with adaptive optimizations
 - Endpoint menu has ZERO lag - all animations removed
