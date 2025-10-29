@@ -8,7 +8,7 @@ const initDatabase = async () => {
     await sequelize.authenticate();
     console.log('✓ Database connected');
     
-    await sequelize.sync({ alter: false });
+    await sequelize.sync({ alter: true });
     console.log('✓ Database tables synced');
     
     const adminExists = await User.findOne({ where: { role: 'admin' } });

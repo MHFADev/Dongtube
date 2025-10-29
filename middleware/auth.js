@@ -82,27 +82,51 @@ export const checkVIPAccess = async (req, res, next) => {
     if (!vipEndpointsCache || (currentTime - cacheTimestamp) > CACHE_DURATION) {
       vipEndpointsCache = await VIPEndpoint.findAll({
         where: { requiresVIP: true },
-        attributes: ['path']
+        attributes: ['path', 'method', 'name', 'description']
       });
       cacheTimestamp = currentTime;
     }
 
     const requestPath = req.path;
-    const isVIPEndpoint = vipEndpointsCache.some(endpoint => 
-      requestPath.startsWith(endpoint.path)
-    );
+    const requestMethod = req.method;
+    
+    const vipEndpoint = vipEndpointsCache.find(endpoint => {
+      const pathMatches = requestPath.startsWith(endpoint.path);
+      
+      if (!pathMatches) return false;
+      
+      if (endpoint.method && endpoint.method !== 'ALL') {
+        return endpoint.method.toUpperCase() === requestMethod.toUpperCase();
+      }
+      
+      return true;
+    });
 
-    if (!isVIPEndpoint) {
+    if (!vipEndpoint) {
       return next();
     }
 
+    const adminWhatsApp = process.env.ADMIN_WHATSAPP_NUMBER || '6281234567890';
+    const whatsappUrl = `https://wa.me/${adminWhatsApp}?text=${encodeURIComponent('Halo! Saya ingin upgrade ke VIP untuk akses premium API 🚀')}`;
+    
     const token = req.cookies?.token || req.headers.authorization?.split(' ')[1];
     
     if (!token) {
       return res.status(401).json({
         success: false,
-        error: 'This endpoint requires VIP access. Please login.',
-        vipRequired: true
+        error: '🔒 Endpoint Premium - Login Required',
+        message: 'Endpoint ini memerlukan akses VIP. Silakan login terlebih dahulu atau hubungi admin untuk upgrade ke VIP.',
+        vipRequired: true,
+        endpoint: {
+          path: vipEndpoint.path,
+          name: vipEndpoint.name,
+          description: vipEndpoint.description
+        },
+        upgrade: {
+          whatsapp: adminWhatsApp,
+          whatsappUrl: whatsappUrl,
+          message: 'Hubungi admin via WhatsApp untuk upgrade VIP'
+        }
       });
     }
 
@@ -121,9 +145,29 @@ export const checkVIPAccess = async (req, res, next) => {
     if (user.role !== 'vip' && user.role !== 'admin') {
       return res.status(403).json({
         success: false,
-        error: 'This endpoint requires VIP membership',
+        error: '⭐ Upgrade ke VIP Required',
+        message: `Maaf, endpoint "${vipEndpoint.name || vipEndpoint.path}" hanya tersedia untuk member VIP. Upgrade sekarang untuk akses unlimited!`,
         vipRequired: true,
-        upgradeUrl: '/upgrade-to-vip'
+        endpoint: {
+          path: vipEndpoint.path,
+          name: vipEndpoint.name,
+          description: vipEndpoint.description
+        },
+        user: {
+          email: user.email,
+          currentRole: user.role
+        },
+        upgrade: {
+          whatsapp: adminWhatsApp,
+          whatsappUrl: whatsappUrl,
+          message: 'Klik untuk chat admin dan upgrade VIP',
+          benefits: [
+            '✅ Akses semua endpoint premium',
+            '✅ Rate limit lebih tinggi',
+            '✅ Priority support',
+            '✅ Akses fitur terbaru'
+          ]
+        }
       });
     }
 
@@ -131,10 +175,18 @@ export const checkVIPAccess = async (req, res, next) => {
     next();
   } catch (error) {
     if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+      const adminWhatsApp = process.env.ADMIN_WHATSAPP_NUMBER || '6281234567890';
+      const whatsappUrl = `https://wa.me/${adminWhatsApp}?text=${encodeURIComponent('Halo! Saya ingin upgrade ke VIP untuk akses premium API 🚀')}`;
+      
       return res.status(401).json({
         success: false,
-        error: 'Invalid or expired token. Please login again.',
-        vipRequired: true
+        error: 'Invalid or expired token',
+        message: 'Token Anda tidak valid atau sudah expired. Silakan login kembali.',
+        vipRequired: true,
+        upgrade: {
+          whatsapp: adminWhatsApp,
+          whatsappUrl: whatsappUrl
+        }
       });
     }
     next();

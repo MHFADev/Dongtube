@@ -9,22 +9,44 @@ const VIPEndpoint = sequelize.define('VIPEndpoint', {
   },
   path: {
     type: DataTypes.STRING(200),
+    allowNull: false
+  },
+  method: {
+    type: DataTypes.STRING(10),
     allowNull: false,
-    unique: true
+    defaultValue: 'GET'
+  },
+  name: {
+    type: DataTypes.STRING(100),
+    allowNull: true
   },
   requiresVIP: {
     type: DataTypes.BOOLEAN,
-    defaultValue: true,
+    defaultValue: false,
     field: 'requires_vip'
   },
   description: {
-    type: DataTypes.STRING(255),
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  category: {
+    type: DataTypes.STRING(50),
+    allowNull: true
+  },
+  parameters: {
+    type: DataTypes.JSON,
     allowNull: true
   }
 }, {
   tableName: 'vip_endpoints',
   timestamps: true,
-  updatedAt: false
+  updatedAt: false,
+  indexes: [
+    {
+      unique: true,
+      fields: ['path', 'method']
+    }
+  ]
 });
 
 export default VIPEndpoint;

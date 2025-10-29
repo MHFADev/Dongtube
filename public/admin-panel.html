@@ -13,63 +13,152 @@
 
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-      min-height: 100vh;
-      padding: 20px;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
       color: #fff;
+      min-height: 100vh;
+      overflow-x: hidden;
     }
 
     .container {
       max-width: 1400px;
       margin: 0 auto;
+      padding: 20px;
+    }
+
+    .login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .login-box {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .login-box h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #ff6b6b, #ffa500);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .login-box p {
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 500;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #ffa500;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #ff6b6b, #ffa500);
+      color: #fff;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(255, 165, 0, 0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-success {
+      background: rgba(34, 197, 94, 0.3);
+      color: #22c55e;
+      border: 1px solid rgba(34, 197, 94, 0.5);
+    }
+
+    .btn-success:hover {
+      background: rgba(34, 197, 94, 0.5);
+      color: #fff;
     }
 
     .header {
       background: rgba(255, 255, 255, 0.05);
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 204, 0, 0.3);
-      border-radius: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
       padding: 20px 30px;
       margin-bottom: 30px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
     }
 
     .header h1 {
-      color: #ffcc00;
       font-size: 28px;
+      background: linear-gradient(135deg, #ff6b6b, #ffa500);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
-    .header .user-info {
+    .user-info {
       display: flex;
-      gap: 15px;
       align-items: center;
+      gap: 15px;
     }
 
-    .btn {
-      padding: 10px 20px;
-      background: linear-gradient(135deg, #ffcc00 0%, #ff9900 100%);
-      border: none;
-      border-radius: 8px;
-      color: #1a1a1a;
-      font-size: 14px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 20px rgba(255, 204, 0, 0.4);
-    }
-
-    .btn-danger {
-      background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
-      color: #fff;
-    }
-
-    .stats {
+    .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 20px;
@@ -79,500 +168,774 @@
     .stat-card {
       background: rgba(255, 255, 255, 0.05);
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 204, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 15px;
       padding: 20px;
-      text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
     }
 
     .stat-card h3 {
-      font-size: 36px;
-      color: #ffcc00;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.7);
       margin-bottom: 10px;
     }
 
-    .stat-card p {
-      color: #aaa;
+    .stat-card .value {
+      font-size: 32px;
+      font-weight: bold;
+      background: linear-gradient(135deg, #ff6b6b, #ffa500);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .controls {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      color: #fff;
       font-size: 14px;
     }
 
-    .tabs {
+    .search-box input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .filter-group {
       display: flex;
       gap: 10px;
-      margin-bottom: 20px;
+      flex-wrap: wrap;
     }
 
-    .tab {
-      padding: 12px 24px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 204, 0, 0.3);
-      border-radius: 8px;
+    select {
+      padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
       color: #fff;
+      font-size: 14px;
       cursor: pointer;
-      transition: all 0.3s;
     }
 
-    .tab.active {
-      background: linear-gradient(135deg, #ffcc00 0%, #ff9900 100%);
-      color: #1a1a1a;
-      border-color: #ffcc00;
+    select option {
+      background: #1a1a2e;
+      color: #fff;
     }
 
-    .content-section {
-      display: none;
-    }
-
-    .content-section.active {
-      display: block;
-    }
-
-    .card {
+    .table-container {
       background: rgba(255, 255, 255, 0.05);
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 204, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 15px;
-      padding: 30px;
-      margin-bottom: 20px;
+      overflow: hidden;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
     }
 
-    th, td {
-      padding: 12px;
+    thead {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    thead th {
+      padding: 15px;
       text-align: left;
-      border-bottom: 1px solid rgba(255, 204, 0, 0.1);
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 14px;
+      cursor: pointer;
+      user-select: none;
     }
 
-    th {
-      background: rgba(255, 204, 0, 0.1);
-      color: #ffcc00;
-      font-weight: bold;
+    thead th:hover {
+      background: rgba(255, 255, 255, 0.08);
     }
 
-    tr:hover {
-      background: rgba(255, 204, 0, 0.05);
+    tbody tr {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      transition: background 0.2s ease;
     }
 
-    select {
+    tbody tr:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    tbody td {
+      padding: 15px;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 50px;
+      height: 26px;
+      display: inline-block;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.2);
+      transition: 0.3s;
+      border-radius: 26px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background: linear-gradient(135deg, #ff6b6b, #ffa500);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+
+    .badge {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .badge-premium {
+      background: linear-gradient(135deg, #ff6b6b, #ffa500);
+      color: #fff;
+    }
+
+    .badge-free {
+      background: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .badge-method {
+      background: rgba(59, 130, 246, 0.3);
+      color: #3b82f6;
+      border: 1px solid rgba(59, 130, 246, 0.5);
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-top: 20px;
+      padding: 20px;
+    }
+
+    .page-btn {
       padding: 8px 12px;
       background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 204, 0, 0.3);
-      border-radius: 6px;
-      color: #fff;
-      font-size: 14px;
-    }
-
-    input[type="text"] {
-      width: 100%;
-      padding: 12px 15px;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 204, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       border-radius: 8px;
       color: #fff;
-      font-size: 14px;
-      margin-bottom: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
     }
 
-    input:focus {
-      outline: none;
-      border-color: #ffcc00;
-      background: rgba(255, 255, 255, 0.15);
+    .page-btn:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.2);
     }
 
-    .form-group {
-      margin-bottom: 20px;
+    .page-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
-    label {
-      display: block;
-      color: #fff;
-      margin-bottom: 8px;
-      font-size: 14px;
+    .page-btn.active {
+      background: linear-gradient(135deg, #ff6b6b, #ffa500);
+    }
+
+    .hidden {
+      display: none !important;
     }
 
     .alert {
-      padding: 15px;
-      border-radius: 8px;
+      padding: 15px 20px;
+      border-radius: 10px;
       margin-bottom: 20px;
-      display: none;
-    }
-
-    .alert-success {
-      background: rgba(0, 255, 0, 0.1);
-      border: 1px solid rgba(0, 255, 0, 0.3);
-      color: #51cf66;
+      font-size: 14px;
+      animation: slideIn 0.3s ease;
     }
 
     .alert-error {
-      background: rgba(255, 0, 0, 0.1);
-      border: 1px solid rgba(255, 0, 0, 0.3);
-      color: #ff6b6b;
+      background: rgba(255, 59, 59, 0.2);
+      border: 1px solid rgba(255, 59, 59, 0.5);
+      color: #ff3b3b;
+    }
+
+    .alert-success {
+      background: rgba(34, 197, 94, 0.2);
+      border: 1px solid rgba(34, 197, 94, 0.5);
+      color: #22c55e;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateY(-20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .bulk-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.03);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .checkbox {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
     }
 
     .loading {
       text-align: center;
       padding: 40px;
-      color: #aaa;
+      color: rgba(255, 255, 255, 0.7);
     }
 
-    .btn-sm {
-      padding: 6px 12px;
-      font-size: 12px;
+    .loading::after {
+      content: '...';
+      animation: dots 1.5s steps(4, end) infinite;
     }
 
-    .badge {
-      display: inline-block;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      font-weight: bold;
+    @keyframes dots {
+      0%, 20% { content: '.'; }
+      40% { content: '..'; }
+      60%, 100% { content: '...'; }
     }
 
-    .badge-admin {
-      background: #ff4444;
-      color: #fff;
-    }
+    @media (max-width: 768px) {
+      .table-container {
+        overflow-x: auto;
+      }
 
-    .badge-vip {
-      background: #ffcc00;
-      color: #1a1a1a;
-    }
+      table {
+        min-width: 800px;
+      }
 
-    .badge-user {
-      background: #888;
-      color: #fff;
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .search-box {
+        min-width: 100%;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>⚙️ Admin Panel</h1>
-      <div class="user-info">
-        <span id="userEmail">admin@dongtube.com</span>
-        <button class="btn btn-danger" onclick="logout()">Logout</button>
-      </div>
+  <div id="loginSection" class="login-container">
+    <div class="login-box">
+      <h1>🔐 Admin Panel</h1>
+      <p>Dongtube API Management</p>
+      <div id="loginAlert"></div>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="admin@dongtube.com" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-primary">
+          Login
+        </button>
+      </form>
     </div>
+  </div>
 
-    <div class="alert alert-success" id="successAlert"></div>
-    <div class="alert alert-error" id="errorAlert"></div>
+  <div id="dashboardSection" class="hidden">
+    <div class="container">
+      <div class="header">
+        <div>
+          <h1>🎛️ Admin Dashboard</h1>
+          <p style="color: rgba(255, 255, 255, 0.7); margin-top: 5px;">Manage API Endpoints & Premium Access</p>
+        </div>
+        <div class="user-info">
+          <span id="userEmail" style="color: rgba(255, 255, 255, 0.8);"></span>
+          <button class="btn btn-secondary" onclick="logout()">Logout</button>
+        </div>
+      </div>
 
-    <div class="stats" id="stats">
-      <div class="stat-card">
-        <h3 id="totalUsers">-</h3>
-        <p>Total Users</p>
-      </div>
-      <div class="stat-card">
-        <h3 id="vipUsers">-</h3>
-        <p>VIP Users</p>
-      </div>
-      <div class="stat-card">
-        <h3 id="adminUsers">-</h3>
-        <p>Admin Users</p>
-      </div>
-      <div class="stat-card">
-        <h3 id="vipEndpoints">-</h3>
-        <p>VIP Endpoints</p>
-      </div>
-    </div>
+      <div id="dashboardAlert"></div>
 
-    <div class="tabs">
-      <div class="tab active" onclick="switchTab('users')">👥 Manage Users</div>
-      <div class="tab" onclick="switchTab('endpoints')">🔒 VIP Endpoints</div>
-    </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h3>Total Endpoints</h3>
+          <div class="value" id="totalEndpoints">-</div>
+        </div>
+        <div class="stat-card">
+          <h3>Premium Endpoints</h3>
+          <div class="value" id="premiumEndpoints">-</div>
+        </div>
+        <div class="stat-card">
+          <h3>Free Endpoints</h3>
+          <div class="value" id="freeEndpoints">-</div>
+        </div>
+        <div class="stat-card">
+          <h3>VIP Users</h3>
+          <div class="value" id="vipUsers">-</div>
+        </div>
+        <div class="stat-card">
+          <h3>Total Users</h3>
+          <div class="value" id="totalUsers">-</div>
+        </div>
+      </div>
 
-    <div id="usersSection" class="content-section active">
-      <div class="card">
-        <h2>User Management</h2>
-        <div class="loading" id="usersLoading">Loading users...</div>
-        <table id="usersTable" style="display:none">
+      <div class="controls">
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="🔍 Search endpoints..." onkeyup="searchEndpoints()">
+        </div>
+        <div class="filter-group">
+          <select id="filterPremium" onchange="filterEndpoints()">
+            <option value="">All Status</option>
+            <option value="true">Premium Only</option>
+            <option value="false">Free Only</option>
+          </select>
+          <select id="filterCategory" onchange="filterEndpoints()">
+            <option value="">All Categories</option>
+          </select>
+          <button class="btn btn-secondary" onclick="loadEndpoints()">🔄 Refresh</button>
+          <button class="btn btn-success" onclick="refreshCache()">⚡ Clear Cache</button>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table>
           <thead>
             <tr>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Created</th>
-              <th>Last Login</th>
+              <th style="width: 40px;">
+                <input type="checkbox" class="checkbox" id="selectAll" onchange="toggleSelectAll()">
+              </th>
+              <th>Endpoint Path</th>
+              <th>Method</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Premium</th>
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody id="usersBody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <div id="endpointsSection" class="content-section">
-      <div class="card">
-        <h2>Add VIP Endpoint</h2>
-        <form id="addEndpointForm">
-          <div class="form-group">
-            <label for="endpointPath">Endpoint Path</label>
-            <input type="text" id="endpointPath" placeholder="/api/route-tiktok (1).js" required>
-          </div>
-          <div class="form-group">
-            <label for="endpointDesc">Description (Optional)</label>
-            <input type="text" id="endpointDesc" placeholder="TikTok Downloader - VIP Only">
-          </div>
-          <button type="submit" class="btn">Add VIP Endpoint</button>
-        </form>
-      </div>
-
-      <div class="card">
-        <h2>VIP Endpoints List</h2>
-        <div class="loading" id="endpointsLoading">Loading endpoints...</div>
-        <table id="endpointsTable" style="display:none">
-          <thead>
+          <tbody id="endpointsTable">
             <tr>
-              <th>Path</th>
-              <th>Description</th>
-              <th>Status</th>
-              <th>Created</th>
-              <th>Actions</th>
+              <td colspan="7" class="loading">Loading endpoints</td>
             </tr>
-          </thead>
-          <tbody id="endpointsBody"></tbody>
+          </tbody>
         </table>
+        <div class="bulk-actions" id="bulkActions" style="display: none;">
+          <span id="selectedCount">0 selected</span>
+          <button class="btn btn-success" onclick="bulkSetPremium(true)">⭐ Set Premium</button>
+          <button class="btn btn-secondary" onclick="bulkSetPremium(false)">🆓 Set Free</button>
+        </div>
+        <div class="pagination" id="pagination"></div>
       </div>
     </div>
   </div>
 
   <script>
+    let token = localStorage.getItem('adminToken');
     let currentUser = null;
-    let users = [];
-    let endpoints = [];
+    let allEndpoints = [];
+    let filteredEndpoints = [];
+    let currentPage = 1;
+    let itemsPerPage = 20;
+    let selectedIds = new Set();
 
-    async function checkAuth() {
+    if (token) {
+      showDashboard();
+    } else {
+      document.getElementById('loginSection').classList.remove('hidden');
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await login();
+    });
+
+    async function login() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
       try {
-        const response = await fetch('/auth/me');
-        const data = await response.json();
-        
-        if (!response.ok || data.user.role !== 'admin') {
-          window.location.href = '/login.html';
-          return;
-        }
+        const response = await fetch('/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
 
-        currentUser = data.user;
-        document.getElementById('userEmail').textContent = currentUser.email;
-        
-        loadStats();
-        loadUsers();
-        loadEndpoints();
+        const data = await response.json();
+
+        if (data.success) {
+          if (data.user.role !== 'admin') {
+            showAlert('loginAlert', 'Only admin users can access this panel', 'error');
+            return;
+          }
+
+          token = data.token;
+          currentUser = data.user;
+          localStorage.setItem('adminToken', token);
+          showDashboard();
+        } else {
+          showAlert('loginAlert', data.error || 'Login failed', 'error');
+        }
       } catch (error) {
-        window.location.href = '/login.html';
+        showAlert('loginAlert', 'Network error: ' + error.message, 'error');
       }
+    }
+
+    function logout() {
+      token = null;
+      currentUser = null;
+      localStorage.removeItem('adminToken');
+      document.getElementById('loginSection').classList.remove('hidden');
+      document.getElementById('dashboardSection').classList.add('hidden');
+    }
+
+    function showDashboard() {
+      document.getElementById('loginSection').classList.add('hidden');
+      document.getElementById('dashboardSection').classList.remove('hidden');
+      loadStats();
+      loadEndpoints();
+      loadCategories();
     }
 
     async function loadStats() {
       try {
-        const response = await fetch('/admin/stats');
+        const response = await fetch('/admin/stats', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
         const data = await response.json();
-        
+
         if (data.success) {
-          document.getElementById('totalUsers').textContent = data.stats.totalUsers;
-          document.getElementById('vipUsers').textContent = data.stats.vipUsers;
-          document.getElementById('adminUsers').textContent = data.stats.adminUsers;
-          document.getElementById('vipEndpoints').textContent = data.stats.totalVIPEndpoints;
+          document.getElementById('totalEndpoints').textContent = data.stats.totalEndpoints || 0;
+          document.getElementById('premiumEndpoints').textContent = data.stats.totalVIPEndpoints || 0;
+          document.getElementById('freeEndpoints').textContent = data.stats.freeEndpoints || 0;
+          document.getElementById('vipUsers').textContent = data.stats.vipUsers || 0;
+          document.getElementById('totalUsers').textContent = data.stats.totalUsers || 0;
         }
       } catch (error) {
         console.error('Failed to load stats:', error);
       }
     }
 
-    async function loadUsers() {
+    async function loadEndpoints() {
       try {
-        const response = await fetch('/admin/users');
-        const data = await response.json();
-        
-        if (data.success) {
-          users = data.users;
-          renderUsers();
-        }
-      } catch (error) {
-        showError('Failed to load users');
-      }
-    }
-
-    function renderUsers() {
-      const tbody = document.getElementById('usersBody');
-      tbody.innerHTML = '';
-
-      users.forEach(user => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${user.email}</td>
-          <td><span class="badge badge-${user.role}">${user.role.toUpperCase()}</span></td>
-          <td>${new Date(user.createdAt).toLocaleDateString('id-ID')}</td>
-          <td>${user.lastLogin ? new Date(user.lastLogin).toLocaleDateString('id-ID') : '-'}</td>
-          <td>
-            <select onchange="changeUserRole('${user.id}', this.value)">
-              <option value="user" ${user.role === 'user' ? 'selected' : ''}>User</option>
-              <option value="vip" ${user.role === 'vip' ? 'selected' : ''}>VIP</option>
-              <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
-            </select>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-
-      document.getElementById('usersLoading').style.display = 'none';
-      document.getElementById('usersTable').style.display = 'table';
-    }
-
-    async function changeUserRole(userId, newRole) {
-      try {
-        const response = await fetch(`/admin/users/${userId}/role`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ role: newRole })
+        const response = await fetch('/admin/endpoints/all?limit=1000', {
+          headers: { 'Authorization': `Bearer ${token}` }
         });
 
         const data = await response.json();
 
         if (data.success) {
-          showSuccess(`User role updated to ${newRole.toUpperCase()}`);
-          loadUsers();
-          loadStats();
-        } else {
-          showError(data.error);
-        }
-      } catch (error) {
-        showError('Failed to update user role');
-      }
-    }
-
-    async function loadEndpoints() {
-      try {
-        const response = await fetch('/admin/vip-endpoints');
-        const data = await response.json();
-        
-        if (data.success) {
-          endpoints = data.endpoints;
+          allEndpoints = data.endpoints;
+          filteredEndpoints = [...allEndpoints];
           renderEndpoints();
         }
       } catch (error) {
-        showError('Failed to load endpoints');
+        console.error('Failed to load endpoints:', error);
+        showAlert('dashboardAlert', 'Failed to load endpoints', 'error');
+      }
+    }
+
+    async function loadCategories() {
+      try {
+        const response = await fetch('/admin/categories', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          const select = document.getElementById('filterCategory');
+          select.innerHTML = '<option value="">All Categories</option>';
+          data.categories.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat;
+            option.textContent = cat;
+            select.appendChild(option);
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load categories:', error);
       }
     }
 
     function renderEndpoints() {
-      const tbody = document.getElementById('endpointsBody');
-      tbody.innerHTML = '';
+      const tbody = document.getElementById('endpointsTable');
+      const start = (currentPage - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+      const pageEndpoints = filteredEndpoints.slice(start, end);
 
-      if (endpoints.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#888;">No VIP endpoints configured</td></tr>';
-      } else {
-        endpoints.forEach(endpoint => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td><code>${endpoint.path}</code></td>
-            <td>${endpoint.description || '-'}</td>
-            <td><span class="badge badge-vip">${endpoint.requiresVIP ? 'VIP ONLY' : 'PUBLIC'}</span></td>
-            <td>${new Date(endpoint.createdAt).toLocaleDateString('id-ID')}</td>
-            <td>
-              <button class="btn btn-sm btn-danger" onclick="deleteEndpoint(${endpoint.id})">Delete</button>
-            </td>
-          `;
-          tbody.appendChild(tr);
-        });
-      }
-
-      document.getElementById('endpointsLoading').style.display = 'none';
-      document.getElementById('endpointsTable').style.display = 'table';
-    }
-
-    document.getElementById('addEndpointForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const path = document.getElementById('endpointPath').value;
-      const description = document.getElementById('endpointDesc').value;
-
-      try {
-        const response = await fetch('/admin/vip-endpoints', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ path, description, requiresVIP: true })
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-          showSuccess('VIP endpoint added successfully');
-          document.getElementById('addEndpointForm').reset();
-          loadEndpoints();
-          loadStats();
-        } else {
-          showError(data.error);
-        }
-      } catch (error) {
-        showError('Failed to add VIP endpoint');
-      }
-    });
-
-    async function deleteEndpoint(id) {
-      if (!confirm('Are you sure you want to delete this VIP endpoint?')) {
+      if (pageEndpoints.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: rgba(255,255,255,0.5);">No endpoints found</td></tr>';
         return;
       }
 
+      tbody.innerHTML = pageEndpoints.map(endpoint => `
+        <tr>
+          <td>
+            <input type="checkbox" class="checkbox endpoint-checkbox" 
+                   data-id="${endpoint.id}" 
+                   ${selectedIds.has(endpoint.id) ? 'checked' : ''}
+                   onchange="toggleSelect(${endpoint.id})">
+          </td>
+          <td style="font-family: monospace; color: #60a5fa;">${endpoint.path}</td>
+          <td><span class="badge badge-method">${endpoint.method || 'GET'}</span></td>
+          <td>${endpoint.name || '-'}</td>
+          <td>${endpoint.category || '-'}</td>
+          <td>
+            <label class="toggle-switch">
+              <input type="checkbox" ${endpoint.requiresVIP ? 'checked' : ''} 
+                     onchange="togglePremium(${endpoint.id})">
+              <span class="slider"></span>
+            </label>
+          </td>
+          <td>
+            <span class="badge ${endpoint.requiresVIP ? 'badge-premium' : 'badge-free'}">
+              ${endpoint.requiresVIP ? '⭐ Premium' : '🆓 Free'}
+            </span>
+          </td>
+        </tr>
+      `).join('');
+
+      renderPagination();
+      updateBulkActions();
+    }
+
+    function renderPagination() {
+      const totalPages = Math.ceil(filteredEndpoints.length / itemsPerPage);
+      const pagination = document.getElementById('pagination');
+      
+      let html = `
+        <button class="page-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+          ← Prev
+        </button>
+        <span style="color: rgba(255,255,255,0.7);">
+          Page ${currentPage} of ${totalPages}
+        </span>
+        <button class="page-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+          Next →
+        </button>
+      `;
+      
+      pagination.innerHTML = html;
+    }
+
+    function changePage(page) {
+      const totalPages = Math.ceil(filteredEndpoints.length / itemsPerPage);
+      if (page < 1 || page > totalPages) return;
+      currentPage = page;
+      renderEndpoints();
+    }
+
+    function searchEndpoints() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      applyFilters(search);
+    }
+
+    function filterEndpoints() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      applyFilters(search);
+    }
+
+    function applyFilters(search = '') {
+      const premiumFilter = document.getElementById('filterPremium').value;
+      const categoryFilter = document.getElementById('filterCategory').value;
+
+      filteredEndpoints = allEndpoints.filter(endpoint => {
+        const matchesSearch = !search || 
+          endpoint.path.toLowerCase().includes(search) ||
+          (endpoint.name && endpoint.name.toLowerCase().includes(search)) ||
+          (endpoint.description && endpoint.description.toLowerCase().includes(search));
+
+        const matchesPremium = !premiumFilter || 
+          endpoint.requiresVIP.toString() === premiumFilter;
+
+        const matchesCategory = !categoryFilter || 
+          endpoint.category === categoryFilter;
+
+        return matchesSearch && matchesPremium && matchesCategory;
+      });
+
+      currentPage = 1;
+      renderEndpoints();
+    }
+
+    async function togglePremium(id) {
       try {
-        const response = await fetch(`/admin/vip-endpoints/${id}`, {
-          method: 'DELETE'
+        const response = await fetch(`/admin/endpoints/${id}/toggle-premium`, {
+          method: 'PUT',
+          headers: { 'Authorization': `Bearer ${token}` }
         });
 
         const data = await response.json();
 
         if (data.success) {
-          showSuccess('VIP endpoint deleted');
+          showAlert('dashboardAlert', data.message, 'success');
           loadEndpoints();
           loadStats();
         } else {
-          showError(data.error);
+          showAlert('dashboardAlert', data.error, 'error');
+          loadEndpoints();
         }
       } catch (error) {
-        showError('Failed to delete endpoint');
+        showAlert('dashboardAlert', 'Failed to toggle premium status', 'error');
       }
     }
 
-    function switchTab(tab) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-
-      event.target.classList.add('active');
-      document.getElementById(`${tab}Section`).classList.add('active');
+    function toggleSelect(id) {
+      if (selectedIds.has(id)) {
+        selectedIds.delete(id);
+      } else {
+        selectedIds.add(id);
+      }
+      updateBulkActions();
     }
 
-    function showSuccess(message) {
-      const alert = document.getElementById('successAlert');
-      alert.textContent = message;
-      alert.style.display = 'block';
-      setTimeout(() => {
-        alert.style.display = 'none';
-      }, 3000);
+    function toggleSelectAll() {
+      const checked = document.getElementById('selectAll').checked;
+      const start = (currentPage - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+      const pageEndpoints = filteredEndpoints.slice(start, end);
+
+      pageEndpoints.forEach(endpoint => {
+        if (checked) {
+          selectedIds.add(endpoint.id);
+        } else {
+          selectedIds.delete(endpoint.id);
+        }
+      });
+
+      renderEndpoints();
     }
 
-    function showError(message) {
-      const alert = document.getElementById('errorAlert');
-      alert.textContent = message;
-      alert.style.display = 'block';
-      setTimeout(() => {
-        alert.style.display = 'none';
-      }, 3000);
+    function updateBulkActions() {
+      const count = selectedIds.size;
+      document.getElementById('selectedCount').textContent = `${count} selected`;
+      document.getElementById('bulkActions').style.display = count > 0 ? 'flex' : 'none';
     }
 
-    function logout() {
-      fetch('/auth/logout', { method: 'POST' })
-        .then(() => {
-          window.location.href = '/login.html';
+    async function bulkSetPremium(requiresVIP) {
+      if (selectedIds.size === 0) {
+        showAlert('dashboardAlert', 'No endpoints selected', 'error');
+        return;
+      }
+
+      const confirmed = confirm(`Set ${selectedIds.size} endpoints to ${requiresVIP ? 'PREMIUM' : 'FREE'}?`);
+      if (!confirmed) return;
+
+      try {
+        const response = await fetch('/admin/endpoints/bulk-premium', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            ids: Array.from(selectedIds),
+            requiresVIP
+          })
         });
+
+        const data = await response.json();
+
+        if (data.success) {
+          showAlert('dashboardAlert', data.message, 'success');
+          selectedIds.clear();
+          loadEndpoints();
+          loadStats();
+        } else {
+          showAlert('dashboardAlert', data.error, 'error');
+        }
+      } catch (error) {
+        showAlert('dashboardAlert', 'Failed to update endpoints', 'error');
+      }
     }
 
-    checkAuth();
+    async function refreshCache() {
+      try {
+        const response = await fetch('/admin/cache/refresh', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          showAlert('dashboardAlert', 'Cache refreshed successfully!', 'success');
+        } else {
+          showAlert('dashboardAlert', data.error, 'error');
+        }
+      } catch (error) {
+        showAlert('dashboardAlert', 'Failed to refresh cache', 'error');
+      }
+    }
+
+    function showAlert(elementId, message, type) {
+      const alertDiv = document.getElementById(elementId);
+      alertDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+      setTimeout(() => {
+        alertDiv.innerHTML = '';
+      }, 5000);
+    }
   </script>
 </body>
 </html>

@@ -145,6 +145,208 @@ The website has been optimized for low-end devices (RAM 2-4GB) with comprehensiv
 - Beautiful social media previews when sharing links
 - Performance scales automatically based on device capabilities
 
+# Environment Variables
+
+The following environment variables are required for the application to function properly:
+
+## Required Variables
+
+### JWT_SECRET
+**Purpose**: Secret key for JWT token signing and verification  
+**Type**: String (64+ characters recommended)  
+**Example**: `bceb46bd7eaa9c68cb865ed242912bbab4fd5e2023f431ba5337f02d3d5b591943c883cdd607bcc912a7bc88a610794ff1853bb55ec3e5c5844afcf7796d4225`  
+**How to generate**: 
+```bash
+node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+```
+
+### DATABASE_URL
+**Purpose**: PostgreSQL database connection string  
+**Type**: String  
+**Example**: `postgresql://user:password@localhost:5432/dbname`  
+**Note**: Automatically provided by Replit's PostgreSQL integration
+
+## Optional Variables
+
+### ADMIN_WHATSAPP_NUMBER
+**Purpose**: WhatsApp number for admin contact (for VIP upgrade requests)  
+**Type**: String (phone number with country code, no + symbol)  
+**Example**: `6281234567890` (Indonesia format)  
+**Default**: `6281234567890`  
+**Format**: Include country code without + or spaces (e.g., 62 for Indonesia, 1 for USA)  
+**How to use**: Users will see a WhatsApp chat button when they try to access premium endpoints
+
+### PORT
+**Purpose**: Server port number  
+**Type**: Number  
+**Default**: `5000`  
+**Note**: Always use port 5000 for frontend servers in Replit
+
+## Setup Instructions
+
+1. Go to the "Secrets" tab in Replit (Tools > Secrets)
+2. Add each required environment variable with its value
+3. Restart the Repl for changes to take effect
+
+# Premium Route Management System (Oct 2025)
+
+The API now includes a comprehensive premium route management system that allows administrators to control which endpoints require VIP access.
+
+## Features
+
+### Auto-Registration of Routes
+- All API routes are automatically registered to the database on server start
+- Routes include metadata: path, method, name, description, category
+- Existing routes are updated with new metadata while preserving premium status
+- No manual database entry needed - just add routes to `/routes` folder
+
+### Admin Panel
+- Modern web interface at `/admin-panel.html`
+- Login required with admin role
+- Dashboard with statistics:
+  - Total endpoints (free + premium)
+  - Premium endpoints count
+  - Free endpoints count
+  - VIP users count
+  - Total users count
+
+### Route Management Features
+- **Toggle Premium Status**: Click switch to instantly make any endpoint premium or free
+- **Bulk Operations**: Select multiple endpoints and set as premium/free at once
+- **Search & Filter**: Find endpoints by path, name, or description
+- **Category Filter**: Filter endpoints by category
+- **Real-time Updates**: Changes reflect immediately with cache refresh
+- **Pagination**: Handle large number of endpoints efficiently (20 per page)
+
+### VIP Access Protection
+- Middleware automatically checks if requested endpoint requires VIP
+- Returns detailed error messages with upgrade information
+- Includes WhatsApp link for direct admin contact
+- Shows user current role and endpoint information
+- Different messages for logged-in users vs guests
+
+### Premium Upgrade Modal
+- Beautiful popup displayed when non-VIP users access premium endpoints
+- Shows endpoint information and VIP benefits
+- Direct WhatsApp button to contact admin for upgrade
+- Different UI for logged-in users vs guests
+- Responsive design matching website theme
+
+### Admin API Endpoints
+
+All admin endpoints require authentication with admin role.
+
+#### Statistics
+- `GET /admin/stats` - Get user and endpoint statistics
+
+#### User Management
+- `GET /admin/users` - List all users
+- `PUT /admin/users/:id/role` - Change user role (user/vip/admin)
+
+#### Endpoint Management
+- `GET /admin/endpoints/all` - List all endpoints with pagination and filters
+  - Query params: `premium` (true/false), `search` (text), `category` (string), `page`, `limit`
+- `GET /admin/vip-endpoints` - List VIP endpoints only
+- `POST /admin/vip-endpoints` - Create/update VIP endpoint
+- `PUT /admin/endpoints/:id` - Update endpoint details
+- `PUT /admin/endpoints/:id/toggle-premium` - Toggle premium status
+- `POST /admin/endpoints/bulk-premium` - Bulk set premium status for multiple endpoints
+- `DELETE /admin/vip-endpoints/:id` - Delete VIP endpoint
+- `GET /admin/categories` - Get all unique categories
+- `POST /admin/cache/refresh` - Refresh VIP endpoints cache
+
+### Database Schema
+
+#### VIPEndpoint Model
+```javascript
+{
+  id: INTEGER (auto-increment),
+  path: STRING(200) UNIQUE NOT NULL,  // e.g., "/api/tiktok"
+  method: STRING(10),                  // e.g., "GET", "POST"
+  name: STRING(100),                   // e.g., "TikTok Downloader"
+  description: TEXT,                   // Detailed description
+  category: STRING(50),                // e.g., "downloader", "ai", "image"
+  parameters: JSON,                    // API parameters metadata
+  requiresVIP: BOOLEAN,                // true = premium, false = free
+  createdAt: TIMESTAMP,
+  updatedAt: TIMESTAMP
+}
+```
+
+## Usage Guide
+
+### For Admins
+
+1. **Access Admin Panel**
+   - Navigate to `/admin-panel.html`
+   - Login with admin credentials (see server logs for initial password)
+
+2. **Make Endpoint Premium**
+   - Find endpoint in the list using search/filter
+   - Click the toggle switch to enable premium
+   - Or select multiple endpoints and click "Set Premium"
+
+3. **Make Endpoint Free**
+   - Click toggle switch to disable premium
+   - Or bulk select and click "Set Free"
+
+4. **Monitor Usage**
+   - Check dashboard stats for user counts
+   - See how many endpoints are premium vs free
+   - Track VIP user growth
+
+5. **Refresh Cache**
+   - Click "Clear Cache" button after making changes
+   - Ensures VIP protection applies immediately
+
+### For Users
+
+1. **Free Endpoints**
+   - Accessible to everyone without login
+   - No restrictions
+
+2. **Premium Endpoints**
+   - Requires VIP membership
+   - If accessed without VIP:
+     - Logged-in users: See upgrade modal with WhatsApp button
+     - Guests: See modal with login/signup links + WhatsApp button
+
+3. **Upgrade to VIP**
+   - Click WhatsApp button in modal
+   - Message sent to admin automatically
+   - Admin will upgrade your account
+
+## Technical Details
+
+### VIP Check Flow
+
+```
+1. Request comes in → optionalAuth middleware (sets req.user if logged in)
+2. Request continues → checkVIPAccess middleware
+3. Check if endpoint is in VIP cache
+4. If not VIP endpoint → continue to route handler
+5. If VIP endpoint:
+   a. Check if user is logged in
+   b. Check if user role is 'vip' or 'admin'
+   c. If yes → continue to route handler
+   d. If no → return 403 with upgrade info (WhatsApp link, benefits, etc.)
+```
+
+### Cache Management
+
+- VIP endpoints cached in memory for 60 seconds
+- Automatically refreshed on admin changes
+- Manual refresh available via admin panel
+- Reduces database queries for better performance
+
+### Security
+
+- Admin routes protected by authentication + authorization middleware
+- JWT tokens required for all admin operations
+- Role-based access control (RBAC)
+- Password hashing with bcrypt (12 rounds)
+- Secure token storage in HTTP-only cookies
+
 # System Architecture
 
 ## Route Auto-Loading System

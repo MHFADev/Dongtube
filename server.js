@@ -5,7 +5,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { readdirSync } from "fs";
 import cookieParser from "cookie-parser";
-import { initDatabase } from "./models/index.js";
+import { initDatabase, VIPEndpoint } from "./models/index.js";
 import authRoutes from "./routes/auth.js";
 import adminRoutes from "./routes/admin.js";
 import { checkVIPAccess, optionalAuth } from "./middleware/auth.js";
@@ -100,6 +100,70 @@ async function loadRoutes() {
   }
   
   console.log(chalk.cyan(`\n✅ Total ${allEndpoints.length} endpoints loaded\n`));
+}
+
+async function syncEndpointsToDatabase() {
+  try {
+    console.log(chalk.cyan("🔄 Syncing endpoints to database...\n"));
+    
+    let created = 0;
+    let updated = 0;
+    let skipped = 0;
+    
+    for (const endpoint of allEndpoints) {
+      try {
+        const path = endpoint.path || endpoint.route;
+        const method = endpoint.method || 'GET';
+        
+        if (!path) {
+          skipped++;
+          continue;
+        }
+        
+        const [record, isCreated] = await VIPEndpoint.findOrCreate({
+          where: { path, method },
+          defaults: {
+            path,
+            method,
+            name: endpoint.name || path,
+            description: endpoint.description || endpoint.desc || null,
+            category: endpoint.category || null,
+            parameters: endpoint.parameters || endpoint.params || null,
+            requiresVIP: false
+          }
+        });
+        
+        if (isCreated) {
+          created++;
+          console.log(chalk.green(`  ✓ Created: ${method} ${path}`));
+        } else {
+          await record.update({
+            name: endpoint.name || record.name || path,
+            description: endpoint.description || endpoint.desc || record.description,
+            category: endpoint.category || record.category,
+            parameters: endpoint.parameters || endpoint.params || record.parameters
+          });
+          updated++;
+          console.log(chalk.blue(`  ↻ Updated: ${method} ${path}`));
+        }
+        
+      } catch (err) {
+        console.error(chalk.red(`  ✗ Error syncing endpoint:`), err.message);
+        skipped++;
+      }
+    }
+    
+    console.log(chalk.cyan(`\n📊 Sync Summary:`));
+    console.log(chalk.green(`  ✓ Created: ${created}`));
+    console.log(chalk.blue(`  ↻ Updated: ${updated}`));
+    console.log(chalk.yellow(`  ⊘ Skipped: ${skipped}`));
+    console.log(chalk.cyan(`  ━ Total: ${allEndpoints.length}\n`));
+    
+    return true;
+  } catch (error) {
+    console.error(chalk.red("✗ Failed to sync endpoints:"), error.message);
+    return false;
+  }
 }
 
 // ==================== START SERVER ====================
@@ -198,6 +262,9 @@ async function startServer() {
     
     // STEP 4: Load dynamic routes
     await loadRoutes();
+    
+    // STEP 4.5: Sync all endpoints to database
+    await syncEndpointsToDatabase();
     
     // STEP 5: Register 404 handler (MUST BE LAST!)
     console.log(chalk.cyan("⚙️  Registering error handlers...\n"));
