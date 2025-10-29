@@ -166,8 +166,45 @@
     .brand {
       display: inline-flex;
       align-items: center;
-      gap: 12px;
+      gap: 16px;
       margin-bottom: 12px;
+    }
+
+    .brand-logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      object-fit: cover;
+      box-shadow: 0 4px 16px rgba(255, 165, 0, 0.3);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      animation: logoEntrance 0.8s ease-out backwards;
+      border: 2px solid var(--primary);
+    }
+
+    .brand-logo:hover {
+      transform: scale(1.1) rotate(5deg);
+      box-shadow: 0 8px 24px rgba(255, 165, 0, 0.5), 0 0 30px rgba(255, 165, 0, 0.3);
+      border-color: var(--primary-light);
+    }
+
+    @keyframes logoEntrance {
+      0% {
+        opacity: 0;
+        transform: scale(0.5) rotate(-180deg);
+      }
+      60% {
+        transform: scale(1.1) rotate(10deg);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+      }
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
     }
 
     .brand-title {
@@ -175,6 +212,9 @@
       font-weight: 800;
       color: var(--text);
       letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .brand-title span {
@@ -1301,6 +1341,12 @@
         padding: 40px 16px;
       }
 
+      .brand-logo {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+      }
+
       .brand-title {
         font-size: 1.75rem;
       }
@@ -1441,6 +1487,12 @@
         padding: 24px 12px;
       }
       
+      .brand-logo {
+        width: 42px;
+        height: 42px;
+        border-radius: 8px;
+      }
+
       .brand-title {
         font-size: 1.5rem;
       }
@@ -2284,8 +2336,13 @@
     <header class="header">
       <div class="header-content">
         <div class="brand">
-          <h1 class="brand-title">Dongtube<span>.</span></h1>
-          <span class="version">v2.0</span>
+          <img src="logo.jpg" alt="Dongtube Logo" class="brand-logo">
+          <div class="brand-text">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <h1 class="brand-title">Dongtube<span>.</span></h1>
+              <span class="version">v2.0</span>
+            </div>
+          </div>
         </div>
         <p>Interactive API documentation with real-time testing capabilities for developers.</p>
         <div class="header-links">
