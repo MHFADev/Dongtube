@@ -1,11 +1,74 @@
 // ============================
+// PERFORMANCE DETECTION
+// ============================
+
+let devicePerformance = 'high';
+
+function detectDevicePerformance() {
+  let score = 0;
+  
+  // Check RAM (if available via deviceMemory API)
+  if (navigator.deviceMemory) {
+    if (navigator.deviceMemory <= 2) score += 3;
+    else if (navigator.deviceMemory <= 4) score += 2;
+    else if (navigator.deviceMemory <= 8) score += 1;
+  } else {
+    score += 1;
+  }
+  
+  // Check CPU cores
+  const cores = navigator.hardwareConcurrency || 4;
+  if (cores <= 2) score += 3;
+  else if (cores <= 4) score += 2;
+  else if (cores <= 6) score += 1;
+  
+  // Check for mobile device
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  if (isMobile) score += 2;
+  
+  // Check screen size (smaller screens = likely mobile/weaker device)
+  if (window.innerWidth < 768) score += 1;
+  
+  // Determine performance level
+  if (score >= 6) {
+    devicePerformance = 'potato';
+    console.log('🥔 Potato mode activated - Maximum performance optimization');
+  } else if (score >= 4) {
+    devicePerformance = 'low';
+    console.log('📱 Low-end mode - Performance optimized for 2GB RAM');
+  } else if (score >= 2) {
+    devicePerformance = 'medium';
+    console.log('💻 Medium mode - Balanced performance');
+  } else {
+    devicePerformance = 'high';
+    console.log('🚀 High performance mode');
+  }
+  
+  // Apply CSS class for conditional styling
+  document.body.classList.add(`perf-${devicePerformance}`);
+  
+  return devicePerformance;
+}
+
+// ============================
 // THREE.JS 3D BACKGROUND ANIMATION
 // ============================
 
 let scene, camera, renderer, particles;
+let frameSkip = 0;
 
 function initThreeJS() {
   const canvas = document.getElementById('bg-canvas');
+  
+  // Detect performance first
+  const perf = detectDevicePerformance();
+  
+  // Disable Three.js completely for potato devices
+  if (perf === 'potato') {
+    canvas.style.display = 'none';
+    addCSSFallback();
+    return;
+  }
   
   // Scene
   scene = new THREE.Scene();
@@ -14,34 +77,41 @@ function initThreeJS() {
   camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
   camera.position.z = 50;
   
-  // Renderer - optimized for low-end devices
+  // Renderer - optimized based on device performance
+  const pixelRatio = perf === 'low' ? 1 : Math.min(window.devicePixelRatio, 1.5);
   renderer = new THREE.WebGLRenderer({ 
     canvas, 
     alpha: true, 
     antialias: false,
-    powerPreference: 'low-power'
+    powerPreference: perf === 'high' ? 'default' : 'low-power'
   });
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+  renderer.setPixelRatio(pixelRatio);
   
   // Create floating 3D objects
   particles = [];
-  const geometries = [
-    new THREE.BoxGeometry(2, 2, 2),
-    new THREE.TetrahedronGeometry(1.5),
-    new THREE.OctahedronGeometry(1.5),
-    new THREE.TorusGeometry(1, 0.4, 8, 16)
-  ];
+  
+  // Simpler geometries for low-end devices
+  const geometries = perf === 'low' 
+    ? [new THREE.BoxGeometry(2, 2, 2), new THREE.TetrahedronGeometry(1.5)]
+    : [
+        new THREE.BoxGeometry(2, 2, 2),
+        new THREE.TetrahedronGeometry(1.5),
+        new THREE.OctahedronGeometry(1.5),
+        new THREE.TorusGeometry(1, 0.4, 8, 16)
+      ];
   
   const material = new THREE.MeshBasicMaterial({
     color: 0xffcc00,
     wireframe: true,
     transparent: true,
-    opacity: 0.3
+    opacity: perf === 'low' ? 0.2 : 0.3
   });
   
-  // Create 19 random floating objects (reduced by 5% for better performance)
-  for (let i = 0; i < 19; i++) {
+  // Adjust particle count based on performance
+  const particleCount = perf === 'low' ? 6 : (perf === 'medium' ? 12 : 19);
+  
+  for (let i = 0; i < particleCount; i++) {
     const geometry = geometries[Math.floor(Math.random() * geometries.length)];
     const mesh = new THREE.Mesh(geometry, material);
     
@@ -54,17 +124,18 @@ function initThreeJS() {
     mesh.rotation.x = Math.random() * Math.PI;
     mesh.rotation.y = Math.random() * Math.PI;
     
-    // Random velocity
+    // Slower movement for low-end devices
+    const speedMultiplier = perf === 'low' ? 0.5 : 1;
     mesh.userData.velocity = {
-      x: (Math.random() - 0.5) * 0.02,
-      y: (Math.random() - 0.5) * 0.02,
-      z: (Math.random() - 0.5) * 0.02
+      x: (Math.random() - 0.5) * 0.02 * speedMultiplier,
+      y: (Math.random() - 0.5) * 0.02 * speedMultiplier,
+      z: (Math.random() - 0.5) * 0.02 * speedMultiplier
     };
     
     mesh.userData.rotationSpeed = {
-      x: (Math.random() - 0.5) * 0.02,
-      y: (Math.random() - 0.5) * 0.02,
-      z: (Math.random() - 0.5) * 0.02
+      x: (Math.random() - 0.5) * 0.02 * speedMultiplier,
+      y: (Math.random() - 0.5) * 0.02 * speedMultiplier,
+      z: (Math.random() - 0.5) * 0.02 * speedMultiplier
     };
     
     scene.add(mesh);
@@ -79,7 +150,7 @@ function initThreeJS() {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
-    }, 150);
+    }, 200);
   });
   
   // Start animation
@@ -93,6 +164,12 @@ function animate() {
   if (!isAnimating) return;
   
   animationFrameId = requestAnimationFrame(animate);
+  
+  // Frame skipping for low-end devices (render every 2nd frame)
+  if (devicePerformance === 'low') {
+    frameSkip++;
+    if (frameSkip % 2 !== 0) return;
+  }
   
   // Animate each particle
   particles.forEach(particle => {
@@ -112,10 +189,12 @@ function animate() {
     if (Math.abs(particle.position.z) > 50) particle.userData.velocity.z *= -1;
   });
   
-  // Slowly rotate camera
-  camera.position.x = Math.sin(Date.now() * 0.0001) * 5;
-  camera.position.y = Math.cos(Date.now() * 0.0001) * 5;
-  camera.lookAt(scene.position);
+  // Disable camera rotation for low-end devices
+  if (devicePerformance !== 'low') {
+    camera.position.x = Math.sin(Date.now() * 0.0001) * 5;
+    camera.position.y = Math.cos(Date.now() * 0.0001) * 5;
+    camera.lookAt(scene.position);
+  }
   
   renderer.render(scene, camera);
 }
