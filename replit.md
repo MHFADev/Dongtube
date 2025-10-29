@@ -26,6 +26,12 @@ Preferred communication style: Simple, everyday language.
 ## Feature Specifications
 - **Premium Route Management System**: Allows administrators to toggle VIP access for any API endpoint via an admin panel. Features auto-registration of routes, bulk operations, search/filter capabilities, and real-time updates.
 - **VIP Access Protection**: Middleware automatically checks for VIP status, providing detailed error messages and WhatsApp contact links for upgrade requests to non-VIP users.
+- **Premium Content Security** (Updated: Oct 2025):
+  - **Backend Sanitization**: The `/api/docs` endpoint implements server-side data sanitization to prevent premium endpoint details from being sent to non-VIP users' browsers
+  - **Composite Key Lookup**: Uses `${method}:${path}` composite keys to correctly handle endpoints with the same path but different access levels per HTTP method (e.g., GET free, POST premium)
+  - **Zero-Trust Architecture**: Even if frontend protection is bypassed, backend ensures premium metadata (params, parameters, examples, placeholder) is never transmitted to unauthorized users
+  - **Premium Lock Screen**: Frontend displays a visual lock screen with upgrade prompt and WhatsApp contact for premium endpoints, providing clear UX feedback
+  - **JWT-Based Authentication**: Validates user premium status via JWT tokens before serving full endpoint documentation
 - **Caching Strategy**: Implements in-memory Map-based caching with TTL for specific data (e.g., news endpoints) to reduce database queries and improve performance.
 - **Background Music**: Auto-plays background music with a visual vinyl disc animation and volume controls, starting on page load or first user interaction.
 - **Security**: Admin routes are protected by authentication, authorization middleware, JWT tokens, role-based access control (RBAC), and bcrypt password hashing.
