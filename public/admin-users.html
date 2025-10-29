@@ -556,6 +556,40 @@
     </div>
   </div>
 
+  <!-- Change Role Modal -->
+  <div id="changeRoleModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>👤 Change User Role</h2>
+      </div>
+      <div class="modal-body">
+        <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 10px;">
+          Email: <strong id="changeRoleEmail">-</strong>
+        </p>
+        <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 20px;">
+          Current Role: <strong id="currentRole">-</strong>
+        </p>
+        <div class="form-group">
+          <label for="newRole">New Role</label>
+          <select id="newRole">
+            <option value="user">Regular User</option>
+            <option value="vip">VIP Member</option>
+            <option value="admin">Administrator</option>
+          </select>
+        </div>
+        <div style="background: rgba(251, 146, 60, 0.2); border: 1px solid rgba(251, 146, 60, 0.4); border-radius: 10px; padding: 12px; margin-top: 15px;">
+          <p style="color: rgba(255, 255, 255, 0.8); font-size: 13px; margin: 0;">
+            ⚠️ <strong>Note:</strong> Changing role to VIP will set default 30-day expiry. Use "Grant VIP" for custom duration.
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('changeRoleModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="confirmChangeRole()">Change Role</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     let token = localStorage.getItem('adminToken');
     let allUsers = [];
@@ -667,15 +701,18 @@
             roleBadge = '<span class="badge badge-user">User</span>';
         }
 
-        let actions = '';
+        let actions = `
+          <button class="btn btn-primary btn-sm" onclick="openChangeRoleModal('${user.id}', '${user.email}', '${user.role}')" title="Change Role">👤 Role</button>
+        `;
+        
         if (user.role === 'vip') {
-          actions = `
-            <button class="btn btn-warning btn-sm" onclick="openExtendVIPModal('${user.id}', '${user.email}', '${user.vipExpiresAt || ''}')">Extend</button>
-            <button class="btn btn-danger btn-sm" onclick="revokeVIP('${user.id}', '${user.email}')">Revoke</button>
+          actions += `
+            <button class="btn btn-warning btn-sm" onclick="openExtendVIPModal('${user.id}', '${user.email}', '${user.vipExpiresAt || ''}')" title="Extend VIP">⏰ Extend</button>
+            <button class="btn btn-danger btn-sm" onclick="revokeVIP('${user.id}', '${user.email}')" title="Revoke VIP">❌ Revoke</button>
           `;
         } else if (user.role === 'user') {
-          actions = `
-            <button class="btn btn-success btn-sm" onclick="openGrantVIPModal('${user.id}', '${user.email}')">Grant VIP</button>
+          actions += `
+            <button class="btn btn-success btn-sm" onclick="openGrantVIPModal('${user.id}', '${user.email}')" title="Grant VIP">⭐ Grant VIP</button>
           `;
         }
 
@@ -813,6 +850,48 @@
           loadStats();
         } else {
           showAlert(data.error || 'Failed to revoke VIP access', 'error');
+        }
+      } catch (error) {
+        showAlert('Network error: ' + error.message, 'error');
+      }
+    }
+
+    function openChangeRoleModal(userId, email, currentRole) {
+      selectedUserId = userId;
+      document.getElementById('changeRoleEmail').textContent = email;
+      document.getElementById('currentRole').textContent = currentRole.toUpperCase();
+      document.getElementById('newRole').value = currentRole;
+      document.getElementById('changeRoleModal').classList.add('active');
+    }
+
+    async function confirmChangeRole() {
+      const newRole = document.getElementById('newRole').value;
+      const currentRole = document.getElementById('currentRole').textContent.toLowerCase();
+      
+      if (newRole === currentRole) {
+        showAlert('New role must be different from current role', 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch(`/admin/users/${selectedUserId}/role`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ role: newRole })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          showAlert(`Role changed to ${newRole.toUpperCase()} successfully!`, 'success');
+          closeModal('changeRoleModal');
+          loadUsers();
+          loadStats();
+        } else {
+          showAlert(data.error || 'Failed to change role', 'error');
         }
       } catch (error) {
         showAlert('Network error: ' + error.message, 'error');
