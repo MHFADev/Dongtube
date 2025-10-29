@@ -3277,6 +3277,168 @@
     let allCategories = [];
     let categoryItemsLimit = {};
     const INITIAL_ITEMS_PER_CATEGORY = 15;
+    
+    // Global user state
+    let currentUser = null;
+    
+    // Check if user has premium access
+    function hasPremiumAccess() {
+      if (!currentUser) return false;
+      return currentUser.role === 'vip' || currentUser.role === 'admin';
+    }
+    
+    // Generate premium lock screen HTML
+    function generatePremiumLockScreen() {
+      const adminWhatsApp = '6281234567890';
+      const whatsappUrl = `https://wa.me/${adminWhatsApp}?text=${encodeURIComponent('Halo! Saya ingin upgrade ke VIP untuk akses premium API 🚀')}`;
+      
+      return `
+        <div style="
+          background: linear-gradient(135deg, rgba(255, 165, 0, 0.1) 0%, rgba(255, 107, 107, 0.1) 100%);
+          border: 2px solid rgba(255, 165, 0, 0.3);
+          border-radius: 16px;
+          padding: 40px 32px;
+          text-align: center;
+          margin: 20px 0;
+          position: relative;
+          overflow: hidden;
+        ">
+          <!-- Animated Background -->
+          <div style="
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 165, 0, 0.1) 0%, transparent 70%);
+            animation: rotate 10s linear infinite;
+            pointer-events: none;
+          "></div>
+          
+          <!-- Lock Icon -->
+          <div style="
+            font-size: 72px;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+            position: relative;
+            z-index: 1;
+          ">🔒</div>
+          
+          <!-- Title -->
+          <h3 style="
+            color: var(--primary);
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+          ">Premium Endpoint</h3>
+          
+          <!-- Message -->
+          <p style="
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-bottom: 24px;
+            line-height: 1.6;
+            position: relative;
+            z-index: 1;
+          ">
+            ${currentUser ? 
+              `<strong style="color: var(--text);">${currentUser.email}</strong>, endpoint ini memerlukan akses VIP.<br>Upgrade sekarang untuk mengakses <strong>semua fitur premium</strong>!` :
+              `Anda harus <strong>login</strong> dan memiliki akses <strong>VIP</strong> untuk menggunakan endpoint ini.<br><a href="/login.html" style="color: var(--primary); text-decoration: underline;">Login</a> atau <a href="/signup.html" style="color: var(--primary); text-decoration: underline;">Daftar</a> terlebih dahulu.`
+            }
+          </p>
+          
+          <!-- Benefits -->
+          <div style="
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            text-align: left;
+            position: relative;
+            z-index: 1;
+          ">
+            <h4 style="
+              color: var(--text);
+              font-size: 0.875rem;
+              font-weight: 700;
+              margin-bottom: 12px;
+              text-align: center;
+            ">✨ Benefit VIP Access:</h4>
+            <ul style="
+              list-style: none;
+              padding: 0;
+              margin: 0;
+              color: var(--text-muted);
+              font-size: 0.875rem;
+            ">
+              <li style="padding: 6px 0; display: flex; align-items: center;">
+                <span style="color: var(--success); margin-right: 10px; font-size: 1.2rem;">✓</span>
+                Akses ke semua endpoint premium
+              </li>
+              <li style="padding: 6px 0; display: flex; align-items: center;">
+                <span style="color: var(--success); margin-right: 10px; font-size: 1.2rem;">✓</span>
+                Priority support 24/7
+              </li>
+              <li style="padding: 6px 0; display: flex; align-items: center;">
+                <span style="color: var(--success); margin-right: 10px; font-size: 1.2rem;">✓</span>
+                No rate limits
+              </li>
+              <li style="padding: 6px 0; display: flex; align-items: center;">
+                <span style="color: var(--success); margin-right: 10px; font-size: 1.2rem;">✓</span>
+                Advanced features & tools
+              </li>
+            </ul>
+          </div>
+          
+          <!-- CTA Button -->
+          ${currentUser ? `
+            <button onclick="window.open('${whatsappUrl}', '_blank')" style="
+              background: linear-gradient(135deg, var(--primary), var(--secondary));
+              border: none;
+              color: var(--bg-dark);
+              padding: 14px 32px;
+              border-radius: 10px;
+              font-size: 1rem;
+              font-weight: 700;
+              cursor: pointer;
+              transition: all 0.3s ease;
+              box-shadow: 0 4px 16px rgba(255, 165, 0, 0.3);
+              position: relative;
+              z-index: 1;
+            " onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 24px rgba(255, 165, 0, 0.5)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 16px rgba(255, 165, 0, 0.3)'">
+              💬 Upgrade via WhatsApp
+            </button>
+          ` : `
+            <a href="/login.html" style="
+              display: inline-block;
+              background: linear-gradient(135deg, var(--primary), var(--secondary));
+              border: none;
+              color: var(--bg-dark);
+              padding: 14px 32px;
+              border-radius: 10px;
+              font-size: 1rem;
+              font-weight: 700;
+              text-decoration: none;
+              transition: all 0.3s ease;
+              box-shadow: 0 4px 16px rgba(255, 165, 0, 0.3);
+              position: relative;
+              z-index: 1;
+            " onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 24px rgba(255, 165, 0, 0.5)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 16px rgba(255, 165, 0, 0.3)'">
+              🔐 Login untuk Upgrade
+            </a>
+          `}
+        </div>
+        
+        <style>
+          @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+        </style>
+      `;
+    }
 
 
     // Function to determine category based on path
@@ -3488,6 +3650,12 @@
                         <div class="endpoint-arrow">▼</div>
                       </div>
                       <div class="endpoint-body">
+                        ${ep.requiresVIP && !hasPremiumAccess() ? 
+                          // Show premium lock screen for non-VIP users
+                          generatePremiumLockScreen()
+                        : 
+                          // Show normal endpoint content for VIP/admin users or free endpoints
+                          `
                         <div class="methods-switch">
                           ${methods.map(m => `
                             <button class="method-btn ${m === methods[0] ? 'active' : ''}" 
@@ -3569,6 +3737,7 @@
                             </tbody>
                           </table>
                         </div>
+                        `}
                       </div>
                     </div>
                   </li>
@@ -4536,6 +4705,9 @@ print(data)`;
         authLoading.style.display = 'none';
 
         if (response.ok && data.success) {
+          // Store user data globally for premium access checks
+          currentUser = data.user;
+          
           authUser.style.display = 'inline';
           authGuest.style.display = 'none';
           loginBtn.style.display = 'none';
@@ -4557,6 +4729,7 @@ print(data)`;
             adminBtn.style.display = 'block';
           }
         } else {
+          currentUser = null;
           authUser.style.display = 'none';
           authGuest.style.display = 'inline';
           loginBtn.style.display = 'block';
@@ -4565,6 +4738,7 @@ print(data)`;
           adminBtn.style.display = 'none';
         }
       } catch (error) {
+        currentUser = null;
         authLoading.style.display = 'none';
         authUser.style.display = 'none';
         authGuest.style.display = 'inline';
