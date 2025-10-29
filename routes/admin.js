@@ -7,7 +7,7 @@ const router = express.Router();
 router.get('/admin/users', authenticate, authorize('admin'), async (req, res) => {
   try {
     const users = await User.findAll({
-      attributes: ['id', 'email', 'role', 'createdAt', 'lastLogin'],
+      attributes: ['id', 'email', 'role', 'vipExpiresAt', 'createdAt', 'lastLogin'],
       order: [['createdAt', 'DESC']]
     });
 
@@ -62,6 +62,172 @@ router.put('/admin/users/:id/role', authenticate, authorize('admin'), async (req
     res.status(500).json({
       success: false,
       error: 'Failed to update user role'
+    });
+  }
+});
+
+router.post('/admin/users/:id/grant-vip', authenticate, authorize('admin'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { duration } = req.body;
+
+    const user = await User.findByPk(id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    const now = new Date();
+    let expiresAt = new Date();
+
+    switch (duration) {
+      case '7d':
+        expiresAt.setDate(now.getDate() + 7);
+        break;
+      case '30d':
+        expiresAt.setDate(now.getDate() + 30);
+        break;
+      case '90d':
+        expiresAt.setDate(now.getDate() + 90);
+        break;
+      case '1y':
+        expiresAt.setFullYear(now.getFullYear() + 1);
+        break;
+      case 'lifetime':
+        expiresAt = new Date('2099-12-31');
+        break;
+      default:
+        if (req.body.customDate) {
+          expiresAt = new Date(req.body.customDate);
+        } else {
+          expiresAt.setDate(now.getDate() + 30);
+        }
+    }
+
+    await user.update({ 
+      role: 'vip',
+      vipExpiresAt: expiresAt 
+    });
+
+    res.json({
+      success: true,
+      message: 'VIP access granted successfully',
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        vipExpiresAt: user.vipExpiresAt
+      }
+    });
+  } catch (error) {
+    console.error('Grant VIP error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to grant VIP access'
+    });
+  }
+});
+
+router.post('/admin/users/:id/revoke-vip', authenticate, authorize('admin'), async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findByPk(id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    await user.update({ 
+      role: 'user',
+      vipExpiresAt: null 
+    });
+
+    res.json({
+      success: true,
+      message: 'VIP access revoked successfully',
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        vipExpiresAt: user.vipExpiresAt
+      }
+    });
+  } catch (error) {
+    console.error('Revoke VIP error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to revoke VIP access'
+    });
+  }
+});
+
+router.put('/admin/users/:id/extend-vip', authenticate, authorize('admin'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { extendBy, customDate } = req.body;
+
+    const user = await User.findByPk(id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    const currentExpiry = user.vipExpiresAt ? new Date(user.vipExpiresAt) : new Date();
+    let newExpiresAt;
+
+    if (customDate) {
+      newExpiresAt = new Date(customDate);
+    } else {
+      newExpiresAt = new Date(currentExpiry);
+      
+      switch (extendBy) {
+        case '7d':
+          newExpiresAt.setDate(currentExpiry.getDate() + 7);
+          break;
+        case '30d':
+          newExpiresAt.setDate(currentExpiry.getDate() + 30);
+          break;
+        case '90d':
+          newExpiresAt.setDate(currentExpiry.getDate() + 90);
+          break;
+        case '1y':
+          newExpiresAt.setFullYear(currentExpiry.getFullYear() + 1);
+          break;
+        default:
+          newExpiresAt.setDate(currentExpiry.getDate() + 30);
+      }
+    }
+
+    await user.update({ 
+      role: 'vip',
+      vipExpiresAt: newExpiresAt 
+    });
+
+    res.json({
+      success: true,
+      message: 'VIP access extended successfully',
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        vipExpiresAt: user.vipExpiresAt
+      }
+    });
+  } catch (error) {
+    console.error('Extend VIP error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to extend VIP access'
     });
   }
 });
