@@ -25,6 +25,13 @@ The website has been optimized for low-end devices (RAM 2-4GB) with the followin
 - Increased background opacity from 0.85 to 0.95 to reduce blur dependency
 - Added `will-change: transform` only to necessary elements
 - GPU acceleration optimized
+- **Endpoint Border Animation Optimized**:
+  - Changed transition from `all 0.4s` to specific properties at 0.2s (50% faster, more efficient)
+  - Removed box-shadow animation from border indicator (major GPU lag source)
+  - Simplified transform from `translateX(6px) scale(1.02)` to `translateX(4px)` only
+  - Removed box-shadow glow from active state
+  - Reduced gradient opacity in background highlight
+  - Result: Smooth, lag-free endpoint selection even on low-end devices
 
 ## Resource Loading Optimizations
 - Added `loading="lazy"` to all images (logo, thumbnails)
