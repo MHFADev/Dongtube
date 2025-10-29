@@ -3,6 +3,11 @@ import chalk from "chalk";
 import path from "path";
 import { fileURLToPath } from "url";
 import { readdirSync } from "fs";
+import cookieParser from "cookie-parser";
+import { initDatabase } from "./models/index.js";
+import authRoutes from "./routes/auth.js";
+import adminRoutes from "./routes/admin.js";
+import { checkVIPAccess, optionalAuth } from "./middleware/auth.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -12,6 +17,7 @@ const app = express();
 // ==================== MIDDLEWARE ====================
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 
 // CORS
 app.use((req, res, next) => {
@@ -30,6 +36,8 @@ const cache = new Map();
 
 // ==================== AUTO-LOAD ROUTES ====================
 let allEndpoints = [];
+
+app.use(optionalAuth);
 
 async function loadRoutes() {
   const routesPath = path.join(__dirname, "routes");
@@ -83,7 +91,24 @@ async function loadRoutes() {
 // ==================== START SERVER ====================
 async function startServer() {
   try {
-    // STEP 1: Register core routes FIRST
+    // STEP 0: Initialize database
+    console.log(chalk.cyan("🗄️  Initializing database...\n"));
+    const dbInitialized = await initDatabase();
+    
+    if (!dbInitialized) {
+      console.error(chalk.red("Failed to initialize database. Exiting..."));
+      process.exit(1);
+    }
+    
+    console.log(chalk.green("✓ Database initialized\n"));
+    
+    // STEP 1: Register auth routes
+    console.log(chalk.cyan("🔐 Registering authentication routes...\n"));
+    app.use(authRoutes);
+    app.use(adminRoutes);
+    console.log(chalk.green("✓ Auth routes registered\n"));
+    
+    // STEP 2: Register core routes
     console.log(chalk.cyan("⚙️  Registering core routes...\n"));
     
     app.get("/health", (req, res) => {
@@ -152,10 +177,15 @@ async function startServer() {
     
     console.log(chalk.green("✓ Core routes registered\n"));
     
-    // STEP 2: Load dynamic routes
+    // STEP 3: Apply VIP protection middleware (before loading routes)
+    console.log(chalk.cyan("🔒 Applying VIP protection middleware...\n"));
+    app.use(checkVIPAccess);
+    console.log(chalk.green("✓ VIP middleware active\n"));
+    
+    // STEP 4: Load dynamic routes
     await loadRoutes();
     
-    // STEP 3: Register 404 handler (MUST BE LAST!)
+    // STEP 5: Register 404 handler (MUST BE LAST!)
     console.log(chalk.cyan("⚙️  Registering error handlers...\n"));
     
     app.use((req, res) => {
@@ -179,7 +209,7 @@ async function startServer() {
     
     console.log(chalk.green("✓ Error handlers registered\n"));
     
-    // STEP 4: Start listening
+    // STEP 6: Start listening
     const PORT = process.env.PORT || 5000;
     
     app.listen(PORT, '0.0.0.0', () => {

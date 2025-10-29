@@ -2975,6 +2975,25 @@
   </style>
 </head>
 <body>
+  <!-- Auth Status Bar -->
+  <div id="authBar" style="position: fixed; top: 0; left: 0; right: 0; z-index: 9999; background: rgba(26, 26, 26, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255, 165, 0, 0.3); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; font-size: 14px;">
+    <div id="authStatus" style="display: flex; align-items: center; gap: 10px;">
+      <span id="authLoading" style="color: #888;">Checking authentication...</span>
+      <span id="authUser" style="display: none; color: #fff;">
+        Welcome, <strong id="userEmail" style="color: #FFA500;"></strong>
+        <span id="userRole" style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-left: 8px;"></span>
+      </span>
+      <span id="authGuest" style="display: none; color: #888;">Not logged in</span>
+    </div>
+    <div id="authActions" style="display: flex; gap: 10px;">
+      <a href="/login.html" id="loginBtn" style="display: none; padding: 6px 16px; background: linear-gradient(135deg, #FFA500 0%, #FF9900 100%); border-radius: 6px; color: #1a1a1a; font-weight: bold; text-decoration: none; transition: all 0.3s;">Login</a>
+      <a href="/signup.html" id="signupBtn" style="display: none; padding: 6px 16px; border: 1px solid #FFA500; border-radius: 6px; color: #FFA500; font-weight: bold; text-decoration: none; transition: all 0.3s;">Sign Up</a>
+      <a href="/admin-panel.html" id="adminBtn" style="display: none; padding: 6px 16px; background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%); border-radius: 6px; color: #fff; font-weight: bold; text-decoration: none; transition: all 0.3s;">Admin Panel</a>
+      <button id="logoutBtn" style="display: none; padding: 6px 16px; background: transparent; border: 1px solid #ff4444; border-radius: 6px; color: #ff4444; font-weight: bold; cursor: pointer; transition: all 0.3s;" onclick="handleLogout()">Logout</button>
+    </div>
+  </div>
+  <div style="height: 50px;"></div>
+
   <!-- Hamburger Menu Button -->
   <div class="hamburger-menu" id="hamburgerMenu" onclick="toggleMobileMenu()">
     <span></span>
@@ -4386,6 +4405,75 @@ print(data)`;
         bgMusic.pause();
       }
     });
+
+    // Authentication Status Check
+    async function checkAuthStatus() {
+      const authLoading = document.getElementById('authLoading');
+      const authUser = document.getElementById('authUser');
+      const authGuest = document.getElementById('authGuest');
+      const loginBtn = document.getElementById('loginBtn');
+      const signupBtn = document.getElementById('signupBtn');
+      const adminBtn = document.getElementById('adminBtn');
+      const logoutBtn = document.getElementById('logoutBtn');
+      const userEmail = document.getElementById('userEmail');
+      const userRole = document.getElementById('userRole');
+
+      try {
+        const response = await fetch('/auth/me');
+        const data = await response.json();
+
+        authLoading.style.display = 'none';
+
+        if (response.ok && data.success) {
+          authUser.style.display = 'inline';
+          authGuest.style.display = 'none';
+          loginBtn.style.display = 'none';
+          signupBtn.style.display = 'none';
+          logoutBtn.style.display = 'block';
+
+          userEmail.textContent = data.user.email;
+          
+          const roleColors = {
+            'admin': 'background: #ff4444; color: #fff;',
+            'vip': 'background: #ffcc00; color: #1a1a1a;',
+            'user': 'background: #888; color: #fff;'
+          };
+          
+          userRole.textContent = data.user.role.toUpperCase();
+          userRole.style.cssText = roleColors[data.user.role] || roleColors['user'];
+
+          if (data.user.role === 'admin') {
+            adminBtn.style.display = 'block';
+          }
+        } else {
+          authUser.style.display = 'none';
+          authGuest.style.display = 'inline';
+          loginBtn.style.display = 'block';
+          signupBtn.style.display = 'block';
+          logoutBtn.style.display = 'none';
+          adminBtn.style.display = 'none';
+        }
+      } catch (error) {
+        authLoading.style.display = 'none';
+        authUser.style.display = 'none';
+        authGuest.style.display = 'inline';
+        loginBtn.style.display = 'block';
+        signupBtn.style.display = 'block';
+        logoutBtn.style.display = 'none';
+        adminBtn.style.display = 'none';
+      }
+    }
+
+    async function handleLogout() {
+      try {
+        await fetch('/auth/logout', { method: 'POST' });
+        window.location.reload();
+      } catch (error) {
+        alert('Failed to logout');
+      }
+    }
+
+    checkAuthStatus();
   </script>
 </body>
 </html>
