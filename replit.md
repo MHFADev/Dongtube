@@ -59,19 +59,78 @@ The website has been optimized for low-end devices (RAM 2-4GB) with comprehensiv
 - Preview images use existing logo.jpg asset
 - Implemented on both index.html (API docs) and download-tiktok.html
 
-## Media Preview Feature (Oct 29, 2025)
-- **Automatic media detection**: Extracts image, video, and audio URLs from JSON responses
-- **Smart preview rendering with priority-based content-type detection**:
-  - Audio (Priority 1): HTML5 audio player - detects audio/mpeg, audio/wav
-  - Video (Priority 2): HTML5 video player - detects video/mp4, video/* 
-  - Images (Priority 3): Direct display with responsive styling
-- **Response parsing**: `extractMediaUrls()` function scans response objects recursively
-  - Detects URLs based on key names (image, thumbnail, video, audio, download, etc.)
-  - Validates file extensions (.jpg, .png, .mp4, .mp3, .m4a, .wav, .opus, etc.)
-  - Removes duplicate URLs
-- **Enhanced UX**: Users can test and preview media directly in API docs before using endpoints in their code
-- **Supports all media endpoints**: TikTok, Instagram, YouTube, Spotify, TTS (Text-to-Speech), random images, etc.
-- **Bug fix**: Fixed TTS endpoint preview - audio now displays correctly with prioritized content-type checking
+## Enhanced Media Preview System (Oct 29, 2025) - MAJOR UPDATE
+- **Modern UI/UX Design**: Complete redesign with glassmorphism effects, animated gradients, and sophisticated styling
+  - Beautiful media preview cards with hover effects and smooth transitions
+  - Responsive grid layout with auto-fit columns (1-3 columns based on screen size)
+  - Glowing animated borders and shimmer effects
+  - Dark theme optimized with orange/gold accent colors matching website theme
+  
+- **Advanced Media Detection**: Enhanced `extractMediaUrls()` function with improved accuracy
+  - Detects images (.jpg, .jpeg, .png, .gif, .webp, .svg, .bmp)
+  - Detects videos (.mp4, .webm, .mov, .m3u8, .avi, .mkv)
+  - Detects audio (.mp3, .m4a, .wav, .ogg, .opus, .flac, .aac)
+  - Uses both key name analysis and regex pattern matching
+  - Priority system to rank media by type (audio > video > images)
+  - Removes duplicate URLs automatically
+  
+- **Custom Audio Player** (~150 lines of CSS + JS):
+  - Visual waveform animation with 8 animated bars
+  - Custom play/pause button with icon switching
+  - Interactive progress bar with click-to-seek functionality
+  - Time display (current time / total duration)
+  - Volume control slider with icon
+  - Auto-pause other audio players when playing new one
+  - Elegant styling with orange gradients and animations
+  
+- **Image Gallery System**:
+  - Multiple images displayed in thumbnail grid
+  - Click thumbnails to switch main image
+  - Fullscreen view with navigation arrows
+  - Active thumbnail highlighting
+  - Lazy loading for performance
+  
+- **Fullscreen Modal**:
+  - Beautiful overlay with blur backdrop
+  - Large media display for images and videos
+  - Close button (×) and click-outside-to-close
+  - Navigation arrows for image galleries (prev/next)
+  - Smooth fade-in animations
+  - Prevents body scroll when open
+  
+- **Video Player**:
+  - Native HTML5 video controls
+  - Smooth opacity fade-in on load
+  - Responsive container with rounded corners
+  - Error handling for unsupported formats
+  
+- **Media Actions**:
+  - Download button for all media types (images, videos, audio)
+  - Copy URL to clipboard with visual notification
+  - Elegant button styling with icons
+  - Toast notifications for user feedback
+  
+- **Responsive Design** (Mobile-First):
+  - 100% responsive across all devices
+  - Mobile (<768px): Single column layout, touch-optimized controls
+  - Tablet (768px-1024px): 2-column grid
+  - Desktop (>1024px): 3-column grid
+  - Adaptive font sizes and spacing
+  - Touch-friendly button sizes on mobile
+  
+- **Performance Optimizations**:
+  - Lazy loading for images
+  - Efficient event listeners with proper cleanup
+  - Debounced resize handlers
+  - Minimal DOM manipulations
+  - CSS animations using GPU acceleration (transform, opacity)
+  
+- **Code Architecture**:
+  - ~555 lines of dedicated CSS for media preview components
+  - Modular JavaScript functions for each feature
+  - Separation of concerns (rendering, controls, utilities)
+  - Error handling throughout
+  - Clean, maintainable code structure
 
 ## Background Music (Oct 29, 2025)
 - **Auto-play background music**: Plays music.opus file on page load
