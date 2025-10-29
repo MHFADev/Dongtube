@@ -27,6 +27,11 @@ const User = sequelize.define('User', {
       isIn: [['user', 'vip', 'admin']]
     }
   },
+  vipExpiresAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    field: 'vip_expires_at'
+  },
   lastLogin: {
     type: DataTypes.DATE,
     allowNull: true,
