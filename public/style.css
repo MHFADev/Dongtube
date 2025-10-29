@@ -18,6 +18,52 @@ body {
   overflow-x: hidden;
 }
 
+/* Optimize for low-end devices - reduce animations if user prefers reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  #bg-canvas {
+    display: none !important;
+  }
+}
+
+/* Performance optimization - use GPU acceleration only for necessary elements */
+.logo,
+.btn-download,
+.btn-download-video,
+.quality-btn,
+.btn-action {
+  will-change: transform;
+}
+
+/* Reduce backdrop-filter for better performance on low-end devices */
+@supports (backdrop-filter: blur(10px)) {
+  .stats-bar,
+  .main-card,
+  .notification,
+  .history-section,
+  .footer {
+    backdrop-filter: blur(10px);
+  }
+}
+
+/* For very low-end devices, disable backdrop-filter completely */
+@media (max-width: 768px) and (max-height: 1024px) {
+  .stats-bar,
+  .main-card,
+  .notification,
+  .history-section,
+  .footer {
+    backdrop-filter: none;
+  }
+}
+
 /* Three.js Canvas Background */
 #bg-canvas {
   position: fixed;
@@ -42,8 +88,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(20, 20, 20, 0.85);
-  backdrop-filter: blur(20px);
+  background: rgba(20, 20, 20, 0.95);
   border: 1px solid rgba(255, 204, 0, 0.3);
   border-radius: 15px;
   padding: 20px 25px;
@@ -104,8 +149,7 @@ body {
 
 /* Main Card */
 .main-card {
-  background: rgba(20, 20, 20, 0.85);
-  backdrop-filter: blur(20px);
+  background: rgba(20, 20, 20, 0.95);
   border: 1px solid #ffcc00;
   border-radius: 20px;
   padding: 40px 30px;
