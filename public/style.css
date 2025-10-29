@@ -154,6 +154,110 @@ body.perf-medium .logo {
   animation-duration: 5s;
 }
 
+/* ============================
+   ANIMATION SIMPLIFICATION FOR LOW-END
+   ============================ */
+
+/* Reduce spinner animation complexity */
+body.perf-low .spinner,
+body.perf-potato .spinner {
+  animation-duration: 1s !important;
+}
+
+/* Simplify notification animations */
+body.perf-low .notification,
+body.perf-potato .notification {
+  transition: all 0.2s ease !important;
+}
+
+/* Reduce history item hover effects */
+body.perf-low .history-item:hover {
+  transform: translateX(2px) !important;
+}
+
+body.perf-potato .history-item:hover {
+  transform: none !important;
+}
+
+/* Simplify quality button effects */
+body.perf-low .quality-btn:hover,
+body.perf-potato .quality-btn:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Reduce progress bar glow */
+body.perf-low .progress-fill,
+body.perf-potato .progress-fill {
+  box-shadow: none !important;
+}
+
+/* Disable complex pseudo-element animations */
+body.perf-potato .endpoint::before,
+body.perf-potato .category-item::before,
+body.perf-potato .category-item::after,
+body.perf-potato .method::before {
+  display: none !important;
+}
+
+/* Simplify shake animation for low-end */
+body.perf-low .error-card {
+  animation-duration: 0.3s !important;
+}
+
+body.perf-potato .error-card {
+  animation: none !important;
+}
+
+/* Reduce slideUp/slideDown animation complexity */
+body.perf-low .result-card,
+body.perf-low .history-section,
+body.perf-low .stats-bar,
+body.perf-low .main-card {
+  animation-duration: 0.3s !important;
+}
+
+body.perf-potato .result-card,
+body.perf-potato .history-section,
+body.perf-potato .stats-bar,
+body.perf-potato .main-card {
+  animation-duration: 0.15s !important;
+}
+
+/* Optimize thumbnail loading */
+.thumbnail {
+  content-visibility: auto;
+  will-change: auto;
+}
+
+/* Passive event listeners optimization hint */
+* {
+  touch-action: manipulation;
+}
+
+/* Reduce repaints with transform-based animations */
+body.perf-low .stats:hover,
+body.perf-potato .stats:hover {
+  transform: translateY(-3px) !important;
+}
+
+/* Simplify button active states */
+body.perf-low .btn-download:active,
+body.perf-low .btn-download-video:active,
+body.perf-potato .btn-download:active,
+body.perf-potato .btn-download-video:active {
+  transform: scale(0.98) !important;
+}
+
+/* GPU acceleration hints for critical elements */
+.main-card,
+.result-card,
+.notification {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
 /* Three.js Canvas Background */
 #bg-canvas {
   position: fixed;
