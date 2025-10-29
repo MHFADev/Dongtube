@@ -2685,11 +2685,14 @@
         items: filtered.filter(ep => ep.category === cat)
       })).filter(group => group.items.length > 0);
 
-      // Store all rendered endpoints for lookup
+      // Store ALL endpoints for lookup (not just visible ones)
       renderedEndpoints = [];
       grouped.forEach(group => {
         renderedEndpoints.push(...group.items);
       });
+      
+      // Track which endpoints are actually rendered
+      const actuallyRenderedIds = [];
 
       // Render grouped sections
       container.innerHTML = grouped.map((group, groupIdx) => {
@@ -2713,6 +2716,7 @@
                 const methods = ep.method.split(',').map(m => m.trim());
                 const globalIdx = renderedEndpoints.indexOf(ep);
                 const id = `ep-${globalIdx}`;
+                actuallyRenderedIds.push(id);
                 
                 return `
                   <li class="endpoint-list-item">
@@ -2827,9 +2831,12 @@
         `;
       }).join('');
 
-      // Update code examples for all endpoints
-      renderedEndpoints.forEach((ep, idx) => {
-        updateCodeExamples(`ep-${idx}`);
+      // Update code examples only for actually rendered endpoints
+      actuallyRenderedIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          updateCodeExamples(id);
+        }
       });
     }
 
