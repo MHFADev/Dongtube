@@ -3892,9 +3892,13 @@ data = response.json()
 print(data)`;
       }
 
-      document.getElementById(`code-curl-${id}`).innerHTML = highlightSyntax(curlCode, 'curl');
-      document.getElementById(`code-js-${id}`).innerHTML = highlightSyntax(jsCode, 'js');
-      document.getElementById(`code-python-${id}`).innerHTML = highlightSyntax(pythonCode, 'python');
+      const curlEl = document.getElementById(`code-curl-${id}`);
+      const jsEl = document.getElementById(`code-js-${id}`);
+      const pythonEl = document.getElementById(`code-python-${id}`);
+      
+      if (curlEl) curlEl.innerHTML = highlightSyntax(curlCode, 'curl');
+      if (jsEl) jsEl.innerHTML = highlightSyntax(jsCode, 'js');
+      if (pythonEl) pythonEl.innerHTML = highlightSyntax(pythonCode, 'python');
     }
 
     function highlightSyntax(code, lang) {
