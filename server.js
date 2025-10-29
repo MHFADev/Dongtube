@@ -263,9 +263,6 @@ async function startServer() {
     // STEP 4: Load dynamic routes
     await loadRoutes();
     
-    // STEP 4.5: Sync all endpoints to database
-    await syncEndpointsToDatabase();
-    
     // STEP 5: Register 404 handler (MUST BE LAST!)
     console.log(chalk.cyan("⚙️  Registering error handlers...\n"));
     
@@ -290,7 +287,7 @@ async function startServer() {
     
     console.log(chalk.green("✓ Error handlers registered\n"));
     
-    // STEP 6: Start listening
+    // STEP 6: Start listening FIRST (before DB sync)
     const PORT = process.env.PORT || 5000;
     
     app.listen(PORT, '0.0.0.0', () => {
@@ -300,6 +297,13 @@ async function startServer() {
       console.log(chalk.cyan(`📚 API Docs: http://localhost:${PORT}/api/docs`));
       console.log(chalk.cyan(`📚 Debug: http://localhost:${PORT}/debug/routes`));
       console.log(chalk.yellow(`\n🔥 Test endpoint: http://localhost:${PORT}/api/test\n`));
+      
+      // STEP 6.5: Sync endpoints to database in background (after port is open)
+      syncEndpointsToDatabase().then(() => {
+        console.log(chalk.green("\n✅ Endpoint sync completed\n"));
+      }).catch(err => {
+        console.error(chalk.red("\n✗ Endpoint sync failed:"), err.message);
+      });
     });
     
   } catch (err) {
