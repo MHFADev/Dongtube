@@ -623,48 +623,16 @@
       border: 1px solid var(--border);
       border-radius: 12px;
       overflow: hidden;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      animation: fadeInUp 0.5s ease-out backwards;
       position: relative;
-    }
-
-    .endpoint::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 165, 0, 0.03), transparent);
-      transition: left 0.6s ease;
-      pointer-events: none;
-    }
-
-    .endpoint:hover::before {
-      left: 100%;
     }
 
     .endpoint:hover {
       border-color: #3A3A3A;
-      transform: translateX(6px) scale(1.01);
-      box-shadow: 0 6px 30px rgba(0, 0, 0, 0.4);
     }
 
     .endpoint.active {
       border-color: var(--primary);
-      box-shadow: 0 8px 32px rgba(255, 165, 0, 0.3);
       background: linear-gradient(135deg, var(--bg-card) 0%, rgba(255, 165, 0, 0.02) 100%);
-    }
-
-    .endpoint.active::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--primary), transparent);
-      animation: shimmer 2s ease-in-out infinite;
     }
 
     .endpoint-header {
@@ -702,35 +670,11 @@
       text-align: center;
       width: 90px;
       flex-shrink: 0;
-      position: relative;
-      overflow: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .method::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      background: var(--primary);
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      transition: width 0.4s ease, height 0.4s ease;
-      opacity: 0.3;
-    }
-
-    .endpoint:hover .method::before {
-      width: 100px;
-      height: 100px;
     }
 
     .endpoint.active .method {
       background: var(--primary);
       color: var(--bg-dark);
-      box-shadow: 0 0 15px rgba(255, 165, 0, 0.4);
-      animation: pulse 2s ease-in-out infinite;
     }
 
     .endpoint-info {
@@ -763,36 +707,26 @@
     .endpoint-arrow {
       color: var(--text-muted);
       font-size: 0.875rem;
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       flex-shrink: 0;
       width: 20px;
       text-align: center;
     }
 
     .endpoint.active .endpoint-arrow {
-      transform: rotate(180deg);
       color: var(--primary);
     }
 
-    /* Endpoint Body - Smooth Slide Animation */
+    /* Endpoint Body - No Animation */
     .endpoint-body {
-      max-height: 0;
-      opacity: 0;
-      overflow: hidden;
-      padding: 0 24px;
-      border-top: 1px solid transparent;
+      display: none;
       background: var(--bg-darker);
       max-width: 100%;
-      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-      transform: translateY(-10px);
     }
 
     .endpoint.active .endpoint-body {
-      max-height: 5000px;
-      opacity: 1;
+      display: block;
       padding: 24px;
-      border-top-color: var(--border);
-      transform: translateY(0);
+      border-top: 1px solid var(--border);
     }
     
     /* Make endpoint body more compact and readable */

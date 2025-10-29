@@ -8,30 +8,43 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Performance Optimizations (Oct 2025)
 
-The website has been optimized for low-end devices (RAM 2-4GB) with the following improvements:
+The website has been optimized for low-end devices (RAM 2-4GB) with comprehensive performance improvements:
+
+## 4-Tier Adaptive Performance System
+- **Automatic device detection**: High / Medium / Low / Potato tiers
+- **Smart scoring system**: Based on RAM, CPU cores, and lightweight benchmark (<5ms)
+- **iOS-friendly detection**: Avoids misclassifying modern iPhones as low-end
+- **Adaptive rendering**: Each tier receives optimized settings automatically
 
 ## Three.js Animation Optimizations
-- Reduced particle count from 20 to 19 (5% reduction as requested)
+- **High tier** (8GB+ RAM): 19 particles, full effects
+- **Medium tier** (4-8GB RAM): 12 particles, reduced effects
+- **Low tier** (2-4GB RAM): 6 particles (68% reduction), minimal effects
+- **Potato tier** (<2GB RAM): CSS-only fallback, Three.js disabled
+- Frame throttling (skip frames on low-end devices)
 - Disabled antialiasing for better GPU performance
-- Capped pixel ratio to 1.5 for low-end devices
+- Capped pixel ratio to 1.5-2 based on device tier
 - Set renderer to low-power mode
 - Auto-pause animation when browser tab is hidden (saves CPU/GPU)
 - Debounced window resize events (150ms delay)
 
 ## CSS & Rendering Optimizations
 - Added `prefers-reduced-motion` support - disables all animations for users who prefer reduced motion
-- Reduced backdrop-filter blur from 20px to 10px
-- Completely removed backdrop-filter on mobile devices (<768px)
-- Increased background opacity from 0.85 to 0.95 to reduce blur dependency
-- Added `will-change: transform` only to necessary elements
-- GPU acceleration optimized
-- **Endpoint Border Animation Optimized**:
-  - Changed transition from `all 0.4s` to specific properties at 0.2s (50% faster, more efficient)
-  - Removed box-shadow animation from border indicator (major GPU lag source)
-  - Simplified transform from `translateX(6px) scale(1.02)` to `translateX(4px)` only
-  - Removed box-shadow glow from active state
-  - Reduced gradient opacity in background highlight
-  - Result: Smooth, lag-free endpoint selection even on low-end devices
+- Completely removed backdrop-filter on mobile devices (<768px) - major performance killer
+- Increased background opacity from 0.85 to 0.95 to compensate for removed blur
+- Added CSS containment for better paint performance
+- `will-change` only applied during hover/active states (more efficient)
+- Optimized shadow effects reduced on low-tier devices
+- **ALL Endpoint Menu Animations REMOVED** (Oct 29, 2025):
+  - Removed ALL transitions from `.endpoint` elements
+  - Removed border sliding animation (::before pseudo-element)
+  - Removed hover transform (translateX + scale)
+  - Removed hover box-shadow animation
+  - Removed shimmer animation on active state (::after pseudo-element)
+  - Removed pulse animation on method badges
+  - Removed arrow rotation animation
+  - Changed endpoint body from slide animation to instant display:none/block
+  - Result: **ZERO LAG** when opening/closing endpoint menus, instant response
 
 ## Resource Loading Optimizations
 - Added `loading="lazy"` to all images (logo, thumbnails)
@@ -39,8 +52,18 @@ The website has been optimized for low-end devices (RAM 2-4GB) with the followin
 - Async font loading with print media trick
 - Font preconnect to googleapis
 
+## Social Media Integration (Oct 29, 2025)
+- **Open Graph tags**: Attractive preview cards on Facebook, WhatsApp, LinkedIn, Telegram
+- **Twitter Card tags**: Rich media cards when shared on Twitter/X
+- **SEO meta tags**: Improved search engine visibility
+- Preview images use existing logo.jpg asset
+- Implemented on both index.html (API docs) and download-tiktok.html
+
 ## Result
-Website now runs smoothly on devices with 2-4GB RAM without sacrificing visual quality (animations reduced by only 5% as requested).
+- Website runs smoothly on 2GB RAM phones with adaptive optimizations
+- Endpoint menu has ZERO lag - all animations removed
+- Beautiful social media previews when sharing links
+- Performance scales automatically based on device capabilities
 
 # System Architecture
 
