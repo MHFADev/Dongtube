@@ -7,36 +7,47 @@ let devicePerformance = 'high';
 function detectDevicePerformance() {
   let score = 0;
   
+  // Detect iOS devices (Safari always reports hardwareConcurrency as 2, and no deviceMemory)
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const isAndroid = /Android/i.test(navigator.userAgent);
+  
   // Check RAM (if available via deviceMemory API)
   if (navigator.deviceMemory) {
-    if (navigator.deviceMemory <= 2) score += 3;
+    if (navigator.deviceMemory <= 2) score += 4;
     else if (navigator.deviceMemory <= 4) score += 2;
     else if (navigator.deviceMemory <= 8) score += 1;
-  } else {
-    score += 1;
+  } else if (isAndroid) {
+    // Android without deviceMemory API is likely old/low-end
+    score += 3;
   }
   
-  // Check CPU cores
+  // Check CPU cores (but be careful with iOS which always reports 2)
   const cores = navigator.hardwareConcurrency || 4;
-  if (cores <= 2) score += 3;
-  else if (cores <= 4) score += 2;
-  else if (cores <= 6) score += 1;
+  if (!isIOS) {
+    // Only use core count for non-iOS devices
+    if (cores <= 2) score += 3;
+    else if (cores <= 4) score += 1;
+  }
   
-  // Check for mobile device
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  if (isMobile) score += 2;
+  // Check for very old or budget Android devices
+  if (isAndroid) {
+    // Check screen resolution as additional indicator
+    const screenArea = window.screen.width * window.screen.height;
+    if (screenArea < 800 * 600) score += 2;
+  }
   
-  // Check screen size (smaller screens = likely mobile/weaker device)
-  if (window.innerWidth < 768) score += 1;
+  // Run a quick performance benchmark
+  const perfScore = runQuickBenchmark();
+  score += perfScore;
   
-  // Determine performance level
-  if (score >= 6) {
+  // Determine performance level with adjusted thresholds
+  if (score >= 10) {
     devicePerformance = 'potato';
-    console.log('🥔 Potato mode activated - Maximum performance optimization');
-  } else if (score >= 4) {
+    console.log('🥔 Potato mode - Maximum optimization for very old devices');
+  } else if (score >= 6) {
     devicePerformance = 'low';
-    console.log('📱 Low-end mode - Performance optimized for 2GB RAM');
-  } else if (score >= 2) {
+    console.log('📱 Low-end mode - Optimized for 2GB RAM phones');
+  } else if (score >= 3) {
     devicePerformance = 'medium';
     console.log('💻 Medium mode - Balanced performance');
   } else {
@@ -48,6 +59,29 @@ function detectDevicePerformance() {
   document.body.classList.add(`perf-${devicePerformance}`);
   
   return devicePerformance;
+}
+
+function runQuickBenchmark() {
+  // Lightweight performance test: measure DOM manipulation speed
+  const startTime = performance.now();
+  
+  // Test 1: Simple arithmetic (very lightweight, ~0.1-2ms)
+  let result = 0;
+  for (let i = 0; i < 5000; i++) {
+    result += i * 0.5;
+  }
+  
+  const duration = performance.now() - startTime;
+  
+  // Score based on benchmark duration (adjusted for lighter test)
+  // Modern devices: <1ms → 0 points
+  // Medium devices: 1-3ms → 1 point
+  // Old devices: 3-5ms → 2 points
+  // Very old devices: >5ms → 4 points
+  if (duration > 5) return 4;
+  if (duration > 3) return 2;
+  if (duration > 1) return 1;
+  return 0;
 }
 
 // ============================
