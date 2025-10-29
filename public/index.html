@@ -2965,6 +2965,58 @@ print(data)`;
       return code;
     }
 
+    function extractMediaUrls(data) {
+      const mediaList = [];
+      
+      function scanObject(obj, depth = 0) {
+        if (depth > 5 || !obj || typeof obj !== 'object') return;
+        
+        for (const key in obj) {
+          const value = obj[key];
+          
+          if (typeof value === 'string') {
+            const lowerKey = key.toLowerCase();
+            const lowerValue = value.toLowerCase();
+            
+            if ((lowerKey.includes('image') || lowerKey.includes('thumbnail') || lowerKey.includes('cover') || lowerKey.includes('photo') || lowerKey.includes('picture')) && 
+                (lowerValue.includes('http') && (lowerValue.includes('.jpg') || lowerValue.includes('.jpeg') || lowerValue.includes('.png') || lowerValue.includes('.gif') || lowerValue.includes('.webp')))) {
+              mediaList.push({ type: 'image', url: value, key: key });
+            }
+            else if ((lowerKey.includes('video') || lowerKey.includes('play') || lowerKey.includes('wmplay') || lowerKey.includes('hdplay')) && 
+                     lowerValue.includes('http') && (lowerValue.includes('.mp4') || lowerValue.includes('video') || lowerValue.includes('.m3u8'))) {
+              mediaList.push({ type: 'video', url: value, key: key });
+            }
+            else if ((lowerKey.includes('audio') || lowerKey.includes('music') || lowerKey.includes('song') || lowerKey.includes('download') || lowerKey.includes('mp3')) && 
+                     lowerValue.includes('http') && (lowerValue.includes('.mp3') || lowerValue.includes('.m4a') || lowerValue.includes('.wav') || lowerValue.includes('audio'))) {
+              mediaList.push({ type: 'audio', url: value, key: key });
+            }
+            else if (lowerValue.match(/^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i)) {
+              mediaList.push({ type: 'image', url: value, key: key });
+            }
+            else if (lowerValue.match(/^https?:\/\/.+\.(mp4|webm|mov)(\?.*)?$/i)) {
+              mediaList.push({ type: 'video', url: value, key: key });
+            }
+            else if (lowerValue.match(/^https?:\/\/.+\.(mp3|m4a|wav|ogg|opus)(\?.*)?$/i)) {
+              mediaList.push({ type: 'audio', url: value, key: key });
+            }
+          } else if (Array.isArray(value)) {
+            value.forEach(item => scanObject(item, depth + 1));
+          } else if (typeof value === 'object') {
+            scanObject(value, depth + 1);
+          }
+        }
+      }
+      
+      scanObject(data);
+      
+      const uniqueUrls = new Set();
+      return mediaList.filter(media => {
+        if (uniqueUrls.has(media.url)) return false;
+        uniqueUrls.add(media.url);
+        return true;
+      });
+    }
+
     async function execute(id, path, isBinary) {
       const el = document.getElementById(id);
       const resultEl = document.getElementById(`result-${id}`);
@@ -3024,16 +3076,64 @@ print(data)`;
               <strong>Status:</strong> ${res.status} ${res.statusText}<br>
               <strong>URL:</strong> ${url}
             </div>
-            <video controls><source src="${vidUrl}" type="${contentType}"></video>
+            <video controls style="max-width: 100%; border-radius: 8px;"><source src="${vidUrl}" type="${contentType}"></video>
           `;
-        } else {
-          const data = await res.json();
+        } else if (contentType && (contentType.includes('audio') || contentType.includes('mpeg') || contentType.includes('mp3'))) {
+          const blob = await res.blob();
+          const audioUrl = URL.createObjectURL(blob);
           contentEl.innerHTML = `
             <div class="result-meta">
               <strong>Method:</strong> ${method}<br>
               <strong>Status:</strong> ${res.status} ${res.statusText}<br>
               <strong>URL:</strong> ${url}
             </div>
+            <div style="margin-top: 12px; padding: 16px; background: var(--bg-card); border-radius: 8px; border: 1px solid var(--border);">
+              <div style="margin-bottom: 8px; font-size: 0.875rem; color: var(--text); font-weight: 600;">🎵 Audio Preview</div>
+              <audio controls style="width: 100%;" src="${audioUrl}"></audio>
+            </div>
+          `;
+        } else {
+          const data = await res.json();
+          
+          let previewHTML = '';
+          if (data.success && data.data) {
+            const mediaUrls = extractMediaUrls(data.data);
+            if (mediaUrls.length > 0) {
+              previewHTML = '<div style="margin-top: 16px; padding: 16px; background: rgba(255, 165, 0, 0.05); border-radius: 8px; border: 1px solid rgba(255, 165, 0, 0.2);">';
+              previewHTML += '<div style="font-size: 0.875rem; font-weight: 600; color: var(--primary); margin-bottom: 12px;">📺 Media Preview</div>';
+              
+              mediaUrls.forEach(media => {
+                if (media.type === 'image') {
+                  previewHTML += `<div style="margin-bottom: 12px;">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">🖼️ Image</div>
+                    <img src="${media.url}" style="max-width: 100%; border-radius: 8px; border: 1px solid var(--border);" />
+                  </div>`;
+                } else if (media.type === 'video') {
+                  previewHTML += `<div style="margin-bottom: 12px;">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">🎬 Video</div>
+                    <video controls style="max-width: 100%; border-radius: 8px; border: 1px solid var(--border);">
+                      <source src="${media.url}" type="video/mp4">
+                    </video>
+                  </div>`;
+                } else if (media.type === 'audio') {
+                  previewHTML += `<div style="margin-bottom: 12px;">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">🎵 Audio</div>
+                    <audio controls style="width: 100%;" src="${media.url}"></audio>
+                  </div>`;
+                }
+              });
+              
+              previewHTML += '</div>';
+            }
+          }
+          
+          contentEl.innerHTML = `
+            <div class="result-meta">
+              <strong>Method:</strong> ${method}<br>
+              <strong>Status:</strong> ${res.status} ${res.statusText}<br>
+              <strong>URL:</strong> ${url}
+            </div>
+            ${previewHTML}
             <pre>${JSON.stringify(data, null, 2)}</pre>
           `;
         }
@@ -3117,7 +3217,30 @@ print(data)`;
     
     let isPlaying = false;
 
-    bgMusic.volume = 0.7;
+    bgMusic.volume = 0.5;
+    
+    function autoPlayMusic() {
+      bgMusic.play().then(() => {
+        if (vinylDisc) vinylDisc.classList.add('spinning');
+        if (vinylDiscMobile) vinylDiscMobile.classList.add('spinning');
+        if (playPauseIcon) playPauseIcon.innerHTML = '<path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>';
+        if (playPauseIconMobile) playPauseIconMobile.innerHTML = '<path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>';
+        isPlaying = true;
+      }).catch(err => {
+        console.log('Autoplay prevented by browser. User interaction required.');
+      });
+    }
+    
+    document.addEventListener('click', function autoplayOnInteraction() {
+      if (!isPlaying) {
+        autoPlayMusic();
+      }
+      document.removeEventListener('click', autoplayOnInteraction);
+    }, { once: true });
+    
+    setTimeout(() => {
+      autoPlayMusic();
+    }, 500);
 
     function togglePlayPause() {
       if (isPlaying) {
