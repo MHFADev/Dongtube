@@ -1695,11 +1695,7 @@
         }
       });
 
-      const epIndex = parseInt(id.replace('ep-', ''));
-      const endpoint = renderedEndpoints[epIndex];
-      if (!endpoint) return;
-
-      const path = endpoint.path;
+      const path = el.querySelector('.endpoint-path').textContent;
       const url = `${API_BASE}${path}`;
 
       // cURL
