@@ -151,6 +151,7 @@ router.get('/auth/me', authenticate, async (req, res) => {
         id: req.user.id,
         email: req.user.email,
         role: req.user.role,
+        vipExpiresAt: req.user.vipExpiresAt,
         lastLogin: req.user.lastLogin
       }
     });
@@ -158,6 +159,52 @@ router.get('/auth/me', authenticate, async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Failed to get user info'
+    });
+  }
+});
+
+router.post('/auth/refresh-token', authenticate, async (req, res) => {
+  try {
+    const freshUser = await User.findByPk(req.user.id, {
+      attributes: ['id', 'email', 'role', 'vipExpiresAt', 'lastLogin']
+    });
+
+    if (!freshUser) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    const newToken = generateToken(freshUser);
+
+    res.cookie('token', newToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+
+    console.log(`🔄 Token refreshed for user ${freshUser.email} - Current role: ${freshUser.role}`);
+
+    res.json({
+      success: true,
+      message: 'Token refreshed successfully with latest user data',
+      user: {
+        id: freshUser.id,
+        email: freshUser.email,
+        role: freshUser.role,
+        vipExpiresAt: freshUser.vipExpiresAt,
+        lastLogin: freshUser.lastLogin
+      },
+      token: newToken,
+      roleUpdated: req.user.role !== freshUser.role
+    });
+  } catch (error) {
+    console.error('Refresh token error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to refresh token'
     });
   }
 });

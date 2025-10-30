@@ -48,9 +48,13 @@ router.put('/admin/users/:id/role', authenticate, authorize('admin'), async (req
 
     await user.update({ role });
 
+    console.log(`👤 ADMIN: Updated user ${user.email} role to ${role}`);
+
     res.json({
       success: true,
       message: 'User role updated successfully',
+      refreshTokenRequired: true,
+      instruction: 'User should call POST /auth/refresh-token to get updated access immediately',
       user: {
         id: user.id,
         email: user.email,
@@ -115,9 +119,13 @@ router.post('/admin/users/:id/grant-vip', authenticate, authorize('admin'), asyn
       vipExpiresAt: expiresAt 
     });
 
+    console.log(`⭐ ADMIN: Granted VIP access to ${user.email} until ${expiresAt || 'permanent'}`);
+
     res.json({
       success: true,
       message: 'VIP access granted successfully',
+      refreshTokenRequired: true,
+      instruction: 'User should call POST /auth/refresh-token to activate VIP access immediately',
       user: {
         id: user.id,
         email: user.email,
@@ -233,9 +241,13 @@ router.post('/admin/users/:id/revoke-vip', authenticate, authorize('admin'), asy
       vipExpiresAt: null 
     });
 
+    console.log(`🚫 ADMIN: Revoked VIP access from ${user.email}`);
+
     res.json({
       success: true,
       message: 'VIP access revoked successfully',
+      refreshTokenRequired: true,
+      instruction: 'User should call POST /auth/refresh-token to apply changes immediately',
       user: {
         id: user.id,
         email: user.email,

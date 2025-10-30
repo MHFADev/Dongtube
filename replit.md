@@ -82,6 +82,18 @@ Preferred communication style: Simple, everyday language.
 - **Caching Strategy**: Implements in-memory Map-based caching with TTL for specific data (e.g., news endpoints) to reduce database queries and improve performance.
 - **Background Music**: Auto-plays background music with a visual vinyl disc animation and volume controls, starting on page load or first user interaction.
 - **Security**: Admin routes are protected by authentication, authorization middleware, JWT tokens, role-based access control (RBAC), and bcrypt password hashing.
+- **Instant VIP Access System** (Added: Oct 30, 2025):
+  - **Token Refresh Endpoint**: `/auth/refresh-token` (POST) allows users to immediately get updated access after role changes without logout/login
+  - **Real-Time Database Check**: On every request, middleware fetches latest user role directly from database, ensuring current VIP status is always respected
+  - **Admin Notifications**: When admin changes user role, response includes `refreshTokenRequired: true` flag and instructions for instant activation
+  - **Automatic Role Detection**: Token refresh endpoint compares old vs new role and returns `roleUpdated: true` when role has changed
+  - **Zero Wait Time**: Users can access VIP features immediately after calling refresh endpoint, no cache delays or logout required
+  - **How It Works**:
+    1. Admin changes user role from 'user' to 'vip' via `/admin/users/:id/role` or `/admin/users/:id/grant-vip`
+    2. Admin panel receives response with `refreshTokenRequired: true`
+    3. User (or admin panel) calls `POST /auth/refresh-token` with current token
+    4. User receives new token with updated role, instant VIP access granted
+  - **Frontend Integration**: Admin panel can automatically notify user or trigger refresh on their behalf
 - **Indonesian Primbon (Fortune-Telling) Services** (Added: Oct 30, 2025):
   - **Name Meaning Analysis**: Interprets the spiritual meaning and characteristics of Indonesian names
   - **Name Compatibility**: Checks relationship compatibility between two names
