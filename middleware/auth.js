@@ -73,7 +73,7 @@ export const authorize = (...allowedRoles) => {
 
 let vipEndpointsCache = null;
 let cacheTimestamp = 0;
-const CACHE_DURATION = 60000;
+const CACHE_DURATION = 5000;
 
 export const checkVIPAccess = async (req, res, next) => {
   try {
