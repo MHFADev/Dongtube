@@ -9,6 +9,7 @@ import chokidar from "chokidar";
 import { initDatabase, VIPEndpoint, User } from "./models/index.js";
 import authRoutes from "./routes/auth.js";
 import adminRoutes from "./routes/admin.js";
+import sseRoutes from "./routes/sse.js";
 import { checkVIPAccess, optionalAuth } from "./middleware/auth.js";
 import RouteManager from "./services/RouteManager.js";
 
@@ -144,7 +145,9 @@ async function startServer() {
     console.log(chalk.cyan("🔐 Registering authentication routes...\n"));
     app.use(authRoutes);
     app.use(adminRoutes);
+    app.use(sseRoutes);
     console.log(chalk.green("✓ Auth routes registered\n"));
+    console.log(chalk.cyan("📡 SSE real-time updates enabled\n"));
     
     // STEP 2: Register core routes
     console.log(chalk.cyan("⚙️  Registering core routes...\n"));

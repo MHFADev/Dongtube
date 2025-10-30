@@ -1,6 +1,7 @@
 import express from 'express';
 import { User, VIPEndpoint } from '../models/index.js';
 import { authenticate, authorize, refreshVIPCache } from '../middleware/auth.js';
+import { roleChangeEmitter } from '../services/EventEmitter.js';
 
 const router = express.Router();
 
@@ -46,15 +47,19 @@ router.put('/admin/users/:id/role', authenticate, authorize('admin'), async (req
       });
     }
 
+    const oldRole = user.role;
     await user.update({ role });
 
-    console.log(`👤 ADMIN: Updated user ${user.email} role to ${role}`);
+    console.log(`👤 ADMIN: Updated user ${user.email} role from ${oldRole} to ${role}`);
+    
+    roleChangeEmitter.notifyRoleChange(user.id, oldRole, role, user.vipExpiresAt);
 
     res.json({
       success: true,
-      message: 'User role updated successfully',
+      message: 'User role updated successfully - Real-time notification sent!',
       refreshTokenRequired: true,
-      instruction: 'User should call POST /auth/refresh-token to get updated access immediately',
+      realtimeUpdate: true,
+      instruction: 'User will be automatically notified if connected to SSE stream',
       user: {
         id: user.id,
         email: user.email,
@@ -120,12 +125,15 @@ router.post('/admin/users/:id/grant-vip', authenticate, authorize('admin'), asyn
     });
 
     console.log(`⭐ ADMIN: Granted VIP access to ${user.email} until ${expiresAt || 'permanent'}`);
+    
+    roleChangeEmitter.notifyVIPGranted(user.id, user.email, expiresAt);
 
     res.json({
       success: true,
-      message: 'VIP access granted successfully',
+      message: 'VIP access granted successfully - Real-time notification sent!',
       refreshTokenRequired: true,
-      instruction: 'User should call POST /auth/refresh-token to activate VIP access immediately',
+      realtimeUpdate: true,
+      instruction: 'User will be automatically notified and access activated in real-time',
       user: {
         id: user.id,
         email: user.email,
@@ -242,12 +250,15 @@ router.post('/admin/users/:id/revoke-vip', authenticate, authorize('admin'), asy
     });
 
     console.log(`🚫 ADMIN: Revoked VIP access from ${user.email}`);
+    
+    roleChangeEmitter.notifyVIPRevoked(user.id, user.email);
 
     res.json({
       success: true,
-      message: 'VIP access revoked successfully',
+      message: 'VIP access revoked successfully - Real-time notification sent!',
       refreshTokenRequired: true,
-      instruction: 'User should call POST /auth/refresh-token to apply changes immediately',
+      realtimeUpdate: true,
+      instruction: 'User will be automatically notified in real-time',
       user: {
         id: user.id,
         email: user.email,
