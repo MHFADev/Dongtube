@@ -694,4 +694,75 @@ router.get('/admin/endpoints/category/:category', authenticate, authorize('admin
   }
 });
 
+router.post('/admin/reload/trigger', authenticate, authorize('admin'), async (req, res) => {
+  try {
+    const { routeManager } = await import('../server.js');
+    
+    console.log('\n🔄 Admin triggered manual route reload...\n');
+    
+    const result = await routeManager.reload();
+    
+    if (result.success) {
+      return res.json({
+        success: true,
+        message: 'Routes reloaded successfully',
+        duration: result.duration,
+        totalEndpoints: result.totalEndpoints,
+        timestamp: new Date().toISOString()
+      });
+    } else if (result.skipped) {
+      return res.status(409).json({
+        success: false,
+        message: 'Reload already in progress',
+        skipped: true
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: 'Route reload failed',
+        error: result.error
+      });
+    }
+  } catch (error) {
+    console.error('Manual reload error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to trigger route reload',
+      details: error.message
+    });
+  }
+});
+
+router.get('/admin/reload/status', authenticate, authorize('admin'), async (req, res) => {
+  try {
+    const { routeManager } = await import('../server.js');
+    
+    const status = routeManager.getStatus();
+    
+    res.json({
+      success: true,
+      status: {
+        currentStatus: status.status,
+        isReloading: status.isReloading,
+        totalEndpoints: status.totalEndpoints,
+        lastReloadTime: status.lastReloadTime,
+        lastError: status.lastError,
+        statistics: {
+          totalReloads: status.stats.totalReloads,
+          successfulReloads: status.stats.successfulReloads,
+          failedReloads: status.stats.failedReloads,
+          lastReloadDuration: status.stats.lastReloadDuration
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Get reload status error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch reload status',
+      details: error.message
+    });
+  }
+});
+
 export default router;

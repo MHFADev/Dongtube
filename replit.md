@@ -10,6 +10,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Core Design Principles
 - **Route Auto-Loading**: Dynamically discovers and registers route modules from the `routes/` directory at startup, promoting modularity and simplifying endpoint management.
+- **Hot-Reload System** (Added: Oct 30, 2025):
+  - **Zero-Downtime Reloads**: Automatically detects changes to route files and reloads them without restarting the server
+  - **RouteManager Service**: Centralized service class (`services/RouteManager.js`) managing all route operations with mutex locking to prevent concurrent reloads
+  - **File Watcher**: Chokidar-based file watcher monitors `routes/` directory for add/change/delete events with 500ms debouncing
+  - **Atomic Router Swapping**: Uses double-buffer technique to build new router in isolation, then swap atomically to ensure zero downtime
+  - **Database Synchronization**: Automatically syncs endpoint metadata to VIPEndpoint table with Sequelize transaction support and rollback on failure
+  - **Admin Control**: Endpoints at `/admin/reload/trigger` (POST) and `/admin/reload/status` (GET) for manual reload control and status monitoring
+  - **Status Tracking**: Comprehensive statistics including total reloads, success/fail counts, last reload duration, and current status (ready/loading/error)
+  - **Cache Integration**: Automatically refreshes VIP cache after route reload to maintain consistency with database
+  - **Validation**: Validates module exports before loading to prevent broken routes from crashing the server
 - **Optimized for Low-End Devices**: Implements a 4-tier adaptive performance system based on device detection (RAM, CPU), dynamically adjusting animations (Three.js particles), CSS effects (backdrop-filter removal on mobile, optimized shadows), and resource loading (lazy loading, `defer` attributes) to ensure smooth performance on devices with 2-4GB RAM.
 - **Centralized HTTP Client**: A reusable `HTTPClient` (wrapping Axios) provides automatic retry logic, consistent timeouts, and standard User-Agent headers, enhancing reliability for web scraping across various routes.
 - **Validation Layer**: A centralized utility for URL validation (including domain checking) and empty string detection, ensuring consistent security and request integrity.

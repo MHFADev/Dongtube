@@ -3,13 +3,14 @@ import express from "express";
 import chalk from "chalk";
 import path from "path";
 import { fileURLToPath } from "url";
-import { readdirSync } from "fs";
 import cookieParser from "cookie-parser";
 import jwt from "jsonwebtoken";
+import chokidar from "chokidar";
 import { initDatabase, VIPEndpoint, User } from "./models/index.js";
 import authRoutes from "./routes/auth.js";
 import adminRoutes from "./routes/admin.js";
 import { checkVIPAccess, optionalAuth } from "./middleware/auth.js";
+import RouteManager from "./services/RouteManager.js";
 
 if (!process.env.JWT_SECRET) {
   console.error(chalk.bgRed.white('\n ✗ FATAL: JWT_SECRET environment variable is required but not set! \n'));
@@ -49,123 +50,81 @@ app.use('/asset', express.static(path.join(__dirname, "asset")));
 // Cache
 const cache = new Map();
 
-// ==================== AUTO-LOAD ROUTES ====================
-let allEndpoints = [];
+// ==================== ROUTE MANAGER ====================
+const routesPath = path.join(__dirname, "routes");
+const routeManager = new RouteManager(routesPath);
 
 app.use(optionalAuth);
 
-async function loadRoutes() {
-  const routesPath = path.join(__dirname, "routes");
-  const routeFiles = readdirSync(routesPath).filter(file => file.endsWith(".js"));
-  
-  console.log(chalk.cyan("\n🔄 Loading routes...\n"));
-  
-  for (const file of routeFiles) {
-    try {
-      const routePath = path.join(routesPath, file);
-      const route = await import(`file://${routePath}?t=${Date.now()}`);
-      
-      console.log(chalk.yellow(`  🔍 Debug ${file}:`));
-      console.log(chalk.gray(`     - Has default export: ${!!route.default}`));
-      console.log(chalk.gray(`     - Default type: ${typeof route.default}`));
-      
-      // Register router
-      if (route.default && typeof route.default === 'function') {
-        app.use(route.default);
-        console.log(chalk.green(`  ✓ Router registered: ${file}`));
-        
-        // Log routes
-        if (route.default.stack) {
-          route.default.stack.forEach(layer => {
-            if (layer.route) {
-              const methods = Object.keys(layer.route.methods).join(', ').toUpperCase();
-              console.log(chalk.blue(`    → ${methods} ${layer.route.path}`));
-            }
-          });
-        }
-      }
-      
-      // Collect metadata
-      if (route.metadata) {
-        if (Array.isArray(route.metadata)) {
-          allEndpoints.push(...route.metadata);
-        } else {
-          allEndpoints.push(route.metadata);
-        }
-        console.log(chalk.green(`  ✓ Metadata collected`));
-      }
-      
-    } catch (error) {
-      console.error(chalk.red(`  ✗ Failed: ${file}`), error.message);
+// ==================== FILE WATCHER ====================
+let debounceTimer = null;
+const DEBOUNCE_DELAY = 500;
+
+function startFileWatcher() {
+  console.log(chalk.cyan('\n👁️  Starting file watcher for hot-reload...\n'));
+
+  const watcher = chokidar.watch(routesPath, {
+    ignored: /(^|[\/\\])\../,
+    persistent: true,
+    ignoreInitial: true,
+    awaitWriteFinish: {
+      stabilityThreshold: 300,
+      pollInterval: 100
     }
+  });
+
+  watcher
+    .on('add', (filePath) => {
+      if (!filePath.endsWith('.js')) return;
+      console.log(chalk.green(`\n📄 File added: ${path.basename(filePath)}`));
+      scheduleReload('add', filePath);
+    })
+    .on('change', (filePath) => {
+      if (!filePath.endsWith('.js')) return;
+      console.log(chalk.yellow(`\n📝 File changed: ${path.basename(filePath)}`));
+      scheduleReload('change', filePath);
+    })
+    .on('unlink', (filePath) => {
+      if (!filePath.endsWith('.js')) return;
+      console.log(chalk.red(`\n🗑️  File deleted: ${path.basename(filePath)}`));
+      scheduleReload('unlink', filePath);
+    })
+    .on('error', (error) => {
+      console.error(chalk.red('\n✗ File watcher error:'), error.message);
+    })
+    .on('ready', () => {
+      console.log(chalk.green('✓ File watcher is ready and monitoring routes/\n'));
+    });
+
+  function scheduleReload(event, filePath) {
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
+
+    debounceTimer = setTimeout(async () => {
+      console.log(chalk.cyan(`\n⚡ Triggering hot-reload (event: ${event})...\n`));
+      
+      try {
+        const result = await routeManager.reload();
+        
+        if (result.success) {
+          console.log(chalk.bgGreen.black(`\n ✓ Hot-reload successful in ${result.duration}ms `));
+          console.log(chalk.green(`   Total endpoints: ${result.totalEndpoints}\n`));
+        } else if (result.skipped) {
+          console.log(chalk.yellow('\n⏸️  Hot-reload skipped (already in progress)\n'));
+        } else {
+          console.log(chalk.bgRed.white('\n ✗ Hot-reload failed '));
+          console.log(chalk.red(`   Error: ${result.error}\n`));
+        }
+      } catch (error) {
+        console.error(chalk.red('\n✗ Hot-reload error:'), error.message);
+      }
+    }, DEBOUNCE_DELAY);
   }
-  
-  console.log(chalk.cyan(`\n✅ Total ${allEndpoints.length} endpoints loaded\n`));
 }
 
-async function syncEndpointsToDatabase() {
-  try {
-    console.log(chalk.cyan("🔄 Syncing endpoints to database...\n"));
-    
-    let created = 0;
-    let updated = 0;
-    let skipped = 0;
-    
-    for (const endpoint of allEndpoints) {
-      try {
-        const path = endpoint.path || endpoint.route;
-        const method = endpoint.method || 'GET';
-        
-        if (!path) {
-          skipped++;
-          continue;
-        }
-        
-        const [record, isCreated] = await VIPEndpoint.findOrCreate({
-          where: { path, method },
-          defaults: {
-            path,
-            method,
-            name: endpoint.name || path,
-            description: endpoint.description || endpoint.desc || null,
-            category: endpoint.category || null,
-            parameters: endpoint.parameters || endpoint.params || null,
-            requiresVIP: false
-          }
-        });
-        
-        if (isCreated) {
-          created++;
-          console.log(chalk.green(`  ✓ Created: ${method} ${path}`));
-        } else {
-          await record.update({
-            name: endpoint.name || record.name || path,
-            description: endpoint.description || endpoint.desc || record.description,
-            category: endpoint.category || record.category,
-            parameters: endpoint.parameters || endpoint.params || record.parameters
-          });
-          updated++;
-          console.log(chalk.blue(`  ↻ Updated: ${method} ${path}`));
-        }
-        
-      } catch (err) {
-        console.error(chalk.red(`  ✗ Error syncing endpoint:`), err.message);
-        skipped++;
-      }
-    }
-    
-    console.log(chalk.cyan(`\n📊 Sync Summary:`));
-    console.log(chalk.green(`  ✓ Created: ${created}`));
-    console.log(chalk.blue(`  ↻ Updated: ${updated}`));
-    console.log(chalk.yellow(`  ⊘ Skipped: ${skipped}`));
-    console.log(chalk.cyan(`  ━ Total: ${allEndpoints.length}\n`));
-    
-    return true;
-  } catch (error) {
-    console.error(chalk.red("✗ Failed to sync endpoints:"), error.message);
-    return false;
-  }
-}
+// Export routeManager for admin endpoints
+export { routeManager };
 
 // ==================== START SERVER ====================
 async function startServer() {
@@ -195,7 +154,8 @@ async function startServer() {
         status: "ok",
         uptime: Math.floor(process.uptime()),
         timestamp: new Date().toISOString(),
-        total_endpoints: allEndpoints.length
+        total_endpoints: routeManager.getAllEndpoints().length,
+        routeManager: routeManager.getStatus()
       });
     });
 
@@ -204,6 +164,7 @@ async function startServer() {
     });
 
     app.get("/api", (req, res) => {
+      const allEndpoints = routeManager.getAllEndpoints();
       res.json({
         name: "Dongtube API Server",
         version: "2.0.0",
@@ -217,6 +178,8 @@ async function startServer() {
     });
 
     app.get("/api/docs", async (req, res) => {
+      const allEndpoints = routeManager.getAllEndpoints();
+      
       // Check user authentication and role
       let hasPremiumAccess = false;
       try {
@@ -349,8 +312,22 @@ async function startServer() {
     app.use(checkVIPAccess);
     console.log(chalk.green("✓ VIP middleware active\n"));
     
-    // STEP 4: Load dynamic routes
-    await loadRoutes();
+    // STEP 4: Mount dynamic router proxy
+    console.log(chalk.cyan("🔧 Mounting dynamic route proxy...\n"));
+    app.use((req, res, next) => {
+      const activeRouter = routeManager.getActiveRouter();
+      if (activeRouter) {
+        activeRouter(req, res, next);
+      } else {
+        next();
+      }
+    });
+    console.log(chalk.green("✓ Dynamic router proxy mounted\n"));
+    
+    // STEP 4.5: Initial route load
+    console.log(chalk.cyan("📦 Loading initial routes...\n"));
+    await routeManager.reload();
+    console.log(chalk.green("✓ Initial routes loaded\n"));
     
     // STEP 5: Register 404 handler (MUST BE LAST!)
     console.log(chalk.cyan("⚙️  Registering error handlers...\n"));
@@ -381,18 +358,14 @@ async function startServer() {
     
     app.listen(PORT, '0.0.0.0', () => {
       console.log(chalk.bgGreen.black(`\n ✓ Server running on port ${PORT} `));
-      console.log(chalk.bgBlue.white(` ℹ Total endpoints: ${allEndpoints.length} `));
+      console.log(chalk.bgBlue.white(` ℹ Total endpoints: ${routeManager.getAllEndpoints().length} `));
       console.log(chalk.cyan(`\n📚 Home: http://localhost:${PORT}`));
       console.log(chalk.cyan(`📚 API Docs: http://localhost:${PORT}/api/docs`));
       console.log(chalk.cyan(`📚 Debug: http://localhost:${PORT}/debug/routes`));
       console.log(chalk.yellow(`\n🔥 Test endpoint: http://localhost:${PORT}/api/test\n`));
       
-      // STEP 6.5: Sync endpoints to database in background (after port is open)
-      syncEndpointsToDatabase().then(() => {
-        console.log(chalk.green("\n✅ Endpoint sync completed\n"));
-      }).catch(err => {
-        console.error(chalk.red("\n✗ Endpoint sync failed:"), err.message);
-      });
+      // STEP 6.5: Start file watcher for hot-reload
+      startFileWatcher();
     });
     
   } catch (err) {
