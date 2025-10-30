@@ -31,6 +31,18 @@ Preferred communication style: Simple, everyday language.
 - **Enhanced Media Preview System**: Features a modern glassmorphism UI with animated gradients, responsive grid layouts, custom audio player with waveform animation, image gallery, and fullscreen modal for media display. Includes advanced media type detection and actions like download and URL copy.
 - **Accessibility**: Includes `prefers-reduced-motion` support.
 - **Social Media Integration**: Implements Open Graph and Twitter Card tags, along with SEO meta tags, for improved shareability and search engine visibility.
+- **Smart VIP Popup Logic** (Updated: Oct 30, 2025):
+  - **Authentication-Aware**: VIP popup differentiates between unauthenticated users (shows login prompt) and authenticated non-VIP users (shows upgrade prompt)
+  - **Context-Sensitive Messaging**: Displays personalized messages based on user authentication state, preventing redundant login prompts for already-authenticated users
+  - **Composite Auth Check**: Uses both backend `isAuthenticated` flag and frontend `currentUser` state for robust authentication detection
+- **UI Layer Management** (Fixed: Oct 30, 2025):
+  - **Proper Z-Index Hierarchy**: Auth status bar (z-index 999) positioned below hamburger menu (z-index 1000), ensuring interactive elements remain clickable
+  - **No Overlapping Issues**: Fixed header bar covering mobile navigation controls
+- **Tab-Aware Audio Control** (Added: Oct 30, 2025):
+  - **Automatic Pause/Resume**: Background music automatically pauses when user switches tabs or minimizes browser
+  - **Visibility API Integration**: Uses `document.visibilitychange` event to detect tab activity status
+  - **Seamless Experience**: Music resumes automatically when user returns to the tab, maintaining previous playback state
+  - **Animation Sync**: Vinyl disc spinning animation syncs with audio playback state across tab visibility changes
 - **Powerful Admin Panel** (Updated: Oct 30, 2025):
   - **Endpoint Management Dashboard**: Full-featured interface (`/admin-panel.html`) for managing all API endpoints with complete CRUD operations
   - **Bulk Operations**: Select multiple endpoints with checkboxes and batch update their VIP/Free status simultaneously
