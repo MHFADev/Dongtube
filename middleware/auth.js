@@ -101,11 +101,13 @@ export const checkVIPAccess = async (req, res, next) => {
     const currentTime = Date.now();
     
     if (!vipEndpointsCache || (currentTime - cacheTimestamp) > CACHE_DURATION) {
+      const wasNull = !vipEndpointsCache;
       vipEndpointsCache = await VIPEndpoint.findAll({
         where: { requiresVIP: true },
         attributes: ['path', 'method', 'name', 'description']
       });
       cacheTimestamp = currentTime;
+      console.log(`📥 VIP Cache ${wasNull ? 'loaded' : 'refreshed'}: ${vipEndpointsCache.length} VIP endpoint(s) in cache`);
     }
 
     const requestPath = req.path;
@@ -248,6 +250,8 @@ export const optionalAuth = async (req, res, next) => {
 };
 
 export const refreshVIPCache = () => {
+  const oldCacheSize = vipEndpointsCache ? vipEndpointsCache.length : 0;
   vipEndpointsCache = null;
   cacheTimestamp = 0;
+  console.log(`🔄 VIP Cache cleared! Previous cache had ${oldCacheSize} VIP endpoint(s). Next request will reload from database.`);
 };

@@ -516,9 +516,14 @@ router.put('/admin/endpoints/:id/toggle-premium', authenticate, authorize('admin
       });
     }
     
+    const oldStatus = endpoint.requiresVIP;
     await endpoint.update({
       requiresVIP: !endpoint.requiresVIP
     });
+    
+    const newStatus = endpoint.requiresVIP;
+    console.log(`\n🔧 ADMIN: Toggled endpoint "${endpoint.path}" (${endpoint.method})`);
+    console.log(`   Status changed: ${oldStatus ? 'VIP' : 'FREE'} → ${newStatus ? 'VIP' : 'FREE'}`);
     
     refreshVIPCache();
     
