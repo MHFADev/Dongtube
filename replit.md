@@ -1,6 +1,6 @@
 # Overview
 
-Dongtube API is a modular Express.js server that aggregates various third-party content services. It features an auto-loading architecture for route modules, simplifying endpoint registration. The API supports downloading media from social platforms (TikTok, Instagram, YouTube, Facebook, Spotify), generating AI images, scraping anime/manga sites, fetching news, processing images, and traditional Indonesian fortune-telling (primbon) services. The project aims to provide a unified, performant, and user-friendly interface for diverse online content, optimized for low-end devices.
+Dongtube API is a modular Express.js server that aggregates various third-party content services. It provides a unified, performant, and user-friendly interface for diverse online content, optimized for low-end devices. Key capabilities include downloading media from social platforms (TikTok, Instagram, YouTube, Facebook, Spotify), generating AI images, scraping anime/manga sites, fetching news, processing images, and offering traditional Indonesian fortune-telling (primbon) services.
 
 # User Preferences
 
@@ -9,110 +9,46 @@ Preferred communication style: Simple, everyday language.
 # System Architecture
 
 ## Core Design Principles
-- **Route Auto-Loading**: Dynamically discovers and registers route modules from the `routes/` directory at startup, promoting modularity and simplifying endpoint management.
-- **Hot-Reload System** (Added: Oct 30, 2025):
-  - **Zero-Downtime Reloads**: Automatically detects changes to route files and reloads them without restarting the server
-  - **RouteManager Service**: Centralized service class (`services/RouteManager.js`) managing all route operations with mutex locking to prevent concurrent reloads
-  - **File Watcher**: Chokidar-based file watcher monitors `routes/` directory for add/change/delete events with 500ms debouncing
-  - **Atomic Router Swapping**: Uses double-buffer technique to build new router in isolation, then swap atomically to ensure zero downtime
-  - **Database Synchronization**: Automatically syncs endpoint metadata to VIPEndpoint table with Sequelize transaction support and rollback on failure
-  - **Admin Control**: Endpoints at `/admin/reload/trigger` (POST) and `/admin/reload/status` (GET) for manual reload control and status monitoring
-  - **Status Tracking**: Comprehensive statistics including total reloads, success/fail counts, last reload duration, and current status (ready/loading/error)
-  - **Cache Integration**: Automatically refreshes VIP cache after route reload to maintain consistency with database
-  - **Validation**: Validates module exports before loading to prevent broken routes from crashing the server
-- **Optimized for Low-End Devices**: Implements a 4-tier adaptive performance system based on device detection (RAM, CPU), dynamically adjusting animations (Three.js particles), CSS effects (backdrop-filter removal on mobile, optimized shadows), and resource loading (lazy loading, `defer` attributes) to ensure smooth performance on devices with 2-4GB RAM.
-- **Centralized HTTP Client**: A reusable `HTTPClient` (wrapping Axios) provides automatic retry logic, consistent timeouts, and standard User-Agent headers, enhancing reliability for web scraping across various routes.
-- **Validation Layer**: A centralized utility for URL validation (including domain checking) and empty string detection, ensuring consistent security and request integrity.
-- **Consistent Error Handling**: An `asyncHandler` wrapper provides consistent JSON error responses with appropriate HTTP status codes for all asynchronous route handlers.
-- **Content Delivery Strategy**: Supports JSON for structured data, direct binary responses for media, and URL redirection for proxied downloads, adapting to various content types.
+- **Route Auto-Loading**: Dynamically discovers and registers route modules, promoting modularity and simplifying endpoint management.
+- **Hot-Reload System**: Automatically detects changes to route files and reloads them without restarting the server, ensuring zero-downtime. This system uses a centralized `RouteManager` service with mutex locking, Chokidar-based file watching, atomic router swapping, and database synchronization for endpoint metadata. It also provides admin control for manual triggers and status monitoring, and integrates with cache refreshing.
+- **Optimized for Low-End Devices**: Implements a 4-tier adaptive performance system based on device detection, dynamically adjusting animations, CSS effects, and resource loading for smooth performance on devices with 2-4GB RAM.
+- **Centralized HTTP Client**: A reusable `HTTPClient` with automatic retry logic, consistent timeouts, and standard User-Agent headers for reliable web scraping.
+- **Validation Layer**: Centralized utility for URL validation and empty string detection to ensure request integrity.
+- **Consistent Error Handling**: `asyncHandler` wrapper provides consistent JSON error responses for all asynchronous route handlers.
+- **Content Delivery Strategy**: Supports JSON, direct binary responses, and URL redirection for various content types.
 
 ## UI/UX & Frontend
-- **Adaptive Rendering**: Automatically adjusts rendering settings based on device performance tiers (High, Medium, Low, Potato) for Three.js animations and CSS effects.
-- **Enhanced Media Preview System**: Features a modern glassmorphism UI with animated gradients, responsive grid layouts, custom audio player with waveform animation, image gallery, and fullscreen modal for media display. Includes advanced media type detection and actions like download and URL copy.
+- **Adaptive Rendering**: Adjusts rendering settings based on device performance tiers for Three.js animations and CSS effects.
+- **Enhanced Media Preview System**: Features a modern glassmorphism UI with animated gradients, responsive grid layouts, custom audio player, image gallery, and fullscreen modal. Includes advanced media type detection and actions.
 - **Accessibility**: Includes `prefers-reduced-motion` support.
-- **Social Media Integration**: Implements Open Graph and Twitter Card tags, along with SEO meta tags, for improved shareability and search engine visibility.
-- **Smart VIP Popup Logic** (Updated: Oct 30, 2025):
-  - **Authentication-Aware**: VIP popup differentiates between unauthenticated users (shows login prompt) and authenticated non-VIP users (shows upgrade prompt)
-  - **Context-Sensitive Messaging**: Displays personalized messages based on user authentication state, preventing redundant login prompts for already-authenticated users
-  - **Composite Auth Check**: Uses both backend `isAuthenticated` flag and frontend `currentUser` state for robust authentication detection
-- **UI Layer Management** (Fixed: Oct 30, 2025):
-  - **Proper Z-Index Hierarchy**: Auth status bar (z-index 999) positioned below hamburger menu (z-index 1000), ensuring interactive elements remain clickable
-  - **No Overlapping Issues**: Fixed header bar covering mobile navigation controls
-- **Tab-Aware Audio Control** (Added: Oct 30, 2025):
-  - **Automatic Pause/Resume**: Background music automatically pauses when user switches tabs or minimizes browser
-  - **Visibility API Integration**: Uses `document.visibilitychange` event to detect tab activity status
-  - **Seamless Experience**: Music resumes automatically when user returns to the tab, maintaining previous playback state
-  - **Animation Sync**: Vinyl disc spinning animation syncs with audio playback state across tab visibility changes
-- **Powerful Admin Panel** (Updated: Oct 30, 2025):
-  - **Endpoint Management Dashboard**: Full-featured interface (`/admin-panel.html`) for managing all API endpoints with complete CRUD operations
-  - **Bulk Operations**: Select multiple endpoints with checkboxes and batch update their VIP/Free status simultaneously
-  - **Inline Status Toggle**: Quick one-click toggle to change endpoint status between VIP and Free directly from the table
-  - **Add/Edit/Delete Endpoints**: Modal-based forms for creating new endpoints or editing existing ones with full field support (path, method, name, category, description, VIP status)
-  - **Advanced Filtering**: Real-time search across endpoint paths/names/descriptions with category and status filters
-  - **Auto-loading Categories**: Dynamic category filter that automatically populates from database
-  - **Statistics Dashboard**: Real-time display of total users, VIP users, premium endpoints, and free endpoints
-  - **Full Access Control**: Admin authentication required, with prominent navigation to user management and site exit
-  - **Responsive Design**: Optimized for desktop and mobile devices with modern glassmorphism UI
+- **Social Media Integration**: Implements Open Graph, Twitter Card tags, and SEO meta tags.
+- **Smart VIP Popup Logic**: Differentiates between unauthenticated and authenticated non-VIP users, displaying context-sensitive messages based on authentication state.
+- **UI Layer Management**: Ensures proper z-index hierarchy and prevents overlapping issues for interactive elements.
+- **Tab-Aware Audio Control**: Background music automatically pauses/resumes based on tab visibility using the Visibility API.
+- **Powerful Admin Panel**: Full-featured interface for managing API endpoints with CRUD operations, bulk actions, inline status toggling, advanced filtering, and a statistics dashboard.
 
 ## Feature Specifications
-- **Premium Route Management System**: Allows administrators to toggle VIP access for any API endpoint via an admin panel. Features auto-registration of routes, bulk operations, search/filter capabilities, and real-time updates.
-- **VIP Access Protection**: Middleware automatically checks for VIP status, providing detailed error messages and WhatsApp contact links for upgrade requests to non-VIP users.
-- **100% Unrestricted Admin Control** (Updated: Oct 30, 2025):
-  - **No Auto-Downgrade**: Admin-set VIP statuses are never automatically reverted, regardless of expiry dates. System respects admin decisions completely.
-  - **Complete Admin Bypass**: Admin role bypasses all VIP checks and restrictions, providing unrestricted access to all endpoints.
-  - **Force Update Capability**: Admin can force-update any user's role and VIP status without validation or restrictions via `/admin/users/:id/force-update`.
-  - **Bulk Operations**: Admin can update multiple users simultaneously via `/admin/users/bulk-update` endpoint.
-  - **Permanent VIP Option**: Admin can grant VIP with no expiry date (null vipExpiresAt) using the 'permanent' duration option.
-  - **Full Endpoint Control**: Admin can freely toggle any endpoint between free and premium status via `/admin/endpoints/:id/toggle-premium`.
-- **Premium Content Security** (Updated: Oct 2025):
-  - **Backend Sanitization**: The `/api/docs` endpoint implements server-side data sanitization to prevent premium endpoint details from being sent to non-VIP users' browsers
-  - **Composite Key Lookup**: Uses `${method}:${path}` composite keys to correctly handle endpoints with the same path but different access levels per HTTP method (e.g., GET free, POST premium)
-  - **Zero-Trust Architecture**: Even if frontend protection is bypassed, backend ensures premium metadata (params, parameters, examples, placeholder) is never transmitted to unauthorized users
-  - **Premium Lock Screen**: Frontend displays a visual lock screen with upgrade prompt and WhatsApp contact for premium endpoints, providing clear UX feedback
-  - **JWT-Based Authentication**: Validates user premium status via JWT tokens before serving full endpoint documentation
-- **VIP Endpoint Cache System** (Enhanced: Oct 30, 2025):
-  - **In-Memory Caching**: VIP endpoints cached for 5 seconds to optimize performance
-  - **Automatic Invalidation**: Cache automatically cleared when admin toggles endpoint status
-  - **Debug Logging**: Detailed console logs track cache state transitions:
-    - `🔄 VIP Cache cleared!` - Shown when cache is invalidated (displays previous cache size)
-    - `📥 VIP Cache loaded/refreshed` - Shown when cache is rebuilt from database (displays new cache size)
-    - `🔧 ADMIN: Toggled endpoint` - Shown when admin changes endpoint status (displays old → new status)
-  - **Zero Race Conditions**: Node.js single-threaded execution ensures cache refresh completes before response
-  - **Instant Propagation**: Changes take effect immediately on next user request (max 5 second cache TTL)
-- **Caching Strategy**: Implements in-memory Map-based caching with TTL for specific data (e.g., news endpoints) to reduce database queries and improve performance.
-- **Background Music**: Auto-plays background music with a visual vinyl disc animation and volume controls, starting on page load or first user interaction.
+- **Premium Route Management System**: Allows administrators to toggle VIP access for API endpoints via an admin panel with auto-registration, bulk operations, and real-time updates.
+- **VIP Access Protection**: Middleware checks for VIP status, providing error messages and upgrade options for non-VIP users.
+- **Unrestricted Admin Control**: Admin-set VIP statuses are never automatically reverted, admins bypass all VIP checks, can force-update user roles, perform bulk user updates, and grant permanent VIP access.
+- **Premium Content Security**: Backend sanitization prevents premium endpoint details from being sent to non-VIP users. Uses composite keys for method-specific access and JWT-based authentication for documentation access.
+- **VIP Endpoint Cache System**: In-memory caching with a 5-second TTL, automatic invalidation on admin changes, and debug logging.
+- **Caching Strategy**: Implements in-memory Map-based caching with TTL for specific data to reduce database queries.
+- **Background Music**: Auto-plays background music with a visual vinyl disc animation and volume controls.
 - **Security**: Admin routes are protected by authentication, authorization middleware, JWT tokens, role-based access control (RBAC), and bcrypt password hashing.
-- **Instant VIP Access System** (Added: Oct 30, 2025):
-  - **Token Refresh Endpoint**: `/auth/refresh-token` (POST) allows users to immediately get updated access after role changes without logout/login
-  - **Real-Time Database Check**: On every request, middleware fetches latest user role directly from database, ensuring current VIP status is always respected
-  - **Admin Notifications**: When admin changes user role, response includes `refreshTokenRequired: true` flag and instructions for instant activation
-  - **Automatic Role Detection**: Token refresh endpoint compares old vs new role and returns `roleUpdated: true` when role has changed
-  - **Zero Wait Time**: Users can access VIP features immediately after calling refresh endpoint, no cache delays or logout required
-  - **How It Works**:
-    1. Admin changes user role from 'user' to 'vip' via `/admin/users/:id/role` or `/admin/users/:id/grant-vip`
-    2. Admin panel receives response with `refreshTokenRequired: true`
-    3. User (or admin panel) calls `POST /auth/refresh-token` with current token
-    4. User receives new token with updated role, instant VIP access granted
-  - **Frontend Integration**: Admin panel can automatically notify user or trigger refresh on their behalf
-- **Indonesian Primbon (Fortune-Telling) Services** (Added: Oct 30, 2025):
-  - **Name Meaning Analysis**: Interprets the spiritual meaning and characteristics of Indonesian names
-  - **Name Compatibility**: Checks relationship compatibility between two names
-  - **Lucky Numbers**: Analyzes phone numbers for fortune and luck predictions
-  - **Health Predictions**: Predicts potential health issues based on name, birthdate, and location
-  - **Javanese & Balinese Match-Making**: Traditional matchmaking calculations based on weton (Javanese calendar)
-  - **Business & Wealth Predictions**: Analyzes business potential and fortune based on weton
-  - **Dream Interpretation**: Interprets the meaning of dreams according to primbon tradition
-  - **Zodiac Information**: Provides detailed zodiac sign characteristics and predictions
-  - **URL Encoding**: All endpoints properly encode parameters to handle Indonesian names with spaces and special characters
-  - **Dual Method Support**: All 10 primbon endpoints support both GET and POST methods (20 route handlers total)
-- **Category-Based Endpoint Filtering** (Added: Oct 30, 2025):
-  - Admin endpoint `/admin/endpoints/category/:category` to filter endpoints by category
-  - Supports pagination with configurable limit and offset
-  - Protected by admin authentication and authorization
-  - Enables filtering by special categories like "dev" for development endpoints
+- **Instant VIP Access System**: `refresh-token` endpoint allows users to get updated access immediately after role changes without logout/login, with real-time database checks for VIP status.
+- **Real-Time VIP Access System**: Server-Sent Events (SSE) infrastructure broadcasts role changes instantly to connected users, eliminating the need for manual refresh or logout/login. Features include:
+  - EventEmitter-based pub/sub system for role change notifications
+  - Per-user SSE streams with automatic reconnection and exponential backoff
+  - Frontend auto-refresh token system that updates JWT immediately upon role changes
+  - Authenticated SSE endpoint with httpOnly cookie support
+  - Automatic page reload after token refresh to apply all changes
+  - Heartbeat mechanism for connection keep-alive
+- **Indonesian Primbon Services**: Provides various traditional Indonesian fortune-telling services including name analysis, compatibility checks, lucky numbers, health predictions, Javanese/Balinese matchmaking, business predictions, dream interpretation, and zodiac information. All endpoints support URL encoding and both GET/POST methods.
+- **Category-Based Endpoint Filtering**: Admin endpoint to filter endpoints by category with pagination, protected by authentication.
 
 ## Module Organization
-- Routes are organized by function (e.g., `route-tiktok.js`, `route-image.js`) rather than technology, enhancing maintainability.
+- Routes are organized by function for enhanced maintainability.
 
 # External Dependencies
 
@@ -133,32 +69,13 @@ Preferred communication style: Simple, everyday language.
 - **uuid**
 
 ## Third-Party Service Integrations
-- **Social Media Platforms**:
-    - TikTok (via `tikwm.com`)
-    - Instagram (via `igram.website`)
-    - Facebook (via `a2zconverter.com`)
-    - Xiaohongshu/RedNote (via `rednote-downloader.io`)
-    - Snackvideo (direct scraping)
-- **Image Processing**:
-    - `removebg.one`
-    - `ihancer.com`
-    - `texttoimage.org`
-- **AI Generation**:
-    - Ideogram (via Firebase Cloud Functions `chatbotandroid-3894d.cloudfunctions.net`)
-- **Content Aggregation**:
-    - MyAnimeList (scraping)
-    - AniList GraphQL API
-    - Anichin, Oploverz, Samehadaku (scraping)
-- **News Sources**:
-    - Tribunnews, Kompas (web scraping)
-    - `justice.gov`
-- **Indonesian Services**:
-    - Primbon.com (traditional fortune-telling and divination)
-- **Other Services**:
-    - `waifu.pics`
-    - `api.imgflip.com`
-    - `lrclib.net`
-    - Google Drive
+- **Social Media Platforms**: TikTok (`tikwm.com`), Instagram (`igram.website`), Facebook (`a2zconverter.com`), Xiaohongshu/RedNote (`rednote-downloader.io`), Snackvideo.
+- **Image Processing**: `removebg.one`, `ihancer.com`, `texttoimage.org`.
+- **AI Generation**: Ideogram (via Firebase Cloud Functions `chatbotandroid-3894d.cloudfunctions.net`).
+- **Content Aggregation**: MyAnimeList, AniList GraphQL API, Anichin, Oploverz, Samehadaku.
+- **News Sources**: Tribunnews, Kompas, `justice.gov`.
+- **Indonesian Services**: Primbon.com.
+- **Other Services**: `waifu.pics`, `api.imgflip.com`, `lrclib.net`, Google Drive.
 
 ## Deployment
 - **Vercel**
