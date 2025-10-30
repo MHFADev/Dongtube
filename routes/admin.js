@@ -658,4 +658,36 @@ router.get('/admin/categories', authenticate, authorize('admin'), async (req, re
   }
 });
 
+router.get('/admin/endpoints/category/:category', authenticate, authorize('admin'), async (req, res) => {
+  try {
+    const { category } = req.params;
+    const { page = 1, limit = 50 } = req.query;
+    
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+    
+    const { count, rows } = await VIPEndpoint.findAndCountAll({
+      where: { category },
+      limit: parseInt(limit),
+      offset,
+      order: [['createdAt', 'DESC']]
+    });
+    
+    res.json({
+      success: true,
+      category,
+      total: count,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      pages: Math.ceil(count / parseInt(limit)),
+      endpoints: rows
+    });
+  } catch (error) {
+    console.error('Get endpoints by category error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch endpoints by category'
+    });
+  }
+});
+
 export default router;
