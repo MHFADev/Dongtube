@@ -17,6 +17,10 @@ export const generateToken = (user) => {
 };
 
 const checkAndDowngradeExpiredVIP = async (user) => {
+  if (user.role === 'admin') {
+    return false;
+  }
+  
   if (user.role === 'vip' && user.vipExpiresAt) {
     const now = new Date();
     const expiryDate = new Date(user.vipExpiresAt);
@@ -97,6 +101,23 @@ const CACHE_DURATION = 60000;
 
 export const checkVIPAccess = async (req, res, next) => {
   try {
+    const token = req.cookies?.token || req.headers.authorization?.split(' ')[1];
+    
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const user = await User.findByPk(decoded.id, {
+          attributes: ['id', 'email', 'role', 'vipExpiresAt']
+        });
+        
+        if (user && user.role === 'admin') {
+          req.user = user;
+          return next();
+        }
+      } catch (err) {
+      }
+    }
+    
     const currentTime = Date.now();
     
     if (!vipEndpointsCache || (currentTime - cacheTimestamp) > CACHE_DURATION) {
@@ -139,8 +160,6 @@ export const checkVIPAccess = async (req, res, next) => {
 
     const adminWhatsApp = process.env.ADMIN_WHATSAPP_NUMBER || '6281234567890';
     const whatsappUrl = `https://wa.me/${adminWhatsApp}?text=${encodeURIComponent('Halo! Saya ingin upgrade ke VIP untuk akses premium API 🚀')}`;
-    
-    const token = req.cookies?.token || req.headers.authorization?.split(' ')[1];
     
     if (!token) {
       return res.status(401).json({
