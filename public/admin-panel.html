@@ -1335,10 +1335,14 @@
         });
 
         if (response.ok) {
+          await fetch('/admin/cache/refresh', {
+            method: 'POST',
+            credentials: 'include'
+          });
           await loadEndpoints();
           await refreshStats();
           clearSelection();
-          alert(`Successfully updated ${selectedEndpoints.size} endpoint(s) to ${status}`);
+          alert(`Successfully updated ${selectedEndpoints.size} endpoint(s) to ${status}\n\nChanges are now active for all users!`);
         } else {
           alert('Failed to update endpoints');
         }
@@ -1365,8 +1369,13 @@
         });
 
         if (response.ok) {
+          await fetch('/admin/cache/refresh', {
+            method: 'POST',
+            credentials: 'include'
+          });
           await loadEndpoints();
           await refreshStats();
+          alert(`Endpoint "${endpoint.path}" successfully changed to ${statusText}!\n\nChanges are now active for all users.`);
         } else {
           alert('Failed to update endpoint');
         }
@@ -1440,11 +1449,15 @@
         }
 
         if (response.ok) {
+          await fetch('/admin/cache/refresh', {
+            method: 'POST',
+            credentials: 'include'
+          });
           closeEditModal();
           await loadEndpoints();
           await loadCategories();
           await refreshStats();
-          alert(`Endpoint ${id ? 'updated' : 'created'} successfully`);
+          alert(`Endpoint ${id ? 'updated' : 'created'} successfully!\n\nChanges are now active for all users.`);
         } else {
           const error = await response.json();
           alert(`Failed to save endpoint: ${error.error || 'Unknown error'}`);
@@ -1469,9 +1482,13 @@
         });
 
         if (response.ok) {
+          await fetch('/admin/cache/refresh', {
+            method: 'POST',
+            credentials: 'include'
+          });
           await loadEndpoints();
           await refreshStats();
-          alert('Endpoint deleted successfully');
+          alert('Endpoint deleted successfully!\n\nChanges are now active for all users.');
         } else {
           alert('Failed to delete endpoint');
         }
