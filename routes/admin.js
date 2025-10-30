@@ -99,6 +99,9 @@ router.post('/admin/users/:id/grant-vip', authenticate, authorize('admin'), asyn
       case 'lifetime':
         expiresAt = new Date('2099-12-31');
         break;
+      case 'permanent':
+        expiresAt = null;
+        break;
       default:
         if (req.body.customDate) {
           expiresAt = new Date(req.body.customDate);
@@ -127,6 +130,87 @@ router.post('/admin/users/:id/grant-vip', authenticate, authorize('admin'), asyn
     res.status(500).json({
       success: false,
       error: 'Failed to grant VIP access'
+    });
+  }
+});
+
+router.put('/admin/users/:id/force-update', authenticate, authorize('admin'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { role, vipExpiresAt } = req.body;
+
+    const user = await User.findByPk(id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    const updates = {};
+    if (role !== undefined) {
+      updates.role = role;
+    }
+    if (vipExpiresAt !== undefined) {
+      updates.vipExpiresAt = vipExpiresAt === null ? null : new Date(vipExpiresAt);
+    }
+
+    await user.update(updates);
+
+    res.json({
+      success: true,
+      message: 'User forcefully updated by admin - no restrictions applied',
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        vipExpiresAt: user.vipExpiresAt
+      }
+    });
+  } catch (error) {
+    console.error('Force update error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to force update user'
+    });
+  }
+});
+
+router.post('/admin/users/bulk-update', authenticate, authorize('admin'), async (req, res) => {
+  try {
+    const { userIds, role, vipExpiresAt } = req.body;
+
+    if (!Array.isArray(userIds) || userIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'userIds array is required and must not be empty'
+      });
+    }
+
+    const updates = {};
+    if (role !== undefined) {
+      updates.role = role;
+    }
+    if (vipExpiresAt !== undefined) {
+      updates.vipExpiresAt = vipExpiresAt === null ? null : new Date(vipExpiresAt);
+    }
+
+    const [updatedCount] = await User.update(updates, {
+      where: { id: userIds }
+    });
+
+    res.json({
+      success: true,
+      message: `${updatedCount} users updated by admin - no restrictions applied`,
+      updatedCount,
+      updates
+    });
+  } catch (error) {
+    console.error('Bulk update users error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to bulk update users'
     });
   }
 });
