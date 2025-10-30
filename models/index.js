@@ -1,6 +1,11 @@
 import sequelize from '../config/database.js';
 import User from './User.js';
 import VIPEndpoint from './VIPEndpoint.js';
+import VersionHistory from './VersionHistory.js';
+import ActivityLog from './ActivityLog.js';
+import RateLimitConfig from './RateLimitConfig.js';
+import NotificationConfig from './NotificationConfig.js';
+import IpWhitelist from './IpWhitelist.js';
 import crypto from 'crypto';
 
 const initDatabase = async () => {
@@ -8,7 +13,21 @@ const initDatabase = async () => {
     await sequelize.authenticate();
     console.log('✓ Database connected');
     
-    await sequelize.sync({ alter: true });
+    console.log('📊 Syncing database tables...');
+    await User.sync({ alter: true });
+    console.log('  ✓ User table synced');
+    await VIPEndpoint.sync({ alter: true });
+    console.log('  ✓ VIPEndpoint table synced');
+    await VersionHistory.sync({ alter: true });
+    console.log('  ✓ VersionHistory table synced');
+    await ActivityLog.sync({ alter: true });
+    console.log('  ✓ ActivityLog table synced');
+    await RateLimitConfig.sync({ alter: true });
+    console.log('  ✓ RateLimitConfig table synced');
+    await NotificationConfig.sync({ alter: true });
+    console.log('  ✓ NotificationConfig table synced');
+    await IpWhitelist.sync({ alter: true });
+    console.log('  ✓ IpWhitelist table synced');
     console.log('✓ Database tables synced');
     
     const adminExists = await User.findOne({ where: { role: 'admin' } });
@@ -38,4 +57,14 @@ const initDatabase = async () => {
   }
 };
 
-export { sequelize, User, VIPEndpoint, initDatabase };
+export { 
+  sequelize, 
+  User, 
+  VIPEndpoint, 
+  VersionHistory,
+  ActivityLog,
+  RateLimitConfig,
+  NotificationConfig,
+  IpWhitelist,
+  initDatabase 
+};

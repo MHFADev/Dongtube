@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Panel - Dongtube API</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     * {
       margin: 0;
@@ -730,6 +731,297 @@
         min-width: 100%;
       }
     }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      min-width: 300px;
+      max-width: 400px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      z-index: 10000;
+      animation: slideInRight 0.3s ease-out;
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .toast.success {
+      border-left: 4px solid var(--success);
+    }
+
+    .toast.error {
+      border-left: 4px solid var(--error);
+    }
+
+    .toast.info {
+      border-left: 4px solid var(--primary);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--bg-darker);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+
+    .progress-bar-fill.success {
+      background: linear-gradient(135deg, #00FF88 0%, #00CC6F 100%);
+    }
+
+    .progress-bar-fill.warning {
+      background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    }
+
+    .progress-bar-fill.danger {
+      background: linear-gradient(135deg, #FF4444 0%, #CC0000 100%);
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      background: var(--bg-darker);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .toggle-switch.active {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .toggle-switch-slider {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 18px;
+      height: 18px;
+      background: var(--text);
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+
+    .toggle-switch.active .toggle-switch-slider {
+      left: 22px;
+      background: var(--bg-dark);
+    }
+
+    .chart-container {
+      position: relative;
+      height: 300px;
+      margin-bottom: 24px;
+    }
+
+    .date-range-picker {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .date-input {
+      padding: 10px 16px;
+      background: var(--bg-darker);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.3s ease;
+    }
+
+    .date-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .health-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .health-indicator.healthy {
+      background: rgba(0, 255, 136, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+    }
+
+    .health-indicator.warning {
+      background: rgba(255, 215, 0, 0.1);
+      color: #FFD700;
+      border: 1px solid rgba(255, 215, 0, 0.3);
+    }
+
+    .health-indicator.critical {
+      background: rgba(255, 68, 68, 0.1);
+      color: var(--error);
+      border: 1px solid rgba(255, 68, 68, 0.3);
+    }
+
+    .health-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    .health-indicator.healthy .health-dot {
+      background: var(--success);
+    }
+
+    .health-indicator.warning .health-dot {
+      background: #FFD700;
+    }
+
+    .health-indicator.critical .health-dot {
+      background: var(--error);
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .info-value {
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .file-upload {
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .file-upload:hover {
+      border-color: var(--primary);
+      background: rgba(255, 165, 0, 0.05);
+    }
+
+    .file-upload input[type="file"] {
+      display: none;
+    }
+
+    .pagination {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    .pagination button {
+      min-width: 36px;
+      height: 36px;
+      padding: 0 12px;
+      background: var(--bg-darker);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .pagination button:hover:not(:disabled) {
+      background: var(--bg-card);
+      border-color: var(--primary);
+    }
+
+    .pagination button.active {
+      background: var(--primary);
+      color: var(--bg-dark);
+      border-color: var(--primary);
+    }
+
+    .pagination button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .version-card {
+      background: var(--bg-darker);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .version-card:hover {
+      border-color: var(--primary);
+    }
+
+    .version-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .version-number {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
   </style>
 </head>
 <body>
@@ -773,6 +1065,50 @@
           <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         <span>Users</span>
+      </a>
+
+      <a href="#" class="nav-item" data-section="version-control">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="18" cy="18" r="3" stroke="currentColor" stroke-width="2"/>
+          <circle cx="6" cy="6" r="3" stroke="currentColor" stroke-width="2"/>
+          <path d="M13 6h3a2 2 0 0 1 2 2v7" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        <span>Version Control</span>
+      </a>
+
+      <a href="#" class="nav-item" data-section="activity-logs">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2"/>
+          <polyline points="14 2 14 8 20 8" stroke="currentColor" stroke-width="2"/>
+          <line x1="9" y1="15" x2="15" y2="15" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        <span>Activity Logs</span>
+      </a>
+
+      <a href="#" class="nav-item" data-section="bulk-operations">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="3" y="3" width="7" height="7" stroke="currentColor" stroke-width="2"/>
+          <rect x="14" y="3" width="7" height="7" stroke="currentColor" stroke-width="2"/>
+          <rect x="3" y="14" width="7" height="7" stroke="currentColor" stroke-width="2"/>
+          <rect x="14" y="14" width="7" height="7" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        <span>Bulk Operations</span>
+      </a>
+
+      <a href="#" class="nav-item" data-section="rate-limits">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+          <polyline points="12 6 12 12 16 14" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        <span>Rate Limits</span>
+      </a>
+
+      <a href="#" class="nav-item" data-section="notifications">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="2"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        <span>Notifications</span>
       </a>
 
       <a href="/" class="nav-item">
@@ -842,6 +1178,94 @@
         <div class="loading">
           <div class="spinner"></div>
           <p>Loading statistics...</p>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-header">
+          <h3 class="section-title">System Health Monitor</h3>
+          <div id="health-status" class="health-indicator healthy">
+            <span class="health-dot"></span>
+            <span>All Systems Operational</span>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div>
+            <div class="info-row">
+              <span class="info-label">CPU Usage</span>
+              <span class="info-value" id="cpu-value">--</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-bar-fill success" id="cpu-bar" style="width: 0%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="info-row">
+              <span class="info-label">Memory Usage</span>
+              <span class="info-value" id="memory-value">--</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-bar-fill success" id="memory-bar" style="width: 0%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="info-row">
+              <span class="info-label">Disk Usage</span>
+              <span class="info-value" id="disk-value">--</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-bar-fill success" id="disk-bar" style="width: 0%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="info-row">
+              <span class="info-label">Database Status</span>
+              <span class="info-value"><span id="db-status" class="badge badge-success">Connected</span></span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Uptime</span>
+              <span class="info-value" id="uptime-value">--</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-header">
+          <h3 class="section-title">Analytics Dashboard</h3>
+          <div class="date-range-picker">
+            <input type="date" class="date-input" id="analytics-start-date">
+            <span>to</span>
+            <input type="date" class="date-input" id="analytics-end-date">
+            <button class="btn btn-secondary btn-sm" onclick="loadAnalytics()">Apply</button>
+          </div>
+        </div>
+        
+        <div class="grid-2">
+          <div>
+            <h4 style="margin-bottom: 16px; color: var(--text-muted); font-size: 14px;">User Growth</h4>
+            <div class="chart-container">
+              <canvas id="userGrowthChart"></canvas>
+            </div>
+          </div>
+          <div>
+            <h4 style="margin-bottom: 16px; color: var(--text-muted); font-size: 14px;">VIP Conversion Rate</h4>
+            <div class="chart-container">
+              <canvas id="vipConversionChart"></canvas>
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <h4 style="margin-bottom: 16px; color: var(--text-muted); font-size: 14px;">Top Endpoints Usage</h4>
+          <div class="chart-container">
+            <canvas id="endpointUsageChart"></canvas>
+          </div>
+        </div>
+
+        <div>
+          <h4 style="margin-bottom: 16px; color: var(--text-muted); font-size: 14px;">Peak Usage Times (Last 24 Hours)</h4>
+          <div id="peak-usage-table"></div>
         </div>
       </div>
     </div>
@@ -929,6 +1353,242 @@
         </div>
       </div>
     </div>
+
+    <div id="version-control-section" style="display: none;">
+      <div class="top-bar">
+        <h2>Version Control & Deployment</h2>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <button class="btn btn-primary" onclick="showUpdateVersionModal()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            Update Version
+          </button>
+          <button class="btn btn-secondary" onclick="loadVersionHistory()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M23 4v6h-6M1 20v-6h6" stroke="currentColor" stroke-width="2"/>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <h3 class="section-title" style="margin-bottom: 24px;">Current Version</h3>
+        <div id="current-version-info">
+          <div class="loading">
+            <div class="spinner"></div>
+            <p>Loading version info...</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-header">
+          <h3 class="section-title">Version History</h3>
+        </div>
+        <div id="version-history-list">
+          <div class="loading">
+            <div class="spinner"></div>
+            <p>Loading version history...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="activity-logs-section" style="display: none;">
+      <div class="top-bar">
+        <h2>Activity Logs & Audit Trail</h2>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <button class="btn btn-primary" onclick="exportLogs()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            Export JSON
+          </button>
+          <button class="btn btn-danger" onclick="cleanupOldLogs()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2"/>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            Cleanup Old Logs
+          </button>
+          <button class="btn btn-secondary" onclick="loadActivityLogs()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M23 4v6h-6M1 20v-6h6" stroke="currentColor" stroke-width="2"/>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-header">
+          <h3 class="section-title">Filter Logs</h3>
+          <div class="controls">
+            <div class="search-box">
+              <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="11" cy="11" r="8" stroke="#888888" stroke-width="2"/>
+                <path d="M21 21l-4.35-4.35" stroke="#888888" stroke-width="2"/>
+              </svg>
+              <input type="text" class="search-input" id="search-logs" placeholder="Search logs...">
+            </div>
+            <select class="filter-select" id="filter-action-type">
+              <option value="">All Actions</option>
+              <option value="create">Create</option>
+              <option value="update">Update</option>
+              <option value="delete">Delete</option>
+              <option value="login">Login</option>
+            </select>
+            <div class="date-range-picker">
+              <input type="date" class="date-input" id="logs-start-date">
+              <input type="date" class="date-input" id="logs-end-date">
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="loadActivityLogs()">Apply</button>
+          </div>
+        </div>
+
+        <div class="table-container" id="activity-logs-table">
+          <div class="loading">
+            <div class="spinner"></div>
+            <p>Loading activity logs...</p>
+          </div>
+        </div>
+
+        <div class="pagination" id="logs-pagination"></div>
+      </div>
+    </div>
+
+    <div id="bulk-operations-section" style="display: none;">
+      <div class="top-bar">
+        <h2>Bulk Operations Manager</h2>
+      </div>
+
+      <div class="section-card">
+        <h3 class="section-title" style="margin-bottom: 24px;">Import Data</h3>
+        <div class="file-upload" onclick="document.getElementById('bulk-file-input').click()">
+          <input type="file" id="bulk-file-input" accept=".json,.csv" onchange="handleBulkFileUpload(event)">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin: 0 auto 16px; opacity: 0.3;">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" stroke-width="2"/>
+          </svg>
+          <p style="color: var(--text-muted);">Click to upload CSV or JSON file</p>
+          <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">Supports user data import</p>
+        </div>
+        <div id="bulk-upload-progress" style="display: none; margin-top: 16px;">
+          <div class="info-row">
+            <span class="info-label">Processing...</span>
+            <span class="info-value" id="bulk-progress-text">0%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-bar-fill" id="bulk-progress-bar" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <h3 class="section-title" style="margin-bottom: 24px;">Bulk User Operations</h3>
+        <p style="color: var(--text-muted); margin-bottom: 16px;">Select users from the Users page to perform bulk operations</p>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <button class="btn btn-secondary" onclick="window.location.href='admin-users.html'">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2"/>
+              <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            Go to Users Page
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="rate-limits-section" style="display: none;">
+      <div class="top-bar">
+        <h2>Rate Limiting & Throttle Control</h2>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <button class="btn btn-primary" onclick="showRateLimitModal()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2"/>
+              <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            Add Rate Limit
+          </button>
+          <button class="btn btn-secondary" onclick="loadRateLimits()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M23 4v6h-6M1 20v-6h6" stroke="currentColor" stroke-width="2"/>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-header">
+          <h3 class="section-title">Rate Limit Configurations</h3>
+        </div>
+        <div id="rate-limits-list">
+          <div class="loading">
+            <div class="spinner"></div>
+            <p>Loading rate limits...</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-header">
+          <h3 class="section-title">IP Whitelist</h3>
+          <button class="btn btn-primary btn-sm" onclick="showIPWhitelistModal()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2"/>
+              <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            Add IP
+          </button>
+        </div>
+        <div id="ip-whitelist-list">
+          <div class="loading">
+            <div class="spinner"></div>
+            <p>Loading whitelist...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="notifications-section" style="display: none;">
+      <div class="top-bar">
+        <h2>Notification & Alert System</h2>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <button class="btn btn-primary" onclick="showNotificationModal()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2"/>
+              <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            Add Notification Config
+          </button>
+          <button class="btn btn-secondary" onclick="loadNotificationConfigs()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M23 4v6h-6M1 20v-6h6" stroke="currentColor" stroke-width="2"/>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-header">
+          <h3 class="section-title">Notification Configurations</h3>
+        </div>
+        <div id="notification-configs-list">
+          <div class="loading">
+            <div class="spinner"></div>
+            <p>Loading notification configs...</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="modal" id="edit-endpoint-modal">
@@ -998,6 +1658,168 @@
     </div>
   </div>
 
+  <div class="modal" id="version-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Update Version</h3>
+        <button class="btn-close" onclick="closeVersionModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2"/>
+            <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </button>
+      </div>
+      <form id="version-form" onsubmit="saveVersion(event)">
+        <div class="form-group">
+          <label class="form-label">Version *</label>
+          <input type="text" id="version-number" class="form-input" placeholder="e.g., 1.0.0" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Name</label>
+          <input type="text" id="version-name" class="form-input" placeholder="e.g., Major Update">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea id="version-description" class="form-textarea" placeholder="Describe the changes..."></textarea>
+        </div>
+        <div style="display: flex; gap: 12px; margin-top: 24px;">
+          <button type="submit" class="btn btn-primary" style="flex: 1;">Save Version</button>
+          <button type="button" class="btn btn-secondary" onclick="closeVersionModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="rate-limit-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="rate-limit-modal-title">Add Rate Limit Config</h3>
+        <button class="btn-close" onclick="closeRateLimitModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2"/>
+            <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </button>
+      </div>
+      <form id="rate-limit-form" onsubmit="saveRateLimit(event)">
+        <input type="hidden" id="rate-limit-id">
+        <div class="form-group">
+          <label class="form-label">Route Pattern *</label>
+          <input type="text" id="rate-limit-route" class="form-input" placeholder="/api/..." required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Max Requests *</label>
+          <input type="number" id="rate-limit-max" class="form-input" placeholder="100" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Window (minutes) *</label>
+          <input type="number" id="rate-limit-window" class="form-input" placeholder="15" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Role</label>
+          <select id="rate-limit-role" class="form-select">
+            <option value="">All Users</option>
+            <option value="user">User</option>
+            <option value="vip">VIP</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea id="rate-limit-description" class="form-textarea" placeholder="Optional description"></textarea>
+        </div>
+        <div style="display: flex; gap: 12px; margin-top: 24px;">
+          <button type="submit" class="btn btn-primary" style="flex: 1;">Save</button>
+          <button type="button" class="btn btn-secondary" onclick="closeRateLimitModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="ip-whitelist-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Add IP to Whitelist</h3>
+        <button class="btn-close" onclick="closeIPWhitelistModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2"/>
+            <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </button>
+      </div>
+      <form id="ip-whitelist-form" onsubmit="saveIPWhitelist(event)">
+        <div class="form-group">
+          <label class="form-label">IP Address *</label>
+          <input type="text" id="ip-address" class="form-input" placeholder="192.168.1.1" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <input type="text" id="ip-description" class="form-input" placeholder="e.g., Office IP">
+        </div>
+        <div style="display: flex; gap: 12px; margin-top: 24px;">
+          <button type="submit" class="btn btn-primary" style="flex: 1;">Add to Whitelist</button>
+          <button type="button" class="btn btn-secondary" onclick="closeIPWhitelistModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="notification-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="notification-modal-title">Add Notification Config</h3>
+        <button class="btn-close" onclick="closeNotificationModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2"/>
+            <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </button>
+      </div>
+      <form id="notification-form" onsubmit="saveNotification(event)">
+        <input type="hidden" id="notification-id">
+        <div class="form-group">
+          <label class="form-label">Event Type *</label>
+          <select id="notification-event" class="form-select" required>
+            <option value="">Select event...</option>
+            <option value="user_register">User Registration</option>
+            <option value="vip_purchase">VIP Purchase</option>
+            <option value="vip_expiring">VIP Expiring</option>
+            <option value="system_error">System Error</option>
+            <option value="high_usage">High Usage Alert</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Channel *</label>
+          <select id="notification-channel" class="form-select" required>
+            <option value="email">Email</option>
+            <option value="whatsapp">WhatsApp</option>
+            <option value="both">Both</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Recipient *</label>
+          <input type="text" id="notification-recipient" class="form-input" placeholder="admin@example.com or phone number" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Message Template</label>
+          <textarea id="notification-template" class="form-textarea" placeholder="Message template (use {user}, {event} placeholders)"></textarea>
+        </div>
+        <div class="form-group">
+          <div class="checkbox-wrapper">
+            <input type="checkbox" id="notification-enabled" class="checkbox" checked>
+            <label class="form-label" for="notification-enabled" style="margin: 0;">Enabled</label>
+          </div>
+        </div>
+        <div style="display: flex; gap: 12px; margin-top: 24px;">
+          <button type="submit" class="btn btn-primary" style="flex: 1;">Save</button>
+          <button type="button" class="btn btn-secondary" onclick="closeNotificationModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
   <script>
     let currentSection = 'dashboard';
     let endpoints = [];
@@ -1017,15 +1839,62 @@
       currentSection = section;
       
       document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-      document.querySelector(`[data-section="${section}"]`).classList.add('active');
+      const navItem = document.querySelector(`[data-section="${section}"]`);
+      if (navItem) navItem.classList.add('active');
       
       document.getElementById('dashboard-section').style.display = section === 'dashboard' ? 'block' : 'none';
       document.getElementById('endpoints-section').style.display = section === 'endpoints' ? 'block' : 'none';
+      document.getElementById('version-control-section').style.display = section === 'version-control' ? 'block' : 'none';
+      document.getElementById('activity-logs-section').style.display = section === 'activity-logs' ? 'block' : 'none';
+      document.getElementById('bulk-operations-section').style.display = section === 'bulk-operations' ? 'block' : 'none';
+      document.getElementById('rate-limits-section').style.display = section === 'rate-limits' ? 'block' : 'none';
+      document.getElementById('notifications-section').style.display = section === 'notifications' ? 'block' : 'none';
       
       if (section === 'endpoints' && endpoints.length === 0) {
         loadEndpoints();
         loadCategories();
       }
+      if (section === 'dashboard') {
+        loadSystemHealth();
+        loadAnalytics();
+      }
+      if (section === 'version-control') {
+        loadVersionInfo();
+        loadVersionHistory();
+      }
+      if (section === 'activity-logs') {
+        loadActivityLogs();
+      }
+      if (section === 'rate-limits') {
+        loadRateLimits();
+        loadIPWhitelist();
+      }
+      if (section === 'notifications') {
+        loadNotificationConfigs();
+      }
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      
+      const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ';
+      toast.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          ${type === 'success' ? '<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2"/>' :
+            type === 'error' ? '<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="15" y1="9" x2="9" y2="15" stroke="currentColor" stroke-width="2"/><line x1="9" y1="9" x2="15" y2="15" stroke="currentColor" stroke-width="2"/>' :
+            '<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2"/><line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2"/>'}
+        </svg>
+        <span>${message}</span>
+      `;
+      
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.animation = 'slideInRight 0.3s ease-out reverse';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
     }
 
     async function checkAuth() {
@@ -1513,9 +2382,951 @@
       }
     }
 
+    let healthInterval = null;
+    let analyticsCharts = {};
+
+    async function loadSystemHealth() {
+      try {
+        const response = await fetch('/admin/system-health', { credentials: 'include' });
+        const data = await response.json();
+        
+        updateHealthUI(data.health);
+        
+        if (healthInterval) clearInterval(healthInterval);
+        healthInterval = setInterval(() => loadSystemHealth(), 10000);
+      } catch (error) {
+        console.error('Failed to load system health:', error);
+      }
+    }
+
+    function updateHealthUI(health) {
+      const statusEl = document.getElementById('health-status');
+      const cpuValue = health.cpu?.usage || 0;
+      const memValue = health.memory?.percentage || 0;
+      const diskValue = health.disk?.percentage || 0;
+
+      document.getElementById('cpu-value').textContent = cpuValue.toFixed(1) + '%';
+      document.getElementById('memory-value').textContent = memValue.toFixed(1) + '%';
+      document.getElementById('disk-value').textContent = diskValue.toFixed(1) + '%';
+      document.getElementById('uptime-value').textContent = formatUptime(health.uptime || 0);
+
+      updateProgressBar('cpu-bar', cpuValue);
+      updateProgressBar('memory-bar', memValue);
+      updateProgressBar('disk-bar', diskValue);
+
+      const maxUsage = Math.max(cpuValue, memValue, diskValue);
+      if (maxUsage > 90) {
+        statusEl.className = 'health-indicator critical';
+        statusEl.innerHTML = '<span class="health-dot"></span><span>Critical Load</span>';
+      } else if (maxUsage > 70) {
+        statusEl.className = 'health-indicator warning';
+        statusEl.innerHTML = '<span class="health-dot"></span><span>High Load</span>';
+      } else {
+        statusEl.className = 'health-indicator healthy';
+        statusEl.innerHTML = '<span class="health-dot"></span><span>All Systems Operational</span>';
+      }
+    }
+
+    function updateProgressBar(id, percentage) {
+      const bar = document.getElementById(id);
+      bar.style.width = percentage + '%';
+      bar.className = 'progress-bar-fill';
+      if (percentage > 90) bar.classList.add('danger');
+      else if (percentage > 70) bar.classList.add('warning');
+      else bar.classList.add('success');
+    }
+
+    function formatUptime(seconds) {
+      const days = Math.floor(seconds / 86400);
+      const hours = Math.floor((seconds % 86400) / 3600);
+      const mins = Math.floor((seconds % 3600) / 60);
+      return `${days}d ${hours}h ${mins}m`;
+    }
+
+    async function loadAnalytics() {
+      const startDate = document.getElementById('analytics-start-date')?.value;
+      const endDate = document.getElementById('analytics-end-date')?.value;
+      
+      const params = new URLSearchParams();
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
+      
+      try {
+        const response = await fetch(`/admin/analytics?${params}`, { credentials: 'include' });
+        const data = await response.json();
+        
+        renderUserGrowthChart(data.analytics.userGrowth || []);
+        renderVIPConversionChart(data.analytics.vipConversion || {});
+        renderEndpointUsageChart(data.analytics.endpointUsage || []);
+        renderPeakUsageTable(data.analytics.peakUsage || []);
+      } catch (error) {
+        console.error('Failed to load analytics:', error);
+      }
+    }
+
+    function renderUserGrowthChart(data) {
+      const ctx = document.getElementById('userGrowthChart');
+      if (!ctx) return;
+      
+      if (analyticsCharts.userGrowth) analyticsCharts.userGrowth.destroy();
+      
+      analyticsCharts.userGrowth = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: data.map(d => d.date),
+          datasets: [{
+            label: 'Total Users',
+            data: data.map(d => d.total),
+            borderColor: '#FFA500',
+            backgroundColor: 'rgba(255, 165, 0, 0.1)',
+            tension: 0.4
+          }, {
+            label: 'VIP Users',
+            data: data.map(d => d.vip),
+            borderColor: '#FFD700',
+            backgroundColor: 'rgba(255, 215, 0, 0.1)',
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: '#FFFFFF' } }
+          },
+          scales: {
+            y: { ticks: { color: '#888888' }, grid: { color: '#2A2A2A' } },
+            x: { ticks: { color: '#888888' }, grid: { color: '#2A2A2A' } }
+          }
+        }
+      });
+    }
+
+    function renderVIPConversionChart(data) {
+      const ctx = document.getElementById('vipConversionChart');
+      if (!ctx) return;
+      
+      if (analyticsCharts.vipConversion) analyticsCharts.vipConversion.destroy();
+      
+      analyticsCharts.vipConversion = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: ['Free Users', 'VIP Users'],
+          datasets: [{
+            data: [data.free || 0, data.vip || 0],
+            backgroundColor: ['#888888', '#FFA500']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: '#FFFFFF' } }
+          }
+        }
+      });
+    }
+
+    function renderEndpointUsageChart(data) {
+      const ctx = document.getElementById('endpointUsageChart');
+      if (!ctx) return;
+      
+      if (analyticsCharts.endpointUsage) analyticsCharts.endpointUsage.destroy();
+      
+      analyticsCharts.endpointUsage = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: data.map(d => d.endpoint),
+          datasets: [{
+            label: 'Requests',
+            data: data.map(d => d.count),
+            backgroundColor: '#FFA500'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: '#FFFFFF' } }
+          },
+          scales: {
+            y: { ticks: { color: '#888888' }, grid: { color: '#2A2A2A' } },
+            x: { ticks: { color: '#888888' }, grid: { color: '#2A2A2A' } }
+          }
+        }
+      });
+    }
+
+    function renderPeakUsageTable(data) {
+      const container = document.getElementById('peak-usage-table');
+      if (!container) return;
+      
+      if (data.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 24px;">No peak usage data available</p>';
+        return;
+      }
+      
+      container.innerHTML = `
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Hour</th>
+              <th>Requests</th>
+              <th>Unique Users</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.map(d => `
+              <tr>
+                <td>${d.hour}:00</td>
+                <td>${d.requests}</td>
+                <td>${d.users}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    async function loadVersionInfo() {
+      try {
+        const response = await fetch('/admin/version/current', { credentials: 'include' });
+        const data = await response.json();
+        
+        const container = document.getElementById('current-version-info');
+        if (data.version) {
+          container.innerHTML = `
+            <div class="info-row">
+              <span class="info-label">Version</span>
+              <span class="info-value">${data.version.version}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Name</span>
+              <span class="info-value">${data.version.name || '-'}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Description</span>
+              <span class="info-value">${data.version.description || '-'}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Deployed</span>
+              <span class="info-value">${new Date(data.version.createdAt).toLocaleString()}</span>
+            </div>
+          `;
+        } else {
+          container.innerHTML = '<p style="color: var(--text-muted);">No version information available</p>';
+        }
+      } catch (error) {
+        document.getElementById('current-version-info').innerHTML = '<p style="color: var(--error);">Failed to load version info</p>';
+      }
+    }
+
+    async function loadVersionHistory() {
+      try {
+        const response = await fetch('/admin/version/history', { credentials: 'include' });
+        const data = await response.json();
+        
+        const container = document.getElementById('version-history-list');
+        if (data.versions && data.versions.length > 0) {
+          container.innerHTML = data.versions.map(v => `
+            <div class="version-card">
+              <div class="version-header">
+                <span class="version-number">v${v.version}</span>
+                <button class="btn btn-secondary btn-sm" onclick="rollbackVersion(${v.id})">Rollback</button>
+              </div>
+              <p style="margin-bottom: 4px; font-weight: 600;">${v.name || 'Unnamed'}</p>
+              <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">${v.description || ''}</p>
+              <p style="color: var(--text-muted); font-size: 12px;">${new Date(v.createdAt).toLocaleString()}</p>
+            </div>
+          `).join('');
+        } else {
+          container.innerHTML = '<div class="empty-state"><p>No version history</p></div>';
+        }
+      } catch (error) {
+        document.getElementById('version-history-list').innerHTML = '<div class="empty-state"><p>Failed to load history</p></div>';
+      }
+    }
+
+    function showUpdateVersionModal() {
+      document.getElementById('version-form').reset();
+      document.getElementById('version-modal').classList.add('active');
+    }
+
+    function closeVersionModal() {
+      document.getElementById('version-modal').classList.remove('active');
+    }
+
+    async function saveVersion(event) {
+      event.preventDefault();
+      
+      const data = {
+        version: document.getElementById('version-number').value,
+        name: document.getElementById('version-name').value,
+        description: document.getElementById('version-description').value
+      };
+      
+      try {
+        const response = await fetch('/admin/version', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+          showToast('Version updated successfully!');
+          closeVersionModal();
+          loadVersionInfo();
+          loadVersionHistory();
+        } else {
+          const error = await response.json();
+          showToast(error.error || 'Failed to update version', 'error');
+        }
+      } catch (error) {
+        showToast('Error updating version', 'error');
+      }
+    }
+
+    async function rollbackVersion(id) {
+      if (!confirm('Are you sure you want to rollback to this version?')) return;
+      
+      try {
+        const response = await fetch(`/admin/version/${id}/rollback`, {
+          method: 'POST',
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          showToast('Version rolled back successfully!');
+          loadVersionInfo();
+          loadVersionHistory();
+        } else {
+          showToast('Failed to rollback version', 'error');
+        }
+      } catch (error) {
+        showToast('Error rolling back version', 'error');
+      }
+    }
+
+    let currentLogsPage = 1;
+    const logsPerPage = 50;
+
+    async function loadActivityLogs(page = 1) {
+      currentLogsPage = page;
+      const search = document.getElementById('search-logs')?.value || '';
+      const actionType = document.getElementById('filter-action-type')?.value || '';
+      const startDate = document.getElementById('logs-start-date')?.value || '';
+      const endDate = document.getElementById('logs-end-date')?.value || '';
+      
+      const params = new URLSearchParams({
+        page,
+        limit: logsPerPage,
+        search,
+        actionType,
+        startDate,
+        endDate
+      });
+      
+      try {
+        const response = await fetch(`/admin/activity-logs?${params}`, { credentials: 'include' });
+        const data = await response.json();
+        
+        renderActivityLogsTable(data.logs || []);
+        renderLogsPagination(data.pagination || { total: 0, pages: 1, current: 1 });
+      } catch (error) {
+        document.getElementById('activity-logs-table').innerHTML = '<div class="empty-state"><p>Failed to load logs</p></div>';
+      }
+    }
+
+    function renderActivityLogsTable(logs) {
+      const container = document.getElementById('activity-logs-table');
+      
+      if (logs.length === 0) {
+        container.innerHTML = '<div class="empty-state"><p>No activity logs found</p></div>';
+        return;
+      }
+      
+      container.innerHTML = `
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>User</th>
+              <th>Action</th>
+              <th>Details</th>
+              <th>IP Address</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${logs.map(log => `
+              <tr>
+                <td>${new Date(log.createdAt).toLocaleString()}</td>
+                <td>${log.userEmail || 'System'}</td>
+                <td><span class="badge badge-secondary">${log.action}</span></td>
+                <td>${log.details || '-'}</td>
+                <td><code style="font-size: 12px;">${log.ipAddress || '-'}</code></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function renderLogsPagination(pagination) {
+      const container = document.getElementById('logs-pagination');
+      const pages = [];
+      
+      for (let i = 1; i <= pagination.pages; i++) {
+        pages.push(`
+          <button class="${i === pagination.current ? 'active' : ''}" 
+                  onclick="loadActivityLogs(${i})">${i}</button>
+        `);
+      }
+      
+      container.innerHTML = `
+        <button ${pagination.current === 1 ? 'disabled' : ''} 
+                onclick="loadActivityLogs(${pagination.current - 1})">Previous</button>
+        ${pages.join('')}
+        <button ${pagination.current === pagination.pages ? 'disabled' : ''} 
+                onclick="loadActivityLogs(${pagination.current + 1})">Next</button>
+      `;
+    }
+
+    async function exportLogs() {
+      try {
+        const response = await fetch('/admin/activity-logs/export', { credentials: 'include' });
+        const data = await response.json();
+        
+        const blob = new Blob([JSON.stringify(data.logs, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `activity-logs-${new Date().toISOString()}.json`;
+        a.click();
+        
+        showToast('Logs exported successfully!');
+      } catch (error) {
+        showToast('Failed to export logs', 'error');
+      }
+    }
+
+    async function cleanupOldLogs() {
+      if (!confirm('Delete logs older than 30 days?')) return;
+      
+      try {
+        const response = await fetch('/admin/activity-logs/cleanup', {
+          method: 'DELETE',
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          showToast(`Cleaned up ${data.deleted} old logs`);
+          loadActivityLogs();
+        } else {
+          showToast('Failed to cleanup logs', 'error');
+        }
+      } catch (error) {
+        showToast('Error cleaning up logs', 'error');
+      }
+    }
+
+    async function handleBulkFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const progressDiv = document.getElementById('bulk-upload-progress');
+      progressDiv.style.display = 'block';
+      
+      try {
+        const response = await fetch('/admin/bulk/import', {
+          method: 'POST',
+          credentials: 'include',
+          body: formData
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          document.getElementById('bulk-progress-bar').style.width = '100%';
+          document.getElementById('bulk-progress-text').textContent = '100%';
+          showToast(`Successfully imported ${data.imported} records`);
+          setTimeout(() => progressDiv.style.display = 'none', 2000);
+        } else {
+          showToast('Failed to import file', 'error');
+          progressDiv.style.display = 'none';
+        }
+      } catch (error) {
+        showToast('Error importing file', 'error');
+        progressDiv.style.display = 'none';
+      }
+    }
+
+    async function loadRateLimits() {
+      try {
+        const response = await fetch('/admin/rate-limits', { credentials: 'include' });
+        const data = await response.json();
+        
+        renderRateLimits(data.rateLimits || []);
+      } catch (error) {
+        document.getElementById('rate-limits-list').innerHTML = '<div class="empty-state"><p>Failed to load rate limits</p></div>';
+      }
+    }
+
+    function renderRateLimits(limits) {
+      const container = document.getElementById('rate-limits-list');
+      
+      if (limits.length === 0) {
+        container.innerHTML = '<div class="empty-state"><p>No rate limits configured</p></div>';
+        return;
+      }
+      
+      container.innerHTML = `
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Route</th>
+              <th>Max Requests</th>
+              <th>Window</th>
+              <th>Role</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${limits.map(limit => `
+              <tr>
+                <td><code>${limit.routePattern}</code></td>
+                <td>${limit.maxRequests}</td>
+                <td>${limit.windowMinutes} min</td>
+                <td><span class="badge badge-secondary">${limit.role || 'All'}</span></td>
+                <td>
+                  <div class="action-btns">
+                    <button class="btn btn-icon btn-secondary" onclick="editRateLimit(${limit.id})" title="Edit">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2"/>
+                      </svg>
+                    </button>
+                    <button class="btn btn-icon btn-danger" onclick="deleteRateLimit(${limit.id})" title="Delete">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function showRateLimitModal(limitData = null) {
+      const form = document.getElementById('rate-limit-form');
+      form.reset();
+      
+      if (limitData) {
+        document.getElementById('rate-limit-modal-title').textContent = 'Edit Rate Limit';
+        document.getElementById('rate-limit-id').value = limitData.id;
+        document.getElementById('rate-limit-route').value = limitData.routePattern;
+        document.getElementById('rate-limit-max').value = limitData.maxRequests;
+        document.getElementById('rate-limit-window').value = limitData.windowMinutes;
+        document.getElementById('rate-limit-role').value = limitData.role || '';
+        document.getElementById('rate-limit-description').value = limitData.description || '';
+      } else {
+        document.getElementById('rate-limit-modal-title').textContent = 'Add Rate Limit';
+        document.getElementById('rate-limit-id').value = '';
+      }
+      
+      document.getElementById('rate-limit-modal').classList.add('active');
+    }
+
+    function closeRateLimitModal() {
+      document.getElementById('rate-limit-modal').classList.remove('active');
+    }
+
+    async function saveRateLimit(event) {
+      event.preventDefault();
+      
+      const id = document.getElementById('rate-limit-id').value;
+      const data = {
+        routePattern: document.getElementById('rate-limit-route').value,
+        maxRequests: parseInt(document.getElementById('rate-limit-max').value),
+        windowMinutes: parseInt(document.getElementById('rate-limit-window').value),
+        role: document.getElementById('rate-limit-role').value || null,
+        description: document.getElementById('rate-limit-description').value || null
+      };
+      
+      try {
+        const url = id ? `/admin/rate-limits/${id}` : '/admin/rate-limits';
+        const method = id ? 'PUT' : 'POST';
+        
+        const response = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+          showToast(`Rate limit ${id ? 'updated' : 'created'} successfully!`);
+          closeRateLimitModal();
+          loadRateLimits();
+        } else {
+          showToast('Failed to save rate limit', 'error');
+        }
+      } catch (error) {
+        showToast('Error saving rate limit', 'error');
+      }
+    }
+
+    async function editRateLimit(id) {
+      try {
+        const response = await fetch(`/admin/rate-limits/${id}`, { credentials: 'include' });
+        const data = await response.json();
+        showRateLimitModal(data.rateLimit);
+      } catch (error) {
+        showToast('Failed to load rate limit', 'error');
+      }
+    }
+
+    async function deleteRateLimit(id) {
+      if (!confirm('Delete this rate limit configuration?')) return;
+      
+      try {
+        const response = await fetch(`/admin/rate-limits/${id}`, {
+          method: 'DELETE',
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          showToast('Rate limit deleted successfully!');
+          loadRateLimits();
+        } else {
+          showToast('Failed to delete rate limit', 'error');
+        }
+      } catch (error) {
+        showToast('Error deleting rate limit', 'error');
+      }
+    }
+
+    async function loadIPWhitelist() {
+      try {
+        const response = await fetch('/admin/ip-whitelist', { credentials: 'include' });
+        const data = await response.json();
+        
+        renderIPWhitelist(data.whitelist || []);
+      } catch (error) {
+        document.getElementById('ip-whitelist-list').innerHTML = '<div class="empty-state"><p>Failed to load whitelist</p></div>';
+      }
+    }
+
+    function renderIPWhitelist(whitelist) {
+      const container = document.getElementById('ip-whitelist-list');
+      
+      if (whitelist.length === 0) {
+        container.innerHTML = '<div class="empty-state"><p>No whitelisted IPs</p></div>';
+        return;
+      }
+      
+      container.innerHTML = `
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>IP Address</th>
+              <th>Description</th>
+              <th>Added</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${whitelist.map(ip => `
+              <tr>
+                <td><code>${ip.ipAddress}</code></td>
+                <td>${ip.description || '-'}</td>
+                <td>${new Date(ip.createdAt).toLocaleString()}</td>
+                <td>
+                  <button class="btn btn-icon btn-danger" onclick="deleteIPWhitelist(${ip.id})" title="Delete">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2"/>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function showIPWhitelistModal() {
+      document.getElementById('ip-whitelist-form').reset();
+      document.getElementById('ip-whitelist-modal').classList.add('active');
+    }
+
+    function closeIPWhitelistModal() {
+      document.getElementById('ip-whitelist-modal').classList.remove('active');
+    }
+
+    async function saveIPWhitelist(event) {
+      event.preventDefault();
+      
+      const data = {
+        ipAddress: document.getElementById('ip-address').value,
+        description: document.getElementById('ip-description').value
+      };
+      
+      try {
+        const response = await fetch('/admin/ip-whitelist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+          showToast('IP added to whitelist successfully!');
+          closeIPWhitelistModal();
+          loadIPWhitelist();
+        } else {
+          showToast('Failed to add IP to whitelist', 'error');
+        }
+      } catch (error) {
+        showToast('Error adding IP to whitelist', 'error');
+      }
+    }
+
+    async function deleteIPWhitelist(id) {
+      if (!confirm('Remove this IP from whitelist?')) return;
+      
+      try {
+        const response = await fetch(`/admin/ip-whitelist/${id}`, {
+          method: 'DELETE',
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          showToast('IP removed from whitelist!');
+          loadIPWhitelist();
+        } else {
+          showToast('Failed to remove IP', 'error');
+        }
+      } catch (error) {
+        showToast('Error removing IP', 'error');
+      }
+    }
+
+    async function loadNotificationConfigs() {
+      try {
+        const response = await fetch('/admin/notifications', { credentials: 'include' });
+        const data = await response.json();
+        
+        renderNotificationConfigs(data.notifications || []);
+      } catch (error) {
+        document.getElementById('notification-configs-list').innerHTML = '<div class="empty-state"><p>Failed to load notifications</p></div>';
+      }
+    }
+
+    function renderNotificationConfigs(configs) {
+      const container = document.getElementById('notification-configs-list');
+      
+      if (configs.length === 0) {
+        container.innerHTML = '<div class="empty-state"><p>No notification configurations</p></div>';
+        return;
+      }
+      
+      container.innerHTML = `
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Event</th>
+              <th>Channel</th>
+              <th>Recipient</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${configs.map(config => `
+              <tr>
+                <td><span class="badge badge-secondary">${config.eventType}</span></td>
+                <td>${config.channel}</td>
+                <td>${config.recipient}</td>
+                <td>
+                  <div class="toggle-switch ${config.enabled ? 'active' : ''}" 
+                       onclick="toggleNotification(${config.id}, ${!config.enabled})">
+                    <div class="toggle-switch-slider"></div>
+                  </div>
+                </td>
+                <td>
+                  <div class="action-btns">
+                    <button class="btn btn-icon btn-secondary" onclick="editNotification(${config.id})" title="Edit">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2"/>
+                      </svg>
+                    </button>
+                    <button class="btn btn-icon btn-success" onclick="testNotification(${config.id})" title="Test">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 3l14 9-14 9V3z" fill="currentColor"/>
+                      </svg>
+                    </button>
+                    <button class="btn btn-icon btn-danger" onclick="deleteNotification(${config.id})" title="Delete">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function showNotificationModal(configData = null) {
+      const form = document.getElementById('notification-form');
+      form.reset();
+      
+      if (configData) {
+        document.getElementById('notification-modal-title').textContent = 'Edit Notification Config';
+        document.getElementById('notification-id').value = configData.id;
+        document.getElementById('notification-event').value = configData.eventType;
+        document.getElementById('notification-channel').value = configData.channel;
+        document.getElementById('notification-recipient').value = configData.recipient;
+        document.getElementById('notification-template').value = configData.template || '';
+        document.getElementById('notification-enabled').checked = configData.enabled;
+      } else {
+        document.getElementById('notification-modal-title').textContent = 'Add Notification Config';
+        document.getElementById('notification-id').value = '';
+      }
+      
+      document.getElementById('notification-modal').classList.add('active');
+    }
+
+    function closeNotificationModal() {
+      document.getElementById('notification-modal').classList.remove('active');
+    }
+
+    async function saveNotification(event) {
+      event.preventDefault();
+      
+      const id = document.getElementById('notification-id').value;
+      const data = {
+        eventType: document.getElementById('notification-event').value,
+        channel: document.getElementById('notification-channel').value,
+        recipient: document.getElementById('notification-recipient').value,
+        template: document.getElementById('notification-template').value || null,
+        enabled: document.getElementById('notification-enabled').checked
+      };
+      
+      try {
+        const url = id ? `/admin/notifications/${id}` : '/admin/notifications';
+        const method = id ? 'PUT' : 'POST';
+        
+        const response = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+          showToast(`Notification config ${id ? 'updated' : 'created'} successfully!`);
+          closeNotificationModal();
+          loadNotificationConfigs();
+        } else {
+          showToast('Failed to save notification config', 'error');
+        }
+      } catch (error) {
+        showToast('Error saving notification config', 'error');
+      }
+    }
+
+    async function editNotification(id) {
+      try {
+        const response = await fetch(`/admin/notifications/${id}`, { credentials: 'include' });
+        const data = await response.json();
+        showNotificationModal(data.notification);
+      } catch (error) {
+        showToast('Failed to load notification config', 'error');
+      }
+    }
+
+    async function toggleNotification(id, enabled) {
+      try {
+        const response = await fetch(`/admin/notifications/${id}/toggle`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ enabled })
+        });
+        
+        if (response.ok) {
+          showToast(`Notification ${enabled ? 'enabled' : 'disabled'}!`);
+          loadNotificationConfigs();
+        } else {
+          showToast('Failed to toggle notification', 'error');
+        }
+      } catch (error) {
+        showToast('Error toggling notification', 'error');
+      }
+    }
+
+    async function testNotification(id) {
+      try {
+        const response = await fetch(`/admin/notifications/${id}/test`, {
+          method: 'POST',
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          showToast('Test notification sent successfully!');
+        } else {
+          showToast('Failed to send test notification', 'error');
+        }
+      } catch (error) {
+        showToast('Error sending test notification', 'error');
+      }
+    }
+
+    async function deleteNotification(id) {
+      if (!confirm('Delete this notification configuration?')) return;
+      
+      try {
+        const response = await fetch(`/admin/notifications/${id}`, {
+          method: 'DELETE',
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          showToast('Notification config deleted successfully!');
+          loadNotificationConfigs();
+        } else {
+          showToast('Failed to delete notification config', 'error');
+        }
+      } catch (error) {
+        showToast('Error deleting notification config', 'error');
+      }
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    if (document.getElementById('analytics-start-date')) {
+      document.getElementById('analytics-start-date').value = weekAgo;
+      document.getElementById('analytics-end-date').value = today;
+    }
+
     document.getElementById('search-endpoints')?.addEventListener('input', renderEndpointsTable);
     document.getElementById('filter-category')?.addEventListener('change', renderEndpointsTable);
     document.getElementById('filter-premium')?.addEventListener('change', renderEndpointsTable);
+    document.getElementById('search-logs')?.addEventListener('input', () => loadActivityLogs(1));
 
     checkAuth();
     refreshStats();
