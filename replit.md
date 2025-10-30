@@ -26,6 +26,13 @@ Preferred communication style: Simple, everyday language.
 ## Feature Specifications
 - **Premium Route Management System**: Allows administrators to toggle VIP access for any API endpoint via an admin panel. Features auto-registration of routes, bulk operations, search/filter capabilities, and real-time updates.
 - **VIP Access Protection**: Middleware automatically checks for VIP status, providing detailed error messages and WhatsApp contact links for upgrade requests to non-VIP users.
+- **100% Unrestricted Admin Control** (Updated: Oct 30, 2025):
+  - **No Auto-Downgrade**: Admin-set VIP statuses are never automatically reverted, regardless of expiry dates. System respects admin decisions completely.
+  - **Complete Admin Bypass**: Admin role bypasses all VIP checks and restrictions, providing unrestricted access to all endpoints.
+  - **Force Update Capability**: Admin can force-update any user's role and VIP status without validation or restrictions via `/admin/users/:id/force-update`.
+  - **Bulk Operations**: Admin can update multiple users simultaneously via `/admin/users/bulk-update` endpoint.
+  - **Permanent VIP Option**: Admin can grant VIP with no expiry date (null vipExpiresAt) using the 'permanent' duration option.
+  - **Full Endpoint Control**: Admin can freely toggle any endpoint between free and premium status via `/admin/endpoints/:id/toggle-premium`.
 - **Premium Content Security** (Updated: Oct 2025):
   - **Backend Sanitization**: The `/api/docs` endpoint implements server-side data sanitization to prevent premium endpoint details from being sent to non-VIP users' browsers
   - **Composite Key Lookup**: Uses `${method}:${path}` composite keys to correctly handle endpoints with the same path but different access levels per HTTP method (e.g., GET free, POST premium)
