@@ -811,6 +811,18 @@
               </svg>
               <input type="text" class="search-input" id="search-endpoints" placeholder="Search endpoints...">
             </div>
+            <select class="filter-select" id="filter-category">
+              <option value="">All Categories</option>
+              <option value="dev">Dev</option>
+              <option value="downloader">Downloader</option>
+              <option value="anime">Anime</option>
+              <option value="news">News</option>
+              <option value="tools">Tools</option>
+              <option value="primbon">Primbon</option>
+              <option value="random">Random</option>
+              <option value="image">Image</option>
+              <option value="ai">AI</option>
+            </select>
             <select class="filter-select" id="filter-premium">
               <option value="">All Status</option>
               <option value="true">VIP Only</option>
@@ -977,13 +989,16 @@
       const table = document.getElementById('endpoints-table');
       const search = document.getElementById('search-endpoints').value.toLowerCase();
       const filterPremium = document.getElementById('filter-premium').value;
+      const filterCategory = document.getElementById('filter-category').value.toLowerCase();
       
       let filtered = endpoints.filter(ep => {
         const matchesSearch = ep.path.toLowerCase().includes(search) || 
                             (ep.name && ep.name.toLowerCase().includes(search));
         const matchesPremium = filterPremium === '' || 
                               ep.requiresVIP.toString() === filterPremium;
-        return matchesSearch && matchesPremium;
+        const matchesCategory = filterCategory === '' || 
+                               (ep.category && ep.category.toLowerCase() === filterCategory);
+        return matchesSearch && matchesPremium && matchesCategory;
       });
       
       if (filtered.length === 0) {
@@ -1082,6 +1097,7 @@
     }
 
     document.getElementById('search-endpoints')?.addEventListener('input', renderEndpointsTable);
+    document.getElementById('filter-category')?.addEventListener('change', renderEndpointsTable);
     document.getElementById('filter-premium')?.addEventListener('change', renderEndpointsTable);
 
     checkAuth();
