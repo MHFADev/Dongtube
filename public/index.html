@@ -2090,7 +2090,7 @@
     /* Hamburger Menu Styles */
     .hamburger-menu {
       position: fixed;
-      top: 20px;
+      top: 60px;
       right: 20px;
       z-index: 1000;
       display: none;
@@ -2181,6 +2181,70 @@
       margin-bottom: 24px;
       padding-bottom: 16px;
       border-bottom: 2px solid var(--border);
+    }
+
+    /* Auth Bar Responsive Styles */
+    @media (max-width: 768px) {
+      #authBar {
+        padding: 8px 15px !important;
+        font-size: 12px !important;
+        flex-wrap: wrap;
+      }
+
+      #authStatus {
+        font-size: 11px !important;
+        gap: 6px !important;
+      }
+
+      #authActions {
+        gap: 6px !important;
+      }
+
+      #authActions a,
+      #authActions button {
+        padding: 5px 10px !important;
+        font-size: 11px !important;
+      }
+
+      #userRole {
+        font-size: 9px !important;
+        padding: 2px 6px !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      #authBar {
+        padding: 6px 10px !important;
+        font-size: 11px !important;
+      }
+
+      #authStatus {
+        font-size: 10px !important;
+        max-width: 50%;
+      }
+
+      #authStatus strong {
+        display: inline-block;
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      #authActions {
+        gap: 4px !important;
+        flex-wrap: wrap;
+      }
+
+      #authActions a,
+      #authActions button {
+        padding: 4px 8px !important;
+        font-size: 10px !important;
+      }
+
+      #adminBtn {
+        display: none !important;
+      }
     }
 
     .mobile-menu-title {
