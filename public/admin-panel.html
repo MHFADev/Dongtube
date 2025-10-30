@@ -205,6 +205,8 @@
       justify-content: space-between;
       align-items: center;
       animation: fadeInUp 0.4s ease-out;
+      flex-wrap: wrap;
+      gap: 16px;
     }
 
     .top-bar h2 {
@@ -245,6 +247,26 @@
     .btn-secondary:hover {
       background: var(--bg-card);
       border-color: var(--primary);
+    }
+
+    .btn-danger {
+      background: rgba(255, 68, 68, 0.1);
+      border: 1px solid rgba(255, 68, 68, 0.3);
+      color: var(--error);
+    }
+
+    .btn-danger:hover {
+      background: rgba(255, 68, 68, 0.2);
+    }
+
+    .btn-success {
+      background: rgba(0, 255, 136, 0.1);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      color: var(--success);
+    }
+
+    .btn-success:hover {
+      background: rgba(0, 255, 136, 0.2);
     }
 
     .stats-grid {
@@ -460,6 +482,12 @@
       border: 1px solid rgba(136, 136, 136, 0.3);
     }
 
+    .badge-secondary {
+      background: rgba(136, 136, 136, 0.1);
+      color: var(--text-muted);
+      border: 1px solid rgba(136, 136, 136, 0.3);
+    }
+
     .badge-success {
       background: rgba(0, 255, 136, 0.1);
       color: var(--success);
@@ -579,7 +607,7 @@
       color: var(--text);
     }
 
-    .form-input, .form-select {
+    .form-input, .form-select, .form-textarea {
       width: 100%;
       padding: 12px 16px;
       background: var(--bg-darker);
@@ -591,14 +619,32 @@
       transition: all 0.3s ease;
     }
 
-    .form-input:focus, .form-select:focus {
+    .form-textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
       outline: none;
       border-color: var(--primary);
       background: var(--bg-card);
     }
 
-    .form-input::placeholder {
+    .form-input::placeholder, .form-textarea::placeholder {
       color: var(--text-muted);
+    }
+
+    .checkbox-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .checkbox {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--primary);
     }
 
     .loading {
@@ -619,6 +665,28 @@
 
     @keyframes spin {
       to { transform: rotate(360deg); }
+    }
+
+    .bulk-actions {
+      background: var(--bg-card);
+      border: 1px solid var(--primary);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .bulk-actions.active {
+      display: flex;
+    }
+
+    .bulk-info {
+      color: var(--primary);
+      font-weight: 600;
     }
 
     @media (max-width: 1024px) {
@@ -695,7 +763,7 @@
           <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <span>VIP Endpoints</span>
+        <span>Endpoint Management</span>
       </a>
 
       <a href="admin-users.html" class="nav-item">
@@ -737,7 +805,7 @@
     <div id="dashboard-section">
       <div class="top-bar">
         <h2>Dashboard Overview</h2>
-        <div style="display: flex; gap: 12px;">
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
           <button class="btn btn-secondary" onclick="window.location.href='/admin-users.html'">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -773,15 +841,21 @@
 
     <div id="endpoints-section" style="display: none;">
       <div class="top-bar">
-        <h2>VIP Endpoints Management</h2>
-        <div style="display: flex; gap: 12px;">
-          <button class="btn btn-secondary" onclick="window.location.href='/admin-users.html'">
+        <h2>Endpoint Management</h2>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <button class="btn btn-primary" onclick="showAddEndpointModal()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            Admin Users
+            Add Endpoint
+          </button>
+          <button class="btn btn-secondary" onclick="refreshEndpoints()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M23 4v6h-6M1 20v-6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Refresh
           </button>
           <button class="btn btn-secondary" onclick="window.location.href='/'">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -790,19 +864,37 @@
             </svg>
             Exit Admin
           </button>
-          <button class="btn btn-primary" onclick="refreshEndpoints()">
+        </div>
+      </div>
+
+      <div id="bulk-actions" class="bulk-actions">
+        <span class="bulk-info"><span id="selected-count">0</span> endpoint(s) selected</span>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <button class="btn btn-success" onclick="bulkSetStatus(true)">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M23 4v6h-6M1 20v-6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor"/>
             </svg>
-            Refresh
+            Set to VIP
+          </button>
+          <button class="btn btn-secondary" onclick="bulkSetStatus(false)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            Set to Free
+          </button>
+          <button class="btn btn-danger" onclick="clearSelection()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Clear Selection
           </button>
         </div>
       </div>
 
       <div class="section-card">
         <div class="section-header">
-          <h3 class="section-title">Endpoints</h3>
+          <h3 class="section-title">All Endpoints</h3>
           <div class="controls">
             <div class="search-box">
               <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -813,15 +905,6 @@
             </div>
             <select class="filter-select" id="filter-category">
               <option value="">All Categories</option>
-              <option value="dev">Dev</option>
-              <option value="downloader">Downloader</option>
-              <option value="anime">Anime</option>
-              <option value="news">News</option>
-              <option value="tools">Tools</option>
-              <option value="primbon">Primbon</option>
-              <option value="random">Random</option>
-              <option value="image">Image</option>
-              <option value="ai">AI</option>
             </select>
             <select class="filter-select" id="filter-premium">
               <option value="">All Status</option>
@@ -841,10 +924,79 @@
     </div>
   </div>
 
+  <div class="modal" id="edit-endpoint-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-title">Edit Endpoint</h3>
+        <button class="btn-close" onclick="closeEditModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      <form id="endpoint-form" onsubmit="saveEndpoint(event)">
+        <input type="hidden" id="endpoint-id">
+        
+        <div class="form-group">
+          <label class="form-label">Path *</label>
+          <input type="text" id="endpoint-path" class="form-input" placeholder="/api/example" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Method *</label>
+          <select id="endpoint-method" class="form-select" required>
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+            <option value="PUT">PUT</option>
+            <option value="DELETE">DELETE</option>
+            <option value="ALL">ALL</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Name</label>
+          <input type="text" id="endpoint-name" class="form-input" placeholder="Endpoint name">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <input type="text" id="endpoint-category" class="form-input" placeholder="e.g., downloader, anime, tools">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea id="endpoint-description" class="form-textarea" placeholder="Endpoint description"></textarea>
+        </div>
+
+        <div class="form-group">
+          <div class="checkbox-wrapper">
+            <input type="checkbox" id="endpoint-vip" class="checkbox">
+            <label class="form-label" for="endpoint-vip" style="margin: 0;">Requires VIP Access</label>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 24px;">
+          <button type="submit" class="btn btn-primary" style="flex: 1;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <polyline points="20 6 9 17 4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Save
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="closeEditModal()">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
     let currentSection = 'dashboard';
     let endpoints = [];
     let stats = {};
+    let selectedEndpoints = new Set();
+    let currentEndpointId = null;
 
     document.querySelectorAll('.nav-item[data-section]').forEach(item => {
       item.addEventListener('click', (e) => {
@@ -865,6 +1017,7 @@
       
       if (section === 'endpoints' && endpoints.length === 0) {
         loadEndpoints();
+        loadCategories();
       }
     }
 
@@ -969,12 +1122,36 @@
       }
     }
 
+    async function loadCategories() {
+      try {
+        const response = await fetch('/admin/categories', {
+          credentials: 'include'
+        });
+        const data = await response.json();
+        
+        const select = document.getElementById('filter-category');
+        const currentValue = select.value;
+        
+        select.innerHTML = '<option value="">All Categories</option>';
+        data.categories.forEach(cat => {
+          const option = document.createElement('option');
+          option.value = cat;
+          option.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+          select.appendChild(option);
+        });
+        
+        select.value = currentValue;
+      } catch (error) {
+        console.error('Failed to load categories:', error);
+      }
+    }
+
     async function loadEndpoints() {
       const table = document.getElementById('endpoints-table');
       table.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading endpoints...</p></div>';
       
       try {
-        const response = await fetch('/admin/endpoints/all', {
+        const response = await fetch('/admin/endpoints/all?limit=1000', {
           credentials: 'include'
         });
         const data = await response.json();
@@ -993,7 +1170,8 @@
       
       let filtered = endpoints.filter(ep => {
         const matchesSearch = ep.path.toLowerCase().includes(search) || 
-                            (ep.name && ep.name.toLowerCase().includes(search));
+                            (ep.name && ep.name.toLowerCase().includes(search)) ||
+                            (ep.description && ep.description.toLowerCase().includes(search));
         const matchesPremium = filterPremium === '' || 
                               ep.requiresVIP.toString() === filterPremium;
         const matchesCategory = filterCategory === '' || 
@@ -1019,21 +1197,34 @@
         <table class="data-table">
           <thead>
             <tr>
+              <th width="40">
+                <input type="checkbox" class="checkbox" onchange="toggleSelectAll(this)" id="select-all">
+              </th>
               <th>Path</th>
               <th>Method</th>
               <th>Name</th>
+              <th>Category</th>
               <th>Status</th>
-              <th>Actions</th>
+              <th width="120">Actions</th>
             </tr>
           </thead>
           <tbody>
             ${filtered.map(ep => `
               <tr>
-                <td><code>${ep.path}</code></td>
+                <td>
+                  <input type="checkbox" class="checkbox endpoint-checkbox" data-id="${ep.id}" 
+                    ${selectedEndpoints.has(ep.id) ? 'checked' : ''} 
+                    onchange="toggleEndpointSelection(${ep.id}, this.checked)">
+                </td>
+                <td><code style="font-size: 12px;">${ep.path}</code></td>
                 <td><span class="badge badge-secondary">${ep.method}</span></td>
                 <td>${ep.name || '-'}</td>
+                <td>${ep.category ? '<span class="badge badge-secondary">' + ep.category + '</span>' : '-'}</td>
                 <td>
-                  <span class="badge ${ep.requiresVIP ? 'badge-vip' : 'badge-free'}">
+                  <span class="badge ${ep.requiresVIP ? 'badge-vip' : 'badge-free'}" 
+                    style="cursor: pointer;" 
+                    onclick="quickTogglePremium(${ep.id})"
+                    title="Click to toggle">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       ${ep.requiresVIP ? 
                         '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor"/>' :
@@ -1045,9 +1236,16 @@
                 </td>
                 <td>
                   <div class="action-btns">
-                    <button class="btn btn-icon btn-secondary" onclick="togglePremium(${ep.id}, ${!ep.requiresVIP})" title="Toggle Premium">
+                    <button class="btn btn-icon btn-secondary" onclick="showEditModal(${ep.id})" title="Edit">
                       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </button>
+                    <button class="btn btn-icon btn-danger" onclick="deleteEndpoint(${ep.id})" title="Delete">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                       </svg>
                     </button>
                   </div>
@@ -1057,19 +1255,108 @@
           </tbody>
         </table>
       `;
+
+      updateBulkActions();
     }
 
-    async function togglePremium(id, makeVIP) {
-      if (!confirm(`Are you sure you want to make this endpoint ${makeVIP ? 'PREMIUM' : 'FREE'}?`)) {
+    function toggleSelectAll(checkbox) {
+      const checkboxes = document.querySelectorAll('.endpoint-checkbox');
+      checkboxes.forEach(cb => {
+        const id = parseInt(cb.dataset.id);
+        if (checkbox.checked) {
+          selectedEndpoints.add(id);
+          cb.checked = true;
+        } else {
+          selectedEndpoints.delete(id);
+          cb.checked = false;
+        }
+      });
+      updateBulkActions();
+    }
+
+    function toggleEndpointSelection(id, checked) {
+      if (checked) {
+        selectedEndpoints.add(id);
+      } else {
+        selectedEndpoints.delete(id);
+        document.getElementById('select-all').checked = false;
+      }
+      updateBulkActions();
+    }
+
+    function updateBulkActions() {
+      const bulkActions = document.getElementById('bulk-actions');
+      const count = selectedEndpoints.size;
+      document.getElementById('selected-count').textContent = count;
+      
+      if (count > 0) {
+        bulkActions.classList.add('active');
+      } else {
+        bulkActions.classList.remove('active');
+      }
+    }
+
+    function clearSelection() {
+      selectedEndpoints.clear();
+      document.querySelectorAll('.endpoint-checkbox').forEach(cb => cb.checked = false);
+      document.getElementById('select-all').checked = false;
+      updateBulkActions();
+    }
+
+    async function bulkSetStatus(requiresVIP) {
+      if (selectedEndpoints.size === 0) {
+        alert('No endpoints selected');
         return;
       }
-      
+
+      const status = requiresVIP ? 'PREMIUM/VIP' : 'FREE';
+      if (!confirm(`Set ${selectedEndpoints.size} endpoint(s) to ${status}?`)) {
+        return;
+      }
+
+      try {
+        const response = await fetch('/admin/endpoints/bulk-premium', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            ids: Array.from(selectedEndpoints),
+            requiresVIP
+          })
+        });
+
+        if (response.ok) {
+          await loadEndpoints();
+          await refreshStats();
+          clearSelection();
+          alert(`Successfully updated ${selectedEndpoints.size} endpoint(s) to ${status}`);
+        } else {
+          alert('Failed to update endpoints');
+        }
+      } catch (error) {
+        alert('Error updating endpoints');
+      }
+    }
+
+    async function quickTogglePremium(id) {
+      const endpoint = endpoints.find(e => e.id === id);
+      if (!endpoint) return;
+
+      const newStatus = !endpoint.requiresVIP;
+      const statusText = newStatus ? 'PREMIUM/VIP' : 'FREE';
+
+      if (!confirm(`Change "${endpoint.path}" to ${statusText}?`)) {
+        return;
+      }
+
       try {
         const response = await fetch(`/admin/endpoints/${id}/toggle-premium`, {
           method: 'PUT',
           credentials: 'include'
         });
-        
+
         if (response.ok) {
           await loadEndpoints();
           await refreshStats();
@@ -1081,8 +1368,114 @@
       }
     }
 
+    function showAddEndpointModal() {
+      currentEndpointId = null;
+      document.getElementById('modal-title').textContent = 'Add New Endpoint';
+      document.getElementById('endpoint-form').reset();
+      document.getElementById('endpoint-id').value = '';
+      document.getElementById('edit-endpoint-modal').classList.add('active');
+    }
+
+    function showEditModal(id) {
+      const endpoint = endpoints.find(e => e.id === id);
+      if (!endpoint) return;
+
+      currentEndpointId = id;
+      document.getElementById('modal-title').textContent = 'Edit Endpoint';
+      document.getElementById('endpoint-id').value = id;
+      document.getElementById('endpoint-path').value = endpoint.path || '';
+      document.getElementById('endpoint-method').value = endpoint.method || 'GET';
+      document.getElementById('endpoint-name').value = endpoint.name || '';
+      document.getElementById('endpoint-category').value = endpoint.category || '';
+      document.getElementById('endpoint-description').value = endpoint.description || '';
+      document.getElementById('endpoint-vip').checked = endpoint.requiresVIP || false;
+      document.getElementById('edit-endpoint-modal').classList.add('active');
+    }
+
+    function closeEditModal() {
+      document.getElementById('edit-endpoint-modal').classList.remove('active');
+      currentEndpointId = null;
+    }
+
+    async function saveEndpoint(event) {
+      event.preventDefault();
+
+      const id = document.getElementById('endpoint-id').value;
+      const data = {
+        path: document.getElementById('endpoint-path').value,
+        method: document.getElementById('endpoint-method').value,
+        name: document.getElementById('endpoint-name').value || null,
+        category: document.getElementById('endpoint-category').value || null,
+        description: document.getElementById('endpoint-description').value || null,
+        requiresVIP: document.getElementById('endpoint-vip').checked
+      };
+
+      try {
+        let response;
+        if (id) {
+          response = await fetch(`/admin/endpoints/${id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify(data)
+          });
+        } else {
+          response = await fetch('/admin/vip-endpoints', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify(data)
+          });
+        }
+
+        if (response.ok) {
+          closeEditModal();
+          await loadEndpoints();
+          await loadCategories();
+          await refreshStats();
+          alert(`Endpoint ${id ? 'updated' : 'created'} successfully`);
+        } else {
+          const error = await response.json();
+          alert(`Failed to save endpoint: ${error.error || 'Unknown error'}`);
+        }
+      } catch (error) {
+        alert('Error saving endpoint');
+      }
+    }
+
+    async function deleteEndpoint(id) {
+      const endpoint = endpoints.find(e => e.id === id);
+      if (!endpoint) return;
+
+      if (!confirm(`Delete endpoint "${endpoint.path}"?\n\nThis action cannot be undone.`)) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`/admin/vip-endpoints/${id}`, {
+          method: 'DELETE',
+          credentials: 'include'
+        });
+
+        if (response.ok) {
+          await loadEndpoints();
+          await refreshStats();
+          alert('Endpoint deleted successfully');
+        } else {
+          alert('Failed to delete endpoint');
+        }
+      } catch (error) {
+        alert('Error deleting endpoint');
+      }
+    }
+
     async function refreshEndpoints() {
       await loadEndpoints();
+      await loadCategories();
     }
 
     function logout() {

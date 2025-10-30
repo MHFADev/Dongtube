@@ -338,7 +338,7 @@ router.get('/admin/vip-endpoints', authenticate, authorize('admin'), async (req,
 
 router.post('/admin/vip-endpoints', authenticate, authorize('admin'), async (req, res) => {
   try {
-    const { path, method, description, requiresVIP } = req.body;
+    const { path, method, description, requiresVIP, name, category } = req.body;
 
     if (!path) {
       return res.status(400).json({
@@ -356,7 +356,9 @@ router.post('/admin/vip-endpoints', authenticate, authorize('admin'), async (req
     if (existingEndpoint) {
       await existingEndpoint.update({ 
         requiresVIP: requiresVIP !== undefined ? requiresVIP : true,
-        description: description || existingEndpoint.description
+        description: description || existingEndpoint.description,
+        name: name !== undefined ? name : existingEndpoint.name,
+        category: category !== undefined ? category : existingEndpoint.category
       });
 
       refreshVIPCache();
@@ -372,7 +374,9 @@ router.post('/admin/vip-endpoints', authenticate, authorize('admin'), async (req
       path,
       method: endpointMethod,
       description: description || null,
-      requiresVIP: requiresVIP !== undefined ? requiresVIP : true
+      requiresVIP: requiresVIP !== undefined ? requiresVIP : true,
+      name: name || null,
+      category: category || null
     });
 
     refreshVIPCache();

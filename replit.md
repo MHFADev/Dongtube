@@ -21,7 +21,16 @@ Preferred communication style: Simple, everyday language.
 - **Enhanced Media Preview System**: Features a modern glassmorphism UI with animated gradients, responsive grid layouts, custom audio player with waveform animation, image gallery, and fullscreen modal for media display. Includes advanced media type detection and actions like download and URL copy.
 - **Accessibility**: Includes `prefers-reduced-motion` support.
 - **Social Media Integration**: Implements Open Graph and Twitter Card tags, along with SEO meta tags, for improved shareability and search engine visibility.
-- **Admin Panel**: A modern web interface (`/admin-panel.html`) for managing premium routes, users, and viewing statistics, requiring admin login. Features prominent navigation buttons for quick access to user management and site exit, plus category-based endpoint filtering.
+- **Powerful Admin Panel** (Updated: Oct 30, 2025):
+  - **Endpoint Management Dashboard**: Full-featured interface (`/admin-panel.html`) for managing all API endpoints with complete CRUD operations
+  - **Bulk Operations**: Select multiple endpoints with checkboxes and batch update their VIP/Free status simultaneously
+  - **Inline Status Toggle**: Quick one-click toggle to change endpoint status between VIP and Free directly from the table
+  - **Add/Edit/Delete Endpoints**: Modal-based forms for creating new endpoints or editing existing ones with full field support (path, method, name, category, description, VIP status)
+  - **Advanced Filtering**: Real-time search across endpoint paths/names/descriptions with category and status filters
+  - **Auto-loading Categories**: Dynamic category filter that automatically populates from database
+  - **Statistics Dashboard**: Real-time display of total users, VIP users, premium endpoints, and free endpoints
+  - **Full Access Control**: Admin authentication required, with prominent navigation to user management and site exit
+  - **Responsive Design**: Optimized for desktop and mobile devices with modern glassmorphism UI
 
 ## Feature Specifications
 - **Premium Route Management System**: Allows administrators to toggle VIP access for any API endpoint via an admin panel. Features auto-registration of routes, bulk operations, search/filter capabilities, and real-time updates.
