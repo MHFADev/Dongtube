@@ -86,9 +86,13 @@ export const checkVIPAccess = async (req, res, next) => {
           attributes: ['id', 'email', 'role', 'vipExpiresAt']
         });
         
-        if (user && user.role === 'admin') {
+        if (user) {
+          if (user.role === 'admin') {
+            req.user = user;
+            return next();
+          }
+          
           req.user = user;
-          return next();
         }
       } catch (err) {
       }
@@ -168,7 +172,12 @@ export const checkVIPAccess = async (req, res, next) => {
       });
     }
 
-    if (user.role !== 'vip' && user.role !== 'admin') {
+    if (user.role === 'admin') {
+      req.user = user;
+      return next();
+    }
+
+    if (user.role !== 'vip') {
       return res.status(403).json({
         success: false,
         error: '⭐ Upgrade ke VIP Required',
@@ -181,7 +190,8 @@ export const checkVIPAccess = async (req, res, next) => {
         },
         user: {
           email: user.email,
-          currentRole: user.role
+          currentRole: user.role,
+          isAuthenticated: true
         },
         upgrade: {
           whatsapp: adminWhatsApp,

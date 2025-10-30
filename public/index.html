@@ -3037,7 +3037,7 @@
 </head>
 <body>
   <!-- Auth Status Bar -->
-  <div id="authBar" style="position: fixed; top: 0; left: 0; right: 0; z-index: 9999; background: rgba(26, 26, 26, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255, 165, 0, 0.3); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; font-size: 14px;">
+  <div id="authBar" style="position: fixed; top: 0; left: 0; right: 0; z-index: 999; background: rgba(26, 26, 26, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255, 165, 0, 0.3); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; font-size: 14px;">
     <div id="authStatus" style="display: flex; align-items: center; gap: 10px;">
       <span id="authLoading" style="color: #888;">Checking authentication...</span>
       <span id="authUser" style="display: none; color: #fff;">
@@ -3343,9 +3343,9 @@
             position: relative;
             z-index: 1;
           ">
-            ${currentUser ? 
+            ${currentUser && currentUser.email ? 
               `<strong style="color: var(--text);">${currentUser.email}</strong>, endpoint ini memerlukan akses VIP.<br>Upgrade sekarang untuk mengakses <strong>semua fitur premium</strong>!` :
-              `Anda harus <strong>login</strong> dan memiliki akses <strong>VIP</strong> untuk menggunakan endpoint ini.<br><a href="/login.html" style="color: var(--primary); text-decoration: underline;">Login</a> atau <a href="/signup.html" style="color: var(--primary); text-decoration: underline;">Daftar</a> terlebih dahulu.`
+              `Anda harus <strong>login</strong> terlebih dahulu untuk menggunakan endpoint premium ini.<br><a href="/login.html" style="color: var(--primary); text-decoration: underline;">Login</a> atau <a href="/signup.html" style="color: var(--primary); text-decoration: underline;">Daftar</a> untuk melanjutkan.`
             }
           </p>
           
@@ -4302,6 +4302,8 @@ print(data)`;
             if (data && data.vipRequired === true) {
               console.log('Premium endpoint detected:', data);
               
+              const isAuthenticated = data.user?.isAuthenticated === true || currentUser !== null;
+              
               const errorData = {
                 endpoint: {
                   name: data.endpoint?.name || data.message || 'Premium Endpoint',
@@ -4310,7 +4312,7 @@ print(data)`;
                 upgrade: {
                   whatsappUrl: data.whatsappUrl || data.upgrade?.whatsappUrl || 'https://wa.me/6281234567890?text=Halo,%20saya%20ingin%20upgrade%20ke%20VIP'
                 },
-                user: data.user || null
+                user: isAuthenticated ? (data.user || currentUser) : null
               };
               
               setTimeout(() => {
@@ -4687,6 +4689,27 @@ print(data)`;
       }
       if (isPlaying) {
         bgMusic.pause();
+      }
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        if (isPlaying) {
+          bgMusic.pause();
+          if (vinylDisc) vinylDisc.classList.remove('spinning');
+          if (vinylDiscMobile) vinylDiscMobile.classList.remove('spinning');
+        }
+        if (isSpeaking) {
+          stopSpeaking();
+        }
+      } else {
+        if (isPlaying) {
+          bgMusic.play().catch(err => {
+            console.log('Failed to resume playback:', err);
+          });
+          if (vinylDisc) vinylDisc.classList.add('spinning');
+          if (vinylDiscMobile) vinylDiscMobile.classList.add('spinning');
+        }
       }
     });
 
