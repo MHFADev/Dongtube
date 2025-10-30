@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Panel - Dongtube API</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -11,467 +12,650 @@
       box-sizing: border-box;
     }
 
+    :root {
+      --primary: #FFA500;
+      --primary-light: #FFB733;
+      --secondary: #FFD700;
+      --bg-dark: #0D0D0D;
+      --bg-darker: #080808;
+      --bg-card: #1A1A1A;
+      --text: #FFFFFF;
+      --text-muted: #888888;
+      --border: #2A2A2A;
+      --success: #00FF88;
+      --error: #FF4444;
+    }
+
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      color: #fff;
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text);
+      line-height: 1.6;
       min-height: 100vh;
-      overflow-x: hidden;
     }
 
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 20px;
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
-    .login-container {
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+    }
+
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 280px;
+      height: 100vh;
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      padding: 32px 0;
+      z-index: 100;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-header {
+      padding: 0 24px 32px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-logo {
       display: flex;
-      justify-content: center;
       align-items: center;
-      min-height: 100vh;
+      gap: 12px;
     }
 
-    .login-box {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
-      padding: 40px;
-      width: 100%;
-      max-width: 400px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    .sidebar-logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .login-box h1 {
-      font-size: 32px;
-      margin-bottom: 10px;
-      background: linear-gradient(135deg, #ff6b6b, #ffa500);
+    .sidebar-logo h1 {
+      font-size: 20px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
 
-    .login-box p {
-      color: rgba(255, 255, 255, 0.7);
-      margin-bottom: 30px;
+    .sidebar-nav {
+      padding: 24px 0;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 24px;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 165, 0, 0.1);
+      color: var(--text);
+    }
+
+    .nav-item.active {
+      background: rgba(255, 165, 0, 0.1);
+      color: var(--primary);
+      border-left-color: var(--primary);
+    }
+
+    .nav-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .sidebar-footer {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: var(--bg-dark);
+    }
+
+    .user-info h4 {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .user-info p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .btn-logout {
+      width: 100%;
+      padding: 10px;
+      background: rgba(255, 68, 68, 0.1);
+      border: 1px solid rgba(255, 68, 68, 0.3);
+      border-radius: 8px;
+      color: var(--error);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-logout:hover {
+      background: rgba(255, 68, 68, 0.2);
+    }
+
+    .main-content {
+      margin-left: 280px;
+      padding: 32px;
+      min-height: 100vh;
+    }
+
+    .top-bar {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: fadeInUp 0.4s ease-out;
+    }
+
+    .top-bar h2 {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: var(--bg-dark);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(255, 165, 0, 0.4);
+    }
+
+    .btn-secondary {
+      background: var(--bg-darker);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-card);
+      border-color: var(--primary);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      transition: all 0.3s ease;
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--primary);
+      box-shadow: 0 12px 32px rgba(255, 165, 0, 0.2);
+    }
+
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      background: rgba(255, 165, 0, 0.1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .stat-icon svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .section-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      position: relative;
+      flex: 1;
+      min-width: 250px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px 16px 10px 44px;
+      background: var(--bg-darker);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: var(--bg-card);
+    }
+
+    .search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .filter-select {
+      padding: 10px 16px;
+      background: var(--bg-darker);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .filter-select:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 8px;
+    }
+
+    .data-table thead th {
+      text-align: left;
+      padding: 12px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .data-table tbody tr {
+      background: var(--bg-darker);
+      transition: all 0.3s ease;
+    }
+
+    .data-table tbody tr:hover {
+      background: rgba(255, 165, 0, 0.05);
+      transform: scale(1.01);
+    }
+
+    .data-table tbody td {
+      padding: 16px;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .data-table tbody td:first-child {
+      border-left: 1px solid var(--border);
+      border-top-left-radius: 8px;
+      border-bottom-left-radius: 8px;
+    }
+
+    .data-table tbody td:last-child {
+      border-right: 1px solid var(--border);
+      border-top-right-radius: 8px;
+      border-bottom-right-radius: 8px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge-vip {
+      background: rgba(255, 165, 0, 0.1);
+      color: var(--primary);
+      border: 1px solid rgba(255, 165, 0, 0.3);
+    }
+
+    .badge-free {
+      background: rgba(136, 136, 136, 0.1);
+      color: var(--text-muted);
+      border: 1px solid rgba(136, 136, 136, 0.3);
+    }
+
+    .badge-success {
+      background: rgba(0, 255, 136, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+    }
+
+    .badge-error {
+      background: rgba(255, 68, 68, 0.1);
+      color: var(--error);
+      border: 1px solid rgba(255, 68, 68, 0.3);
+    }
+
+    .action-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-icon {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+    }
+
+    .btn-icon svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 64px 24px;
+      color: var(--text-muted);
+    }
+
+    .empty-state svg {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 16px;
+      opacity: 0.3;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: fadeInUp 0.4s ease-out;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .btn-close {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      background: rgba(255, 68, 68, 0.1);
+      border: 1px solid rgba(255, 68, 68, 0.3);
+      color: var(--error);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-close:hover {
+      background: rgba(255, 68, 68, 0.2);
     }
 
     .form-group {
       margin-bottom: 20px;
     }
 
-    .form-group label {
+    .form-label {
       display: block;
-      margin-bottom: 8px;
-      color: rgba(255, 255, 255, 0.9);
+      font-size: 14px;
       font-weight: 500;
+      margin-bottom: 8px;
+      color: var(--text);
     }
 
-    .form-group input {
+    .form-input, .form-select {
       width: 100%;
       padding: 12px 16px;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 10px;
-      color: #fff;
-      font-size: 14px;
-      transition: all 0.3s ease;
-    }
-
-    .form-group input:focus {
-      outline: none;
-      border-color: #ffa500;
-      background: rgba(255, 255, 255, 0.15);
-    }
-
-    .btn {
-      padding: 12px 24px;
-      border: none;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, #ff6b6b, #ffa500);
-      color: #fff;
-      width: 100%;
-      justify-content: center;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(255, 165, 0, 0.4);
-    }
-
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-    }
-
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    .btn-success {
-      background: rgba(34, 197, 94, 0.3);
-      color: #22c55e;
-      border: 1px solid rgba(34, 197, 94, 0.5);
-    }
-
-    .btn-success:hover {
-      background: rgba(34, 197, 94, 0.5);
-      color: #fff;
-    }
-
-    .header {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
-      padding: 20px 30px;
-      margin-bottom: 30px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 20px;
-    }
-
-    .header h1 {
-      font-size: 28px;
-      background: linear-gradient(135deg, #ff6b6b, #ffa500);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      margin-bottom: 30px;
-    }
-
-    .stat-card {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 15px;
-      padding: 20px;
-      transition: transform 0.3s ease;
-    }
-
-    .stat-card:hover {
-      transform: translateY(-5px);
-    }
-
-    .stat-card h3 {
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.7);
-      margin-bottom: 10px;
-    }
-
-    .stat-card .value {
-      font-size: 32px;
-      font-weight: bold;
-      background: linear-gradient(135deg, #ff6b6b, #ffa500);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .controls {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 15px;
-      padding: 20px;
-      margin-bottom: 20px;
-      display: flex;
-      gap: 15px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .search-box {
-      flex: 1;
-      min-width: 200px;
-    }
-
-    .search-box input {
-      width: 100%;
-      padding: 10px 16px;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 10px;
-      color: #fff;
-      font-size: 14px;
-    }
-
-    .search-box input::placeholder {
-      color: rgba(255, 255, 255, 0.5);
-    }
-
-    .filter-group {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    select {
-      padding: 10px 16px;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 10px;
-      color: #fff;
-      font-size: 14px;
-      cursor: pointer;
-    }
-
-    select option {
-      background: #1a1a2e;
-      color: #fff;
-    }
-
-    .table-container {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 15px;
-      overflow: hidden;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    thead {
-      background: rgba(255, 255, 255, 0.05);
-    }
-
-    thead th {
-      padding: 15px;
-      text-align: left;
-      font-weight: 600;
-      color: rgba(255, 255, 255, 0.9);
-      font-size: 14px;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    thead th:hover {
-      background: rgba(255, 255, 255, 0.08);
-    }
-
-    tbody tr {
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      transition: background 0.2s ease;
-    }
-
-    tbody tr:hover {
-      background: rgba(255, 255, 255, 0.05);
-    }
-
-    tbody td {
-      padding: 15px;
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.8);
-    }
-
-    .toggle-switch {
-      position: relative;
-      width: 50px;
-      height: 26px;
-      display: inline-block;
-    }
-
-    .toggle-switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(255, 255, 255, 0.2);
-      transition: 0.3s;
-      border-radius: 26px;
-    }
-
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 18px;
-      width: 18px;
-      left: 4px;
-      bottom: 4px;
-      background-color: white;
-      transition: 0.3s;
-      border-radius: 50%;
-    }
-
-    input:checked + .slider {
-      background: linear-gradient(135deg, #ff6b6b, #ffa500);
-    }
-
-    input:checked + .slider:before {
-      transform: translateX(24px);
-    }
-
-    .badge {
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      display: inline-block;
-    }
-
-    .badge-premium {
-      background: linear-gradient(135deg, #ff6b6b, #ffa500);
-      color: #fff;
-    }
-
-    .badge-free {
-      background: rgba(255, 255, 255, 0.1);
-      color: rgba(255, 255, 255, 0.7);
-    }
-
-    .badge-method {
-      background: rgba(59, 130, 246, 0.3);
-      color: #3b82f6;
-      border: 1px solid rgba(59, 130, 246, 0.5);
-    }
-
-    .pagination {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-      margin-top: 20px;
-      padding: 20px;
-    }
-
-    .page-btn {
-      padding: 8px 12px;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: var(--bg-darker);
+      border: 1px solid var(--border);
       border-radius: 8px;
-      color: #fff;
-      cursor: pointer;
+      color: var(--text);
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
       transition: all 0.3s ease;
     }
 
-    .page-btn:hover:not(:disabled) {
-      background: rgba(255, 255, 255, 0.2);
+    .form-input:focus, .form-select:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: var(--bg-card);
     }
 
-    .page-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .page-btn.active {
-      background: linear-gradient(135deg, #ff6b6b, #ffa500);
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    .alert {
-      padding: 15px 20px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      font-size: 14px;
-      animation: slideIn 0.3s ease;
-    }
-
-    .alert-error {
-      background: rgba(255, 59, 59, 0.2);
-      border: 1px solid rgba(255, 59, 59, 0.5);
-      color: #ff3b3b;
-    }
-
-    .alert-success {
-      background: rgba(34, 197, 94, 0.2);
-      border: 1px solid rgba(34, 197, 94, 0.5);
-      color: #22c55e;
-    }
-
-    @keyframes slideIn {
-      from {
-        transform: translateY(-20px);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
-
-    .bulk-actions {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      padding: 15px;
-      background: rgba(255, 255, 255, 0.03);
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .checkbox {
-      width: 18px;
-      height: 18px;
-      cursor: pointer;
+    .form-input::placeholder {
+      color: var(--text-muted);
     }
 
     .loading {
       text-align: center;
-      padding: 40px;
-      color: rgba(255, 255, 255, 0.7);
+      padding: 32px;
+      color: var(--text-muted);
     }
 
-    .loading::after {
-      content: '...';
-      animation: dots 1.5s steps(4, end) infinite;
+    .spinner {
+      width: 32px;
+      height: 32px;
+      margin: 0 auto 16px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
     }
 
-    @keyframes dots {
-      0%, 20% { content: '.'; }
-      40% { content: '..'; }
-      60%, 100% { content: '...'; }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
 
-    @media (max-width: 768px) {
-      .table-container {
-        overflow-x: auto;
+    @media (max-width: 1024px) {
+      .sidebar {
+        transform: translateX(-100%);
       }
 
-      table {
-        min-width: 800px;
+      .sidebar.active {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .main-content {
+        padding: 16px;
+      }
+
+      .top-bar {
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .section-header {
+        flex-direction: column;
+        align-items: flex-start;
       }
 
       .controls {
-        flex-direction: column;
-        align-items: stretch;
+        width: 100%;
       }
 
       .search-box {
@@ -481,462 +665,393 @@
   </style>
 </head>
 <body>
-  <div id="loginSection" class="login-container">
-    <div class="login-box">
-      <h1>🔐 Admin Panel</h1>
-      <p>Dongtube API Management</p>
-      <div id="loginAlert"></div>
-      <form id="loginForm">
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" placeholder="admin@dongtube.com" required>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#0D0D0D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 17L12 22L22 17" stroke="#0D0D0D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 12L12 17L22 12" stroke="#0D0D0D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" placeholder="••••••••" required>
+        <h1>Dongtube</h1>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" data-section="dashboard">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/>
+          <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/>
+          <rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/>
+          <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        <span>Dashboard</span>
+      </a>
+
+      <a href="#" class="nav-item" data-section="endpoints">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>VIP Endpoints</span>
+      </a>
+
+      <a href="admin-users.html" class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Users</span>
+      </a>
+
+      <a href="/" class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <polyline points="9 22 9 12 15 12 15 22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Back to Site</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-profile">
+        <div class="user-avatar" id="user-avatar">A</div>
+        <div class="user-info">
+          <h4 id="user-email">Loading...</h4>
+          <p>Administrator</p>
         </div>
-        <button type="submit" class="btn btn-primary">
-          Login
-        </button>
-      </form>
+      </div>
+      <button class="btn-logout" onclick="logout()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Logout
+      </button>
     </div>
   </div>
 
-  <div id="dashboardSection" class="hidden">
-    <div class="container">
-      <div class="header">
-        <div>
-          <h1>🎛️ Admin Dashboard</h1>
-          <p style="color: rgba(255, 255, 255, 0.7); margin-top: 5px;">Manage API Endpoints & Premium Access</p>
-        </div>
-        <div class="user-info">
-          <span id="userEmail" style="color: rgba(255, 255, 255, 0.8);"></span>
-          <button class="btn btn-secondary" onclick="logout()">Logout</button>
-        </div>
+  <div class="main-content">
+    <div id="dashboard-section">
+      <div class="top-bar">
+        <h2>Dashboard Overview</h2>
+        <button class="btn btn-primary" onclick="refreshStats()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M23 4v6h-6M1 20v-6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Refresh Stats
+        </button>
       </div>
 
-      <div id="dashboardAlert"></div>
-
-      <div class="stats-grid">
-        <div class="stat-card">
-          <h3>Total Endpoints</h3>
-          <div class="value" id="totalEndpoints">-</div>
-        </div>
-        <div class="stat-card">
-          <h3>Premium Endpoints</h3>
-          <div class="value" id="premiumEndpoints">-</div>
-        </div>
-        <div class="stat-card">
-          <h3>Free Endpoints</h3>
-          <div class="value" id="freeEndpoints">-</div>
-        </div>
-        <div class="stat-card">
-          <h3>VIP Users</h3>
-          <div class="value" id="vipUsers">-</div>
-        </div>
-        <div class="stat-card">
-          <h3>Total Users</h3>
-          <div class="value" id="totalUsers">-</div>
+      <div class="stats-grid" id="stats-grid">
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Loading statistics...</p>
         </div>
       </div>
+    </div>
 
-      <div class="controls">
-        <div class="search-box">
-          <input type="text" id="searchInput" placeholder="🔍 Search endpoints..." onkeyup="searchEndpoints()">
-        </div>
-        <div class="filter-group">
-          <select id="filterPremium" onchange="filterEndpoints()">
-            <option value="">All Status</option>
-            <option value="true">Premium Only</option>
-            <option value="false">Free Only</option>
-          </select>
-          <select id="filterCategory" onchange="filterEndpoints()">
-            <option value="">All Categories</option>
-          </select>
-          <button class="btn btn-secondary" onclick="loadEndpoints()">🔄 Refresh</button>
-          <button class="btn btn-success" onclick="refreshCache()">⚡ Clear Cache</button>
-          <button class="btn btn-secondary" onclick="window.location.href='/admin-users.html'">👥 Manage Users</button>
-        </div>
+    <div id="endpoints-section" style="display: none;">
+      <div class="top-bar">
+        <h2>VIP Endpoints Management</h2>
+        <button class="btn btn-primary" onclick="refreshEndpoints()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M23 4v6h-6M1 20v-6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Refresh
+        </button>
       </div>
 
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th style="width: 40px;">
-                <input type="checkbox" class="checkbox" id="selectAll" onchange="toggleSelectAll()">
-              </th>
-              <th>Endpoint Path</th>
-              <th>Method</th>
-              <th>Name</th>
-              <th>Category</th>
-              <th>Premium</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="endpointsTable">
-            <tr>
-              <td colspan="7" class="loading">Loading endpoints</td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="bulk-actions" id="bulkActions" style="display: none;">
-          <span id="selectedCount">0 selected</span>
-          <button class="btn btn-success" onclick="bulkSetPremium(true)">⭐ Set Premium</button>
-          <button class="btn btn-secondary" onclick="bulkSetPremium(false)">🆓 Set Free</button>
+      <div class="section-card">
+        <div class="section-header">
+          <h3 class="section-title">Endpoints</h3>
+          <div class="controls">
+            <div class="search-box">
+              <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="11" cy="11" r="8" stroke="#888888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M21 21l-4.35-4.35" stroke="#888888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <input type="text" class="search-input" id="search-endpoints" placeholder="Search endpoints...">
+            </div>
+            <select class="filter-select" id="filter-premium">
+              <option value="">All Status</option>
+              <option value="true">VIP Only</option>
+              <option value="false">Free</option>
+            </select>
+          </div>
         </div>
-        <div class="pagination" id="pagination"></div>
+
+        <div class="table-container" id="endpoints-table">
+          <div class="loading">
+            <div class="spinner"></div>
+            <p>Loading endpoints...</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
-    let token = localStorage.getItem('adminToken');
-    let currentUser = null;
-    let allEndpoints = [];
-    let filteredEndpoints = [];
-    let currentPage = 1;
-    let itemsPerPage = 20;
-    let selectedIds = new Set();
+    let currentSection = 'dashboard';
+    let endpoints = [];
+    let stats = {};
 
-    if (token) {
-      showDashboard();
-    } else {
-      document.getElementById('loginSection').classList.remove('hidden');
-    }
-
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      await login();
+    document.querySelectorAll('.nav-item[data-section]').forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        const section = item.dataset.section;
+        switchSection(section);
+      });
     });
 
-    async function login() {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-
-      try {
-        const response = await fetch('/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-          if (data.user.role !== 'admin') {
-            showAlert('loginAlert', 'Only admin users can access this panel', 'error');
-            return;
-          }
-
-          token = data.token;
-          currentUser = data.user;
-          localStorage.setItem('adminToken', token);
-          showDashboard();
-        } else {
-          showAlert('loginAlert', data.error || 'Login failed', 'error');
-        }
-      } catch (error) {
-        showAlert('loginAlert', 'Network error: ' + error.message, 'error');
+    function switchSection(section) {
+      currentSection = section;
+      
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      document.querySelector(`[data-section="${section}"]`).classList.add('active');
+      
+      document.getElementById('dashboard-section').style.display = section === 'dashboard' ? 'block' : 'none';
+      document.getElementById('endpoints-section').style.display = section === 'endpoints' ? 'block' : 'none';
+      
+      if (section === 'endpoints' && endpoints.length === 0) {
+        loadEndpoints();
       }
     }
 
-    function logout() {
-      token = null;
-      currentUser = null;
-      localStorage.removeItem('adminToken');
-      document.getElementById('loginSection').classList.remove('hidden');
-      document.getElementById('dashboardSection').classList.add('hidden');
+    async function checkAuth() {
+      try {
+        const response = await fetch('/auth/me', {
+          credentials: 'include'
+        });
+        
+        if (!response.ok) {
+          window.location.href = '/login.html';
+          return;
+        }
+        
+        const data = await response.json();
+        if (data.user.role !== 'admin') {
+          window.location.href = '/';
+          return;
+        }
+        
+        document.getElementById('user-email').textContent = data.user.email;
+        document.getElementById('user-avatar').textContent = data.user.email.charAt(0).toUpperCase();
+      } catch (error) {
+        window.location.href = '/login.html';
+      }
     }
 
-    function showDashboard() {
-      document.getElementById('loginSection').classList.add('hidden');
-      document.getElementById('dashboardSection').classList.remove('hidden');
-      loadStats();
-      loadEndpoints();
-      loadCategories();
-    }
-
-    async function loadStats() {
+    async function refreshStats() {
+      const grid = document.getElementById('stats-grid');
+      grid.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading statistics...</p></div>';
+      
       try {
         const response = await fetch('/admin/stats', {
-          headers: { 'Authorization': `Bearer ${token}` }
+          credentials: 'include'
         });
-
         const data = await response.json();
-
-        if (data.success) {
-          document.getElementById('totalEndpoints').textContent = data.stats.totalEndpoints || 0;
-          document.getElementById('premiumEndpoints').textContent = data.stats.totalVIPEndpoints || 0;
-          document.getElementById('freeEndpoints').textContent = data.stats.freeEndpoints || 0;
-          document.getElementById('vipUsers').textContent = data.stats.vipUsers || 0;
-          document.getElementById('totalUsers').textContent = data.stats.totalUsers || 0;
-        }
+        stats = data.stats;
+        
+        grid.innerHTML = `
+          <div class="stat-card">
+            <div class="stat-header">
+              <div>
+                <div class="stat-label">Total Users</div>
+                <div class="stat-value">${stats.totalUsers || 0}</div>
+              </div>
+              <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="#FFA500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <circle cx="9" cy="7" r="4" stroke="#FFA500" stroke-width="2"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="#FFA500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-header">
+              <div>
+                <div class="stat-label">VIP Users</div>
+                <div class="stat-value">${stats.vipUsers || 0}</div>
+              </div>
+              <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" stroke="#FFA500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-header">
+              <div>
+                <div class="stat-label">Premium Endpoints</div>
+                <div class="stat-value">${stats.totalVIPEndpoints || 0}</div>
+              </div>
+              <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke="#FFA500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke="#FFA500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-header">
+              <div>
+                <div class="stat-label">Free Endpoints</div>
+                <div class="stat-value">${stats.freeEndpoints || 0}</div>
+              </div>
+              <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="10" stroke="#FFA500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M12 6v6l4 2" stroke="#FFA500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        `;
       } catch (error) {
-        console.error('Failed to load stats:', error);
+        grid.innerHTML = '<div class="empty-state"><p>Failed to load statistics</p></div>';
       }
     }
 
     async function loadEndpoints() {
+      const table = document.getElementById('endpoints-table');
+      table.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading endpoints...</p></div>';
+      
       try {
-        const response = await fetch('/admin/endpoints/all?limit=1000', {
-          headers: { 'Authorization': `Bearer ${token}` }
+        const response = await fetch('/admin/endpoints/all', {
+          credentials: 'include'
         });
-
         const data = await response.json();
-
-        if (data.success) {
-          allEndpoints = data.endpoints;
-          filteredEndpoints = [...allEndpoints];
-          renderEndpoints();
-        }
+        endpoints = data.endpoints || [];
+        renderEndpointsTable();
       } catch (error) {
-        console.error('Failed to load endpoints:', error);
-        showAlert('dashboardAlert', 'Failed to load endpoints', 'error');
+        table.innerHTML = '<div class="empty-state"><p>Failed to load endpoints</p></div>';
       }
     }
 
-    async function loadCategories() {
-      try {
-        const response = await fetch('/admin/categories', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-          const select = document.getElementById('filterCategory');
-          select.innerHTML = '<option value="">All Categories</option>';
-          data.categories.forEach(cat => {
-            const option = document.createElement('option');
-            option.value = cat;
-            option.textContent = cat;
-            select.appendChild(option);
-          });
-        }
-      } catch (error) {
-        console.error('Failed to load categories:', error);
-      }
-    }
-
-    function renderEndpoints() {
-      const tbody = document.getElementById('endpointsTable');
-      const start = (currentPage - 1) * itemsPerPage;
-      const end = start + itemsPerPage;
-      const pageEndpoints = filteredEndpoints.slice(start, end);
-
-      if (pageEndpoints.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: rgba(255,255,255,0.5);">No endpoints found</td></tr>';
+    function renderEndpointsTable() {
+      const table = document.getElementById('endpoints-table');
+      const search = document.getElementById('search-endpoints').value.toLowerCase();
+      const filterPremium = document.getElementById('filter-premium').value;
+      
+      let filtered = endpoints.filter(ep => {
+        const matchesSearch = ep.path.toLowerCase().includes(search) || 
+                            (ep.name && ep.name.toLowerCase().includes(search));
+        const matchesPremium = filterPremium === '' || 
+                              ep.requiresVIP.toString() === filterPremium;
+        return matchesSearch && matchesPremium;
+      });
+      
+      if (filtered.length === 0) {
+        table.innerHTML = `
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+              <line x1="15" y1="9" x2="9" y2="15" stroke="currentColor" stroke-width="2"/>
+              <line x1="9" y1="9" x2="15" y2="15" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <p>No endpoints found</p>
+          </div>
+        `;
         return;
       }
-
-      tbody.innerHTML = pageEndpoints.map(endpoint => `
-        <tr>
-          <td>
-            <input type="checkbox" class="checkbox endpoint-checkbox" 
-                   data-id="${endpoint.id}" 
-                   ${selectedIds.has(endpoint.id) ? 'checked' : ''}
-                   onchange="toggleSelect(${endpoint.id})">
-          </td>
-          <td style="font-family: monospace; color: #60a5fa;">${endpoint.path}</td>
-          <td><span class="badge badge-method">${endpoint.method || 'GET'}</span></td>
-          <td>${endpoint.name || '-'}</td>
-          <td>${endpoint.category || '-'}</td>
-          <td>
-            <label class="toggle-switch">
-              <input type="checkbox" ${endpoint.requiresVIP ? 'checked' : ''} 
-                     onchange="togglePremium(${endpoint.id})">
-              <span class="slider"></span>
-            </label>
-          </td>
-          <td>
-            <span class="badge ${endpoint.requiresVIP ? 'badge-premium' : 'badge-free'}">
-              ${endpoint.requiresVIP ? '⭐ Premium' : '🆓 Free'}
-            </span>
-          </td>
-        </tr>
-      `).join('');
-
-      renderPagination();
-      updateBulkActions();
-    }
-
-    function renderPagination() {
-      const totalPages = Math.ceil(filteredEndpoints.length / itemsPerPage);
-      const pagination = document.getElementById('pagination');
       
-      let html = `
-        <button class="page-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
-          ← Prev
-        </button>
-        <span style="color: rgba(255,255,255,0.7);">
-          Page ${currentPage} of ${totalPages}
-        </span>
-        <button class="page-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
-          Next →
-        </button>
+      table.innerHTML = `
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Path</th>
+              <th>Method</th>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filtered.map(ep => `
+              <tr>
+                <td><code>${ep.path}</code></td>
+                <td><span class="badge badge-secondary">${ep.method}</span></td>
+                <td>${ep.name || '-'}</td>
+                <td>
+                  <span class="badge ${ep.requiresVIP ? 'badge-vip' : 'badge-free'}">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      ${ep.requiresVIP ? 
+                        '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor"/>' :
+                        '<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>'
+                      }
+                    </svg>
+                    ${ep.requiresVIP ? 'VIP' : 'Free'}
+                  </span>
+                </td>
+                <td>
+                  <div class="action-btns">
+                    <button class="btn btn-icon btn-secondary" onclick="togglePremium(${ep.id}, ${!ep.requiresVIP})" title="Toggle Premium">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
       `;
+    }
+
+    async function togglePremium(id, makeVIP) {
+      if (!confirm(`Are you sure you want to make this endpoint ${makeVIP ? 'PREMIUM' : 'FREE'}?`)) {
+        return;
+      }
       
-      pagination.innerHTML = html;
-    }
-
-    function changePage(page) {
-      const totalPages = Math.ceil(filteredEndpoints.length / itemsPerPage);
-      if (page < 1 || page > totalPages) return;
-      currentPage = page;
-      renderEndpoints();
-    }
-
-    function searchEndpoints() {
-      const search = document.getElementById('searchInput').value.toLowerCase();
-      applyFilters(search);
-    }
-
-    function filterEndpoints() {
-      const search = document.getElementById('searchInput').value.toLowerCase();
-      applyFilters(search);
-    }
-
-    function applyFilters(search = '') {
-      const premiumFilter = document.getElementById('filterPremium').value;
-      const categoryFilter = document.getElementById('filterCategory').value;
-
-      filteredEndpoints = allEndpoints.filter(endpoint => {
-        const matchesSearch = !search || 
-          endpoint.path.toLowerCase().includes(search) ||
-          (endpoint.name && endpoint.name.toLowerCase().includes(search)) ||
-          (endpoint.description && endpoint.description.toLowerCase().includes(search));
-
-        const matchesPremium = !premiumFilter || 
-          endpoint.requiresVIP.toString() === premiumFilter;
-
-        const matchesCategory = !categoryFilter || 
-          endpoint.category === categoryFilter;
-
-        return matchesSearch && matchesPremium && matchesCategory;
-      });
-
-      currentPage = 1;
-      renderEndpoints();
-    }
-
-    async function togglePremium(id) {
       try {
         const response = await fetch(`/admin/endpoints/${id}/toggle-premium`, {
           method: 'PUT',
-          headers: { 'Authorization': `Bearer ${token}` }
+          credentials: 'include'
         });
-
-        const data = await response.json();
-
-        if (data.success) {
-          showAlert('dashboardAlert', data.message, 'success');
-          loadEndpoints();
-          loadStats();
+        
+        if (response.ok) {
+          await loadEndpoints();
+          await refreshStats();
         } else {
-          showAlert('dashboardAlert', data.error, 'error');
-          loadEndpoints();
+          alert('Failed to update endpoint');
         }
       } catch (error) {
-        showAlert('dashboardAlert', 'Failed to toggle premium status', 'error');
+        alert('Error updating endpoint');
       }
     }
 
-    function toggleSelect(id) {
-      if (selectedIds.has(id)) {
-        selectedIds.delete(id);
-      } else {
-        selectedIds.add(id);
-      }
-      updateBulkActions();
+    async function refreshEndpoints() {
+      await loadEndpoints();
     }
 
-    function toggleSelectAll() {
-      const checked = document.getElementById('selectAll').checked;
-      const start = (currentPage - 1) * itemsPerPage;
-      const end = start + itemsPerPage;
-      const pageEndpoints = filteredEndpoints.slice(start, end);
-
-      pageEndpoints.forEach(endpoint => {
-        if (checked) {
-          selectedIds.add(endpoint.id);
-        } else {
-          selectedIds.delete(endpoint.id);
-        }
-      });
-
-      renderEndpoints();
-    }
-
-    function updateBulkActions() {
-      const count = selectedIds.size;
-      document.getElementById('selectedCount').textContent = `${count} selected`;
-      document.getElementById('bulkActions').style.display = count > 0 ? 'flex' : 'none';
-    }
-
-    async function bulkSetPremium(requiresVIP) {
-      if (selectedIds.size === 0) {
-        showAlert('dashboardAlert', 'No endpoints selected', 'error');
-        return;
-      }
-
-      const confirmed = confirm(`Set ${selectedIds.size} endpoints to ${requiresVIP ? 'PREMIUM' : 'FREE'}?`);
-      if (!confirmed) return;
-
-      try {
-        const response = await fetch('/admin/endpoints/bulk-premium', {
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        fetch('/auth/logout', {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            ids: Array.from(selectedIds),
-            requiresVIP
-          })
+          credentials: 'include'
+        }).finally(() => {
+          window.location.href = '/login.html';
         });
-
-        const data = await response.json();
-
-        if (data.success) {
-          showAlert('dashboardAlert', data.message, 'success');
-          selectedIds.clear();
-          loadEndpoints();
-          loadStats();
-        } else {
-          showAlert('dashboardAlert', data.error, 'error');
-        }
-      } catch (error) {
-        showAlert('dashboardAlert', 'Failed to update endpoints', 'error');
       }
     }
 
-    async function refreshCache() {
-      try {
-        const response = await fetch('/admin/cache/refresh', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+    document.getElementById('search-endpoints')?.addEventListener('input', renderEndpointsTable);
+    document.getElementById('filter-premium')?.addEventListener('change', renderEndpointsTable);
 
-        const data = await response.json();
-
-        if (data.success) {
-          showAlert('dashboardAlert', 'Cache refreshed successfully!', 'success');
-        } else {
-          showAlert('dashboardAlert', data.error, 'error');
-        }
-      } catch (error) {
-        showAlert('dashboardAlert', 'Failed to refresh cache', 'error');
-      }
-    }
-
-    function showAlert(elementId, message, type) {
-      const alertDiv = document.getElementById(elementId);
-      alertDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
-      setTimeout(() => {
-        alertDiv.innerHTML = '';
-      }, 5000);
-    }
+    checkAuth();
+    refreshStats();
   </script>
 </body>
 </html>
