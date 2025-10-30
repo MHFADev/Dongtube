@@ -1,6 +1,6 @@
 # Overview
 
-Dongtube API is a modular Express.js server that aggregates various third-party content services. It features an auto-loading architecture for route modules, simplifying endpoint registration. The API supports downloading media from social platforms (TikTok, Instagram, YouTube, Facebook, Spotify), generating AI images, scraping anime/manga sites, fetching news, and processing images. The project aims to provide a unified, performant, and user-friendly interface for diverse online content, optimized for low-end devices.
+Dongtube API is a modular Express.js server that aggregates various third-party content services. It features an auto-loading architecture for route modules, simplifying endpoint registration. The API supports downloading media from social platforms (TikTok, Instagram, YouTube, Facebook, Spotify), generating AI images, scraping anime/manga sites, fetching news, processing images, and traditional Indonesian fortune-telling (primbon) services. The project aims to provide a unified, performant, and user-friendly interface for diverse online content, optimized for low-end devices.
 
 # User Preferences
 
@@ -21,7 +21,7 @@ Preferred communication style: Simple, everyday language.
 - **Enhanced Media Preview System**: Features a modern glassmorphism UI with animated gradients, responsive grid layouts, custom audio player with waveform animation, image gallery, and fullscreen modal for media display. Includes advanced media type detection and actions like download and URL copy.
 - **Accessibility**: Includes `prefers-reduced-motion` support.
 - **Social Media Integration**: Implements Open Graph and Twitter Card tags, along with SEO meta tags, for improved shareability and search engine visibility.
-- **Admin Panel**: A modern web interface (`/admin-panel.html`) for managing premium routes, users, and viewing statistics, requiring admin login.
+- **Admin Panel**: A modern web interface (`/admin-panel.html`) for managing premium routes, users, and viewing statistics, requiring admin login. Features prominent navigation buttons for quick access to user management and site exit, plus category-based endpoint filtering.
 
 ## Feature Specifications
 - **Premium Route Management System**: Allows administrators to toggle VIP access for any API endpoint via an admin panel. Features auto-registration of routes, bulk operations, search/filter capabilities, and real-time updates.
@@ -42,6 +42,22 @@ Preferred communication style: Simple, everyday language.
 - **Caching Strategy**: Implements in-memory Map-based caching with TTL for specific data (e.g., news endpoints) to reduce database queries and improve performance.
 - **Background Music**: Auto-plays background music with a visual vinyl disc animation and volume controls, starting on page load or first user interaction.
 - **Security**: Admin routes are protected by authentication, authorization middleware, JWT tokens, role-based access control (RBAC), and bcrypt password hashing.
+- **Indonesian Primbon (Fortune-Telling) Services** (Added: Oct 30, 2025):
+  - **Name Meaning Analysis**: Interprets the spiritual meaning and characteristics of Indonesian names
+  - **Name Compatibility**: Checks relationship compatibility between two names
+  - **Lucky Numbers**: Analyzes phone numbers for fortune and luck predictions
+  - **Health Predictions**: Predicts potential health issues based on name, birthdate, and location
+  - **Javanese & Balinese Match-Making**: Traditional matchmaking calculations based on weton (Javanese calendar)
+  - **Business & Wealth Predictions**: Analyzes business potential and fortune based on weton
+  - **Dream Interpretation**: Interprets the meaning of dreams according to primbon tradition
+  - **Zodiac Information**: Provides detailed zodiac sign characteristics and predictions
+  - **URL Encoding**: All endpoints properly encode parameters to handle Indonesian names with spaces and special characters
+  - **Dual Method Support**: All 10 primbon endpoints support both GET and POST methods (20 route handlers total)
+- **Category-Based Endpoint Filtering** (Added: Oct 30, 2025):
+  - Admin endpoint `/admin/endpoints/category/:category` to filter endpoints by category
+  - Supports pagination with configurable limit and offset
+  - Protected by admin authentication and authorization
+  - Enables filtering by special categories like "dev" for development endpoints
 
 ## Module Organization
 - Routes are organized by function (e.g., `route-tiktok.js`, `route-image.js`) rather than technology, enhancing maintainability.
@@ -84,6 +100,8 @@ Preferred communication style: Simple, everyday language.
 - **News Sources**:
     - Tribunnews, Kompas (web scraping)
     - `justice.gov`
+- **Indonesian Services**:
+    - Primbon.com (traditional fortune-telling and divination)
 - **Other Services**:
     - `waifu.pics`
     - `api.imgflip.com`
