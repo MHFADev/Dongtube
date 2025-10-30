@@ -70,6 +70,15 @@ Preferred communication style: Simple, everyday language.
   - **Zero-Trust Architecture**: Even if frontend protection is bypassed, backend ensures premium metadata (params, parameters, examples, placeholder) is never transmitted to unauthorized users
   - **Premium Lock Screen**: Frontend displays a visual lock screen with upgrade prompt and WhatsApp contact for premium endpoints, providing clear UX feedback
   - **JWT-Based Authentication**: Validates user premium status via JWT tokens before serving full endpoint documentation
+- **VIP Endpoint Cache System** (Enhanced: Oct 30, 2025):
+  - **In-Memory Caching**: VIP endpoints cached for 5 seconds to optimize performance
+  - **Automatic Invalidation**: Cache automatically cleared when admin toggles endpoint status
+  - **Debug Logging**: Detailed console logs track cache state transitions:
+    - `🔄 VIP Cache cleared!` - Shown when cache is invalidated (displays previous cache size)
+    - `📥 VIP Cache loaded/refreshed` - Shown when cache is rebuilt from database (displays new cache size)
+    - `🔧 ADMIN: Toggled endpoint` - Shown when admin changes endpoint status (displays old → new status)
+  - **Zero Race Conditions**: Node.js single-threaded execution ensures cache refresh completes before response
+  - **Instant Propagation**: Changes take effect immediately on next user request (max 5 second cache TTL)
 - **Caching Strategy**: Implements in-memory Map-based caching with TTL for specific data (e.g., news endpoints) to reduce database queries and improve performance.
 - **Background Music**: Auto-plays background music with a visual vinyl disc animation and volume controls, starting on page load or first user interaction.
 - **Security**: Admin routes are protected by authentication, authorization middleware, JWT tokens, role-based access control (RBAC), and bcrypt password hashing.
