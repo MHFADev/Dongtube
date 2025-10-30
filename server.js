@@ -6,12 +6,18 @@ import { fileURLToPath } from "url";
 import cookieParser from "cookie-parser";
 import jwt from "jsonwebtoken";
 import chokidar from "chokidar";
+import { readFileSync } from "fs";
 import { initDatabase, VIPEndpoint, User } from "./models/index.js";
 import authRoutes from "./routes/auth.js";
 import adminRoutes from "./routes/admin.js";
 import sseRoutes from "./routes/sse.js";
 import { checkVIPAccess, optionalAuth } from "./middleware/auth.js";
 import RouteManager from "./services/RouteManager.js";
+
+// Read package.json to get version
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const packageJson = JSON.parse(readFileSync(path.join(__dirname, 'package.json'), 'utf-8'));
 
 if (!process.env.JWT_SECRET) {
   console.error(chalk.bgRed.white('\n ✗ FATAL: JWT_SECRET environment variable is required but not set! \n'));
@@ -25,9 +31,6 @@ if (!process.env.JWT_SECRET) {
   console.error(chalk.yellow('\n   4. Restart the Repl\n'));
   process.exit(1);
 }
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -159,6 +162,15 @@ async function startServer() {
         timestamp: new Date().toISOString(),
         total_endpoints: routeManager.getAllEndpoints().length,
         routeManager: routeManager.getStatus()
+      });
+    });
+
+    // Version endpoint - returns version from package.json
+    app.get("/api/version", (req, res) => {
+      res.json({
+        version: packageJson.version,
+        name: packageJson.name,
+        description: packageJson.description
       });
     });
 

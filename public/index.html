@@ -4787,6 +4787,30 @@ print(data)`;
 
     checkAuthStatus();
 
+    // Auto-fetch version from package.json
+    async function loadVersion() {
+      try {
+        const response = await fetch('/api/version');
+        const data = await response.json();
+        
+        // Parse version to get only first 2 numbers (e.g., 2.7.9 -> v2.7)
+        const versionParts = data.version.split('.');
+        const shortVersion = `v${versionParts[0]}.${versionParts[1]}`;
+        
+        // Update all elements with class "version"
+        const versionElements = document.querySelectorAll('.version');
+        versionElements.forEach(el => {
+          el.textContent = shortVersion;
+        });
+      } catch (error) {
+        console.error('Failed to load version:', error);
+        // Keep default version if fetch fails
+      }
+    }
+
+    // Load version on page load
+    loadVersion();
+
     // Premium Upgrade Modal Handler
     window.showPremiumModal = function(errorData) {
       const modal = document.getElementById('premiumModal');

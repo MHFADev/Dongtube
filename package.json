@@ -1,6 +1,6 @@
 {
   "name": "dongtube-api",
-  "version": "2.0.0",
+  "version": "2.7.9",
   "description": "Dongtube API Server - Multi-purpose API endpoints",
   "main": "server.js",
   "type": "module",
