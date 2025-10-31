@@ -196,20 +196,19 @@ class RouteManager {
     const transaction = await sequelize.transaction();
 
     try {
-      console.log(chalk.cyan('💾 Syncing endpoints to database...\n'));
+      console.log(chalk.cyan('💾 Syncing endpoints to database (batch mode)...\n'));
 
       let created = 0;
       let updated = 0;
       let skipped = 0;
 
-      for (const endpoint of endpoints) {
+      const syncPromises = endpoints.map(async (endpoint) => {
         try {
           const path = endpoint.path || endpoint.route;
           const method = endpoint.method || 'GET';
 
           if (!path) {
-            skipped++;
-            continue;
+            return { status: 'skipped' };
           }
 
           const [record, isCreated] = await VIPEndpoint.findOrCreate({
@@ -227,8 +226,7 @@ class RouteManager {
           });
 
           if (isCreated) {
-            created++;
-            console.log(chalk.green(`  ✓ Created: ${method} ${path}`));
+            return { status: 'created', method, path };
           } else {
             await record.update({
               name: endpoint.name || record.name || path,
@@ -236,15 +234,22 @@ class RouteManager {
               category: endpoint.category || record.category,
               parameters: endpoint.parameters || endpoint.params || record.parameters
             }, { transaction });
-            updated++;
-            console.log(chalk.blue(`  ↻ Updated: ${method} ${path}`));
+            return { status: 'updated', method, path };
           }
 
         } catch (err) {
           console.error(chalk.red(`  ✗ Error syncing endpoint:`), err.message);
-          skipped++;
+          return { status: 'error' };
         }
-      }
+      });
+
+      const results = await Promise.all(syncPromises);
+
+      results.forEach(result => {
+        if (result.status === 'created') created++;
+        else if (result.status === 'updated') updated++;
+        else if (result.status === 'skipped' || result.status === 'error') skipped++;
+      });
 
       await transaction.commit();
 

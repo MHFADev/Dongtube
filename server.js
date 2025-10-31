@@ -229,7 +229,8 @@ async function startServer() {
         
         const endpointsWithVIPStatus = allEndpoints.map(ep => {
           // Check VIP status using composite key for each method
-          const methods = ep.method.split(',').map(m => m.trim());
+          const methodString = ep.method || 'GET';
+          const methods = methodString.split(',').map(m => m.trim());
           const isVIPForAnyMethod = methods.some(method => {
             const compositeKey = `${method}:${ep.path}`;
             return vipMap.get(compositeKey) === true;

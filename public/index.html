@@ -3515,7 +3515,7 @@
 
     // Function to determine category based on path
     function determineCategory(path, name, description) {
-      const pathLower = path.toLowerCase();
+      const pathLower = (path || '').toLowerCase();
       const nameLower = (name || '').toLowerCase();
       const descLower = (description || '').toLowerCase();
       
@@ -3701,7 +3701,7 @@
             </h2>
             <ol class="endpoint-list">
               ${itemsToShow.map((ep, idx) => {
-                const methods = ep.method.split(',').map(m => m.trim());
+                const methods = (ep.method || 'GET').split(',').map(m => m.trim());
                 const globalIdx = renderedEndpoints.indexOf(ep);
                 const id = `ep-${globalIdx}`;
                 actuallyRenderedIds.push(id);
