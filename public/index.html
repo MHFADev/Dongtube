@@ -3398,6 +3398,13 @@
     // Global user state
     let currentUser = null;
     
+    // Check if endpoint requires VIP/Premium access
+    function isVIPEndpoint(endpoint) {
+      if (!endpoint || !endpoint.status) return false;
+      const status = endpoint.status.toLowerCase();
+      return status === 'vip' || status === 'premium';
+    }
+    
     // Check if user has premium access
     function hasPremiumAccess() {
       if (!currentUser) return false;
@@ -3572,45 +3579,107 @@
       const nameLower = (name || '').toLowerCase();
       const descLower = (description || '').toLowerCase();
       
-      // Social Media & Downloads
+      // AI & Generation - use very specific patterns to avoid false positives
+      if (pathLower.includes('/ai/') || pathLower.includes('/gpt') || 
+          pathLower.includes('/gemini') || pathLower.includes('/claude') ||
+          pathLower.includes('/openai') || pathLower.includes('/chatgpt') ||
+          pathLower.includes('/llm') || pathLower.includes('/chat-bot') ||
+          nameLower.includes('gpt') || nameLower.includes('gemini') ||
+          nameLower.includes('claude') || nameLower.includes('openai') ||
+          nameLower.startsWith('ai ') || nameLower.endsWith(' ai') ||
+          nameLower.includes(' ai ') || nameLower === 'ai' ||
+          descLower.includes('artificial intelligence') || 
+          descLower.includes('language model')) {
+        return 'AI & Generation';
+      }
+      
+      // Downloader - Social Media
+      if ((pathLower.includes('/d/') || pathLower.includes('/download')) &&
+          (pathLower.includes('tiktok') || pathLower.includes('instagram') || 
+           pathLower.includes('facebook') || pathLower.includes('youtube') ||
+           pathLower.includes('twitter') || pathLower.includes('video'))) {
+        return 'Downloader';
+      }
+      
+      // Social Media & API
       if (pathLower.includes('/tiktok') || pathLower.includes('/instagram') || 
           pathLower.includes('/facebook') || pathLower.includes('/youtube') ||
+          pathLower.includes('/twitter') || pathLower.includes('/x/') ||
           pathLower.includes('/xiaohongshu') || pathLower.includes('/snackvideo') ||
-          pathLower.includes('/story')) {
+          pathLower.includes('/story') || pathLower.includes('/threads')) {
         return 'Social Media';
       }
       
-      // Anime
+      // Anime & Manga
       if (pathLower.includes('/anime') || pathLower.includes('/mal') || 
           pathLower.includes('/anilist') || pathLower.includes('/neko') ||
           pathLower.includes('/waifu') || pathLower.includes('/oploverz') ||
-          pathLower.includes('/anichin') || nameLower.includes('anime')) {
-        return 'Anime';
+          pathLower.includes('/anichin') || pathLower.includes('/manga') ||
+          nameLower.includes('anime') || nameLower.includes('manga')) {
+        return 'Anime & Manga';
       }
       
-      // News
+      // News & Information
       if (pathLower.includes('/news') || pathLower.includes('/kompas') ||
+          pathLower.includes('/cnn') || pathLower.includes('/bbc') ||
           nameLower.includes('news') || descLower.includes('news')) {
-        return 'News';
+        return 'News & Information';
       }
       
-      // Image Processing
+      // Image Processing & Generator
       if (pathLower.includes('/image') || pathLower.includes('/ideogram') ||
           pathLower.includes('/brat') || pathLower.includes('/maker') ||
-          pathLower.includes('/enhance')) {
+          pathLower.includes('/enhance') || pathLower.includes('/img') ||
+          pathLower.includes('/photo') || pathLower.includes('/edit')) {
         return 'Image Processing';
       }
       
-      // Search & Tools
+      // Music & Audio
+      if (pathLower.includes('/music') || pathLower.includes('/spotify') ||
+          pathLower.includes('/soundcloud') || pathLower.includes('/lyrics') ||
+          pathLower.includes('/audio') || nameLower.includes('music') ||
+          nameLower.includes('spotify')) {
+        return 'Music & Audio';
+      }
+      
+      // Games & Entertainment
+      if (pathLower.includes('/game') || pathLower.includes('/steam') ||
+          pathLower.includes('/epic') || pathLower.includes('/mobile-legends') ||
+          pathLower.includes('/ml') || nameLower.includes('game')) {
+        return 'Games';
+      }
+      
+      // Search & Utilities
       if (pathLower.includes('/search') || pathLower.includes('/apk') ||
-          pathLower.includes('/lyrics') || pathLower.includes('/wikipedia')) {
+          pathLower.includes('/wikipedia') || pathLower.includes('/google') ||
+          pathLower.includes('/find')) {
         return 'Search & Tools';
       }
       
       // Random & Fun
       if (pathLower.includes('/random') || pathLower.includes('/meme') ||
-          pathLower.includes('/r/')) {
+          pathLower.includes('/r/') || pathLower.includes('/joke') ||
+          pathLower.includes('/fun')) {
         return 'Random & Fun';
+      }
+      
+      // Religion & Islamic
+      if (pathLower.includes('/quran') || pathLower.includes('/hadith') ||
+          pathLower.includes('/islam') || pathLower.includes('/prayer') ||
+          pathLower.includes('/doa') || pathLower.includes('/sholat')) {
+        return 'Religion';
+      }
+      
+      // Education & Learning
+      if (pathLower.includes('/education') || pathLower.includes('/learn') ||
+          pathLower.includes('/tutorial') || pathLower.includes('/course')) {
+        return 'Education';
+      }
+      
+      // Weather & Location
+      if (pathLower.includes('/weather') || pathLower.includes('/location') ||
+          pathLower.includes('/maps') || pathLower.includes('/geo')) {
+        return 'Weather & Location';
       }
       
       // Default
@@ -3765,23 +3834,25 @@
                 const id = `ep-${globalIdx}`;
                 actuallyRenderedIds.push(id);
                 
+                const isVIP = isVIPEndpoint(ep);
+                
                 return `
                   <li class="endpoint-list-item">
-                    <div class="endpoint ${ep.requiresVIP ? 'premium' : ''}" id="${id}">
-                      <div class="endpoint-header ${ep.requiresVIP ? 'premium' : ''}" onclick="toggle('${id}')">
+                    <div class="endpoint ${isVIP ? 'premium' : ''}" id="${id}">
+                      <div class="endpoint-header ${isVIP ? 'premium' : ''}" onclick="toggle('${id}')">
                         <div class="endpoint-number"></div>
                         <div class="method">${ep.method}</div>
                         <div class="endpoint-info">
                           <div class="endpoint-title-row">
                             <div class="endpoint-path" title="${ep.path}">${ep.path}</div>
-                            ${ep.requiresVIP ? '<span class="premium-icon" title="Premium Endpoint"></span>' : ''}
+                            ${isVIP ? '<span class="premium-icon" title="Premium Endpoint - VIP Access Required"></span>' : ''}
                           </div>
                           <div class="endpoint-desc" title="${ep.description || ep.name}">${ep.description || ep.name}</div>
                         </div>
                         <div class="endpoint-arrow">▼</div>
                       </div>
                       <div class="endpoint-body">
-                        ${ep.requiresVIP && !hasPremiumAccess() ? 
+                        ${isVIP && !hasPremiumAccess() ? 
                           // Show premium lock screen for non-VIP users
                           generatePremiumLockScreen()
                         : 
