@@ -18,6 +18,11 @@ class RoleSync {
       return;
     }
 
+    if (!this.isAuthenticated()) {
+      console.log('🔒 Skipping SSE connection - User not authenticated');
+      return;
+    }
+
     try {
       console.log('🔌 Connecting to real-time role update stream...');
       console.log('ℹ️  Note: Browser will automatically send httpOnly cookie with SSE request');
@@ -132,6 +137,16 @@ class RoleSync {
       }
     } catch (error) {
       console.error('❌ Error refreshing token:', error);
+      return false;
+    }
+  }
+
+  isAuthenticated() {
+    try {
+      const token = localStorage.getItem('authToken');
+      const currentUser = localStorage.getItem('currentUser');
+      return !!(token && currentUser);
+    } catch (error) {
       return false;
     }
   }

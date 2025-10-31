@@ -42,9 +42,10 @@ Preferred communication style: Simple, everyday language.
   - EventEmitter-based pub/sub system for role change notifications
   - Per-user SSE streams with automatic reconnection and exponential backoff
   - Frontend auto-refresh token system that updates JWT immediately upon role changes
-  - Authenticated SSE endpoint with httpOnly cookie support
+  - Authenticated SSE endpoint with httpOnly cookie support and graceful handling for unauthenticated users
   - Automatic page reload after token refresh to apply all changes
   - Heartbeat mechanism for connection keep-alive
+  - Smart connection management that skips SSE connection for unauthenticated users to prevent unnecessary 401 errors
 - **Indonesian Primbon Services**: Provides various traditional Indonesian fortune-telling services including name analysis, compatibility checks, lucky numbers, health predictions, Javanese/Balinese matchmaking, business predictions, dream interpretation, and zodiac information. All endpoints support URL encoding and both GET/POST methods.
 - **Category-Based Endpoint Filtering**: Admin endpoint to filter endpoints by category with pagination, protected by authentication.
 
