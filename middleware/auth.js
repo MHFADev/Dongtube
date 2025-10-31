@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { User, VIPEndpoint } from '../models/index.js';
+import { ApiEndpoint } from '../models/endpoint/index.js';
+import { Op } from 'sequelize';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES = '7d';
@@ -115,12 +117,28 @@ export const checkVIPAccess = async (req, res, next) => {
     
     if (!vipEndpointsCache || (currentTime - cacheTimestamp) > CACHE_DURATION) {
       const wasNull = !vipEndpointsCache;
-      vipEndpointsCache = await VIPEndpoint.findAll({
-        where: { requiresVIP: true },
-        attributes: ['path', 'method', 'name', 'description']
-      });
-      cacheTimestamp = currentTime;
-      console.log(`📥 VIP Cache ${wasNull ? 'loaded' : 'refreshed'}: ${vipEndpointsCache.length} VIP endpoint(s) in cache`);
+      
+      // Query from second database (endpoint database)
+      try {
+        vipEndpointsCache = await ApiEndpoint.findAll({
+          where: { 
+            status: { [Op.in]: ['vip', 'premium'] },
+            isActive: true
+          },
+          attributes: ['path', 'method', 'name', 'description', 'status']
+        });
+        cacheTimestamp = currentTime;
+        console.log(`📥 VIP Cache ${wasNull ? 'loaded' : 'refreshed'} from Endpoint DB: ${vipEndpointsCache.length} VIP/Premium endpoint(s)`);
+      } catch (endpointDbError) {
+        // Fallback to old database if endpoint DB is not available
+        console.log('⚠️  Endpoint DB not available, falling back to VIPEndpoint table');
+        vipEndpointsCache = await VIPEndpoint.findAll({
+          where: { requiresVIP: true },
+          attributes: ['path', 'method', 'name', 'description']
+        });
+        cacheTimestamp = currentTime;
+        console.log(`📥 VIP Cache ${wasNull ? 'loaded' : 'refreshed'} from fallback: ${vipEndpointsCache.length} VIP endpoint(s)`);
+      }
     }
 
     const requestPath = req.path;

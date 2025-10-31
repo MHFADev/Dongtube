@@ -1,0 +1,128 @@
+import endpointSequelize from '../../config/database-endpoints.js';
+import ApiEndpoint from './ApiEndpoint.js';
+import EndpointCategory from './EndpointCategory.js';
+import EndpointUsageStats from './EndpointUsageStats.js';
+
+// Define relationships
+ApiEndpoint.hasMany(EndpointUsageStats, {
+  foreignKey: 'endpoint_id',
+  as: 'usageStats',
+  onDelete: 'CASCADE'
+});
+
+EndpointUsageStats.belongsTo(ApiEndpoint, {
+  foreignKey: 'endpoint_id',
+  as: 'endpoint'
+});
+
+// Initialize endpoint database
+const initEndpointDatabase = async () => {
+  try {
+    await endpointSequelize.authenticate();
+    console.log('✓ Endpoint Database connected');
+    
+    console.log('📊 Syncing endpoint database tables...');
+    
+    // Sync tables in order
+    await EndpointCategory.sync({ alter: true });
+    console.log('  ✓ EndpointCategory table synced');
+    
+    await ApiEndpoint.sync({ alter: true });
+    console.log('  ✓ ApiEndpoint table synced');
+    
+    await EndpointUsageStats.sync({ alter: true });
+    console.log('  ✓ EndpointUsageStats table synced');
+    
+    console.log('✓ Endpoint database tables synced');
+    
+    // Create default categories if they don't exist
+    const defaultCategories = [
+      {
+        name: 'social-media',
+        displayName: 'Social Media',
+        description: 'Social media downloaders and tools (TikTok, Instagram, YouTube, etc.)',
+        icon: '📱',
+        color: '#FF6B6B',
+        priority: 100
+      },
+      {
+        name: 'tools',
+        displayName: 'Tools & Utilities',
+        description: 'Various utility tools and converters',
+        icon: '🛠️',
+        color: '#4ECDC4',
+        priority: 90
+      },
+      {
+        name: 'ai',
+        displayName: 'AI & Generation',
+        description: 'AI-powered tools and content generation',
+        icon: '🤖',
+        color: '#95E1D3',
+        priority: 80
+      },
+      {
+        name: 'search',
+        displayName: 'Search & Info',
+        description: 'Search engines and information retrieval',
+        icon: '🔍',
+        color: '#F38181',
+        priority: 70
+      },
+      {
+        name: 'image',
+        displayName: 'Image Processing',
+        description: 'Image manipulation and processing tools',
+        icon: '🖼️',
+        color: '#AA96DA',
+        priority: 60
+      },
+      {
+        name: 'entertainment',
+        displayName: 'Entertainment',
+        description: 'Anime, music, and entertainment content',
+        icon: '🎬',
+        color: '#FCBAD3',
+        priority: 50
+      },
+      {
+        name: 'news',
+        displayName: 'News & Media',
+        description: 'News aggregation and media content',
+        icon: '📰',
+        color: '#FFFFD2',
+        priority: 40
+      },
+      {
+        name: 'other',
+        displayName: 'Other',
+        description: 'Miscellaneous endpoints',
+        icon: '📦',
+        color: '#A8D8EA',
+        priority: 10
+      }
+    ];
+    
+    for (const category of defaultCategories) {
+      await EndpointCategory.findOrCreate({
+        where: { name: category.name },
+        defaults: category
+      });
+    }
+    
+    console.log('✓ Default categories initialized');
+    
+    return true;
+  } catch (error) {
+    console.error('✗ Endpoint database error:', error.message);
+    return false;
+  }
+};
+
+export {
+  endpointSequelize,
+  ApiEndpoint,
+  EndpointCategory,
+  EndpointUsageStats,
+  initEndpointDatabase
+};

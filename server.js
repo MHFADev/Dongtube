@@ -8,11 +8,15 @@ import jwt from "jsonwebtoken";
 import chokidar from "chokidar";
 import { readFileSync } from "fs";
 import { initDatabase, VIPEndpoint, User } from "./models/index.js";
+import { initEndpointDatabase } from "./models/endpoint/index.js";
 import authRoutes from "./routes/auth.js";
 import adminRoutes from "./routes/admin.js";
 import sseRoutes from "./routes/sse.js";
+import endpointsRoutes from "./routes/endpoints.js";
+import adminEndpointsRoutes from "./routes/admin-endpoints.js";
 import { checkVIPAccess, optionalAuth } from "./middleware/auth.js";
 import RouteManager from "./services/RouteManager.js";
+import EndpointSyncService from "./services/EndpointSyncService.js";
 
 // Read package.json to get version
 const __filename = fileURLToPath(import.meta.url);
@@ -57,6 +61,9 @@ const cache = new Map();
 // ==================== ROUTE MANAGER ====================
 const routesPath = path.join(__dirname, "routes");
 const routeManager = new RouteManager(routesPath);
+
+// ==================== ENDPOINT SYNC SERVICE ====================
+const endpointSyncService = new EndpointSyncService(routesPath);
 
 app.use(optionalAuth);
 
@@ -127,30 +134,48 @@ function startFileWatcher() {
   }
 }
 
-// Export routeManager for admin endpoints
-export { routeManager };
+// Export routeManager and endpointSyncService for admin endpoints
+export { routeManager, endpointSyncService };
 
 // ==================== START SERVER ====================
 async function startServer() {
   try {
-    // STEP 0: Initialize database
-    console.log(chalk.cyan("🗄️  Initializing database...\n"));
+    // STEP 0: Initialize primary database
+    console.log(chalk.cyan("🗄️  Initializing primary database...\n"));
     const dbInitialized = await initDatabase();
     
     if (!dbInitialized) {
-      console.error(chalk.red("Failed to initialize database. Exiting..."));
+      console.error(chalk.red("Failed to initialize primary database. Exiting..."));
       process.exit(1);
     }
     
-    console.log(chalk.green("✓ Database initialized\n"));
+    console.log(chalk.green("✓ Primary database initialized\n"));
     
-    // STEP 1: Register auth routes
+    // STEP 0.5: Initialize endpoint database (second database)
+    console.log(chalk.cyan("🗄️  Initializing endpoint database (Database #2)...\n"));
+    const endpointDbInitialized = await initEndpointDatabase();
+    
+    if (!endpointDbInitialized) {
+      console.error(chalk.red("Failed to initialize endpoint database. Continuing with primary database only..."));
+      console.log(chalk.yellow("⚠️  Endpoint management features will be disabled\n"));
+    } else {
+      console.log(chalk.green("✓ Endpoint database initialized\n"));
+      
+      // STEP 0.6: Sync endpoints from routes folder to database
+      console.log(chalk.cyan("🔄 Syncing endpoints from routes folder to database...\n"));
+      await endpointSyncService.syncRoutesToDatabase();
+    }
+    
+    // STEP 1: Register auth and admin routes
     console.log(chalk.cyan("🔐 Registering authentication routes...\n"));
     app.use(authRoutes);
     app.use(adminRoutes);
     app.use(sseRoutes);
-    console.log(chalk.green("✓ Auth routes registered\n"));
+    app.use(endpointsRoutes);
+    app.use(adminEndpointsRoutes);
+    console.log(chalk.green("✓ Auth & admin routes registered\n"));
     console.log(chalk.cyan("📡 SSE real-time updates enabled\n"));
+    console.log(chalk.cyan("📊 Endpoint management routes enabled\n"));
     
     // STEP 2: Register core routes
     console.log(chalk.cyan("⚙️  Registering core routes...\n"));
