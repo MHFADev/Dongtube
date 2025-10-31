@@ -66,17 +66,10 @@ const EndpointUsageStats = endpointSequelize.define('EndpointUsageStats', {
   updatedAt: false,
   indexes: [
     {
-      unique: true,
-      fields: ['endpoint_id', 'date'],
-      name: 'unique_endpoint_date'
+      fields: ['date']
     },
     {
-      fields: ['date'],
-      name: 'idx_date'
-    },
-    {
-      fields: ['endpoint_id'],
-      name: 'idx_endpoint'
+      fields: ['endpoint_id']
     }
   ]
 });

@@ -34,7 +34,7 @@ const ApiEndpoint = endpointSequelize.define('ApiEndpoint', {
     comment: 'Category for grouping (e.g., social-media, tools, ai)'
   },
   status: {
-    type: DataTypes.ENUM('free', 'vip', 'premium', 'disabled'),
+    type: DataTypes.STRING(20),
     defaultValue: 'free',
     allowNull: false,
     comment: 'Access level: free (public), vip (requires VIP), premium (requires payment), disabled (not accessible)'
@@ -119,25 +119,13 @@ const ApiEndpoint = endpointSequelize.define('ApiEndpoint', {
   timestamps: true,
   indexes: [
     {
-      unique: true,
-      fields: ['path', 'method'],
-      name: 'unique_path_method'
+      fields: ['status']
     },
     {
-      fields: ['status'],
-      name: 'idx_status'
+      fields: ['category']
     },
     {
-      fields: ['category'],
-      name: 'idx_category'
-    },
-    {
-      fields: ['is_active'],
-      name: 'idx_active'
-    },
-    {
-      fields: ['created_at'],
-      name: 'idx_created'
+      fields: ['is_active']
     }
   ]
 });

@@ -161,9 +161,13 @@ async function startServer() {
     } else {
       console.log(chalk.green("✓ Endpoint database initialized\n"));
       
-      // STEP 0.6: Sync endpoints from routes folder to database
-      console.log(chalk.cyan("🔄 Syncing endpoints from routes folder to database...\n"));
-      await endpointSyncService.syncRoutesToDatabase();
+      // STEP 0.6: Schedule async sync (non-blocking)
+      console.log(chalk.cyan("📅 Scheduled async endpoint sync after server start\n"));
+      setTimeout(async () => {
+        console.log(chalk.cyan("🔄 Starting background endpoint sync...\n"));
+        await endpointSyncService.syncRoutesToDatabase();
+        console.log(chalk.green("✓ Background endpoint sync completed\n"));
+      }, 5000); // Sync 5 seconds after server starts
     }
     
     // STEP 1: Register auth and admin routes
@@ -366,11 +370,6 @@ async function startServer() {
     });
     console.log(chalk.green("✓ Dynamic router proxy mounted\n"));
     
-    // STEP 4.5: Initial route load
-    console.log(chalk.cyan("📦 Loading initial routes...\n"));
-    await routeManager.reload();
-    console.log(chalk.green("✓ Initial routes loaded\n"));
-    
     // STEP 5: Register 404 handler (MUST BE LAST!)
     console.log(chalk.cyan("⚙️  Registering error handlers...\n"));
     
@@ -395,18 +394,23 @@ async function startServer() {
     
     console.log(chalk.green("✓ Error handlers registered\n"));
     
-    // STEP 6: Start listening FIRST (before DB sync)
+    // STEP 6: Start listening FIRST (before route load)
     const PORT = process.env.PORT || 5000;
     
-    app.listen(PORT, '0.0.0.0', () => {
+    app.listen(PORT, '0.0.0.0', async () => {
       console.log(chalk.bgGreen.black(`\n ✓ Server running on port ${PORT} `));
-      console.log(chalk.bgBlue.white(` ℹ Total endpoints: ${routeManager.getAllEndpoints().length} `));
       console.log(chalk.cyan(`\n📚 Home: http://localhost:${PORT}`));
       console.log(chalk.cyan(`📚 API Docs: http://localhost:${PORT}/api/docs`));
       console.log(chalk.cyan(`📚 Debug: http://localhost:${PORT}/debug/routes`));
       console.log(chalk.yellow(`\n🔥 Test endpoint: http://localhost:${PORT}/api/test\n`));
       
-      // STEP 6.5: Start file watcher for hot-reload
+      // STEP 6.5: Load routes asynchronously AFTER server is listening
+      console.log(chalk.cyan("📦 Loading initial routes (async)...\n"));
+      await routeManager.reload();
+      console.log(chalk.green("✓ Initial routes loaded\n"));
+      console.log(chalk.bgBlue.white(` ℹ Total endpoints: ${routeManager.getAllEndpoints().length} `));
+      
+      // STEP 6.6: Start file watcher for hot-reload
       startFileWatcher();
     });
     

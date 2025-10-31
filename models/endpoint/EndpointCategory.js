@@ -10,7 +10,6 @@ const EndpointCategory = endpointSequelize.define('EndpointCategory', {
   name: {
     type: DataTypes.STRING(50),
     allowNull: false,
-    unique: true,
     comment: 'Category name (e.g., social-media, tools, ai)'
   },
   displayName: {
@@ -50,13 +49,7 @@ const EndpointCategory = endpointSequelize.define('EndpointCategory', {
   timestamps: true,
   indexes: [
     {
-      unique: true,
-      fields: ['name'],
-      name: 'unique_category_name'
-    },
-    {
-      fields: ['priority'],
-      name: 'idx_priority'
+      fields: ['priority']
     }
   ]
 });
