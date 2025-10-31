@@ -9,6 +9,12 @@ Preferred communication style: Simple, everyday language.
 # System Architecture
 
 ## Core Design Principles
+- **Single Database Architecture**: All data (users, endpoints, VIP settings, logs, etc.) stored in one primary PostgreSQL database for simplicity, reliability, and easier maintenance. Endpoint tables (ApiEndpoint, EndpointCategory, EndpointUsageStats) are synchronized from route files to database at startup.
+- **Real-Time Endpoint Updates**: Server-Sent Events (SSE) infrastructure broadcasts endpoint changes instantly to all connected users. When admins modify endpoint status/settings in admin panel, changes immediately reflect in user interface without page refresh. Features:
+  - `EndpointEventEmitter` service for broadcasting endpoint CRUD events
+  - SSE endpoint `/sse/endpoint-updates` with heartbeat and auto-reconnection
+  - Frontend listeners that auto-reload endpoint data on change events
+  - Visual notifications for real-time updates
 - **Route Auto-Loading**: Dynamically discovers and registers route modules, promoting modularity and simplifying endpoint management.
 - **Hot-Reload System**: Automatically detects changes to route files and reloads them without restarting the server, ensuring zero-downtime. This system uses a centralized `RouteManager` service with mutex locking, Chokidar-based file watching, atomic router swapping, and database synchronization for endpoint metadata. It also provides admin control for manual triggers and status monitoring, and integrates with cache refreshing.
 - **Optimized for Low-End Devices**: Implements a 4-tier adaptive performance system based on device detection, dynamically adjusting animations, CSS effects, and resource loading for smooth performance on devices with 2-4GB RAM.
@@ -28,6 +34,7 @@ Preferred communication style: Simple, everyday language.
 - **Powerful Admin Panel**: Full-featured interface for managing API endpoints with CRUD operations, bulk actions, inline status toggling, advanced filtering, and a statistics dashboard.
 
 ## Feature Specifications
+- **Database-Driven Endpoint Management**: All 112+ API endpoints stored in primary database (`api_endpoints` table) with metadata including status (free/vip/premium/disabled), category, priority, parameters, and examples. Endpoints automatically sync from route files to database on server startup. Admin panel provides full CRUD operations with instant SSE broadcasts to all users.
 - **Premium Route Management System**: Allows administrators to toggle VIP access for API endpoints via an admin panel with auto-registration, bulk operations, and real-time updates.
 - **VIP Access Protection**: Middleware comprehensively validates VIP status including role checking and expiration date validation (`vipExpiresAt`). Provides contextual error messages differentiating between unauthenticated users, non-VIP users, and expired VIP users with tailored upgrade/renewal prompts.
 - **VIP Expiration Validation**: Utility function `isVIPValid()` validates VIP status considering both role and expiration date across backend and frontend, ensuring consistent access control.
