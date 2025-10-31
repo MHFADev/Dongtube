@@ -387,13 +387,37 @@ router.post("/api/tools/jwt-decode", (req, res) => {
       return res.status(400).json({ success: false, error: "JWT token is required" });
     }
 
-    const parts = token.split('.');
+    const parts = token.trim().split('.');
     if (parts.length !== 3) {
-      return res.status(400).json({ success: false, error: 'Invalid JWT format' });
+      return res.status(400).json({ success: false, error: 'Invalid JWT format. A valid JWT must have exactly 3 parts separated by dots (header.payload.signature)' });
     }
 
-    const header = JSON.parse(Buffer.from(parts[0], 'base64').toString('utf-8'));
-    const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf-8'));
+    function base64UrlDecode(str) {
+      let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+      while (base64.length % 4) {
+        base64 += '=';
+      }
+      return Buffer.from(base64, 'base64').toString('utf-8');
+    }
+
+    let header, payload;
+    try {
+      header = JSON.parse(base64UrlDecode(parts[0]));
+    } catch (e) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Invalid JWT header. Unable to decode or parse the header portion of the token.' 
+      });
+    }
+
+    try {
+      payload = JSON.parse(base64UrlDecode(parts[1]));
+    } catch (e) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Invalid JWT payload. Unable to decode or parse the payload portion of the token.' 
+      });
+    }
     
     res.json({
       success: true,
@@ -405,7 +429,10 @@ router.post("/api/tools/jwt-decode", (req, res) => {
     });
   } catch (error) {
     console.error('JWT decode error:', error);
-    res.status(500).json({ success: false, error: 'Failed to decode JWT' });
+    res.status(400).json({ 
+      success: false, 
+      error: 'Failed to decode JWT. Please ensure the token is properly formatted.' 
+    });
   }
 });
 
