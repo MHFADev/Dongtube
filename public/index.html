@@ -122,6 +122,28 @@
       0%, 100% { box-shadow: 0 0 5px rgba(255, 165, 0, 0.2); }
       50% { box-shadow: 0 0 20px rgba(255, 165, 0, 0.4), 0 0 30px rgba(255, 165, 0, 0.2); }
     }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOutRight {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
     
     @keyframes shimmer {
       0% { background-position: -1000px 0; }
@@ -3595,17 +3617,23 @@
       return 'Other';
     }
 
-    async function loadEndpoints() {
+    async function loadEndpoints(forceRefresh = false) {
       try {
-        const res = await fetch(`${API_BASE}/api/docs`);
+        console.log('🔄 Loading endpoints from database...');
+        
+        // Fetch dari DATABASE, bukan dari /api/docs
+        const res = await fetch(`${API_BASE}/api/endpoints?limit=1000&sortBy=priority&sortOrder=DESC${forceRefresh ? '&_=' + Date.now() : ''}`);
         const data = await res.json();
         
         if (data.success) {
-          // Add category to each endpoint
+          // Map endpoints dengan category
           allEndpoints = data.endpoints.map(ep => ({
             ...ep,
-            category: determineCategory(ep.path, ep.name, ep.description)
+            // Gunakan category dari database, fallback ke determineCategory
+            category: ep.category || determineCategory(ep.path, ep.name, ep.description)
           }));
+          
+          console.log(`✓ Loaded ${allEndpoints.length} endpoints from database`);
           
           // Get unique categories
           allCategories = [...new Set(allEndpoints.map(ep => ep.category))].sort();
@@ -3621,8 +3649,8 @@
           renderGroupedEndpoints();
         }
       } catch (err) {
-        console.error('Error:', err);
-        document.getElementById('loading').innerHTML = '<p style="color: var(--error);">Failed to load endpoints.</p>';
+        console.error('❌ Error loading endpoints:', err);
+        document.getElementById('loading').innerHTML = '<p style="color: var(--error);">Failed to load endpoints from database.</p>';
       } finally {
         document.getElementById('loading').style.display = 'none';
       }
@@ -4443,6 +4471,107 @@ print(data)`;
     })();
 
     loadEndpoints();
+
+    // ============================
+    // REAL-TIME ENDPOINT UPDATES via SSE
+    // ============================
+    let eventSource = null;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 5;
+
+    function connectRealtimeUpdates() {
+      if (eventSource) {
+        console.log('⚠️  SSE already connected');
+        return;
+      }
+
+      console.log('📡 Connecting to real-time endpoint updates...');
+      eventSource = new EventSource('/sse/endpoint-updates');
+
+      eventSource.onopen = () => {
+        console.log('✅ Connected to real-time endpoint updates');
+        reconnectAttempts = 0;
+      };
+
+      eventSource.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          handleRealtimeEvent(data);
+        } catch (error) {
+          console.error('Failed to parse SSE message:', error);
+        }
+      };
+
+      eventSource.onerror = (error) => {
+        console.error('SSE connection error:', error);
+        eventSource.close();
+        eventSource = null;
+
+        if (reconnectAttempts < maxReconnectAttempts) {
+          reconnectAttempts++;
+          const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
+          console.log(`Reconnecting in ${delay / 1000}s... (attempt ${reconnectAttempts}/${maxReconnectAttempts})`);
+          setTimeout(() => connectRealtimeUpdates(), delay);
+        }
+      };
+    }
+
+    async function handleRealtimeEvent(event) {
+      console.log('📢 Real-time event received:', event);
+
+      switch (event.type) {
+        case 'connected':
+          console.log('✓', event.message);
+          break;
+
+        case 'endpoint_change':
+        case 'endpoint_bulk_change':
+        case 'endpoint_sync_complete':
+          console.log('🔄 Endpoint changed, reloading from database...');
+          await loadEndpoints(true); // Force refresh from database
+          showRealtimeNotification('🔄 Endpoints updated!', 'info');
+          break;
+
+        default:
+          console.log('Unknown event type:', event.type);
+      }
+    }
+
+    function showRealtimeNotification(message, type = 'info') {
+      const notification = document.createElement('div');
+      notification.className = 'realtime-notification';
+      notification.textContent = message;
+      notification.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        padding: 15px 24px;
+        background: ${type === 'success' ? '#00FF88' : type === 'error' ? '#FF4444' : '#FFA500'};
+        color: ${type === 'info' ? '#0D0D0D' : '#FFFFFF'};
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        z-index: 10000;
+        font-weight: 600;
+        animation: slideInRight 0.3s ease;
+      `;
+
+      document.body.appendChild(notification);
+
+      setTimeout(() => {
+        notification.style.animation = 'slideOutRight 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+
+    // Connect to real-time updates
+    connectRealtimeUpdates();
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+      if (eventSource) {
+        eventSource.close();
+      }
+    });
 
     // ============================
     // MEDIA PREVIEW CONTROLS
