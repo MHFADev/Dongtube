@@ -1,7 +1,8 @@
 import express from 'express';
-import { ApiEndpoint, EndpointCategory, EndpointUsageStats } from '../models/endpoint/index.js';
+import { ApiEndpoint, EndpointCategory, EndpointUsageStats } from '../models/index.js';
 import { authenticate, authorize } from '../middleware/auth.js';
 import { Op } from 'sequelize';
+import endpointEventEmitter from '../services/EndpointEventEmitter.js';
 
 const router = express.Router();
 
@@ -141,6 +142,9 @@ router.post('/admin/endpoints-db', authenticate, authorize('admin'), async (req,
       metadata: metadata || {}
     });
 
+    // Emit real-time event
+    endpointEventEmitter.notifyEndpointChange('created', endpoint);
+
     res.json({
       success: true,
       message: 'Endpoint created successfully',
@@ -176,6 +180,9 @@ router.put('/admin/endpoints-db/:id', authenticate, authorize('admin'), async (r
 
     await endpoint.update(updateData);
 
+    // Emit real-time event
+    endpointEventEmitter.notifyEndpointChange('updated', endpoint);
+
     res.json({
       success: true,
       message: 'Endpoint updated successfully',
@@ -208,7 +215,11 @@ router.delete('/admin/endpoints-db/:id', authenticate, authorize('admin'), async
       });
     }
 
+    const deletedEndpoint = endpoint.toJSON();
     await endpoint.destroy();
+
+    // Emit real-time event
+    endpointEventEmitter.notifyEndpointChange('deleted', deletedEndpoint);
 
     res.json({
       success: true,
@@ -251,10 +262,14 @@ router.put('/admin/endpoints-db/:id/toggle-status', authenticate, authorize('adm
 
     await endpoint.update({ status });
 
+    // Emit real-time event
+    endpointEventEmitter.notifyEndpointChange('status_changed', endpoint);
+
     res.json({
       success: true,
       message: `Endpoint status changed to ${status}`,
-      endpoint
+      endpoint,
+      realtime: true
     });
   } catch (error) {
     console.error('Toggle status error:', error);
@@ -285,10 +300,14 @@ router.put('/admin/endpoints-db/:id/toggle-active', authenticate, authorize('adm
 
     await endpoint.update({ isActive: !endpoint.isActive });
 
+    // Emit real-time event
+    endpointEventEmitter.notifyEndpointChange('active_toggled', endpoint);
+
     res.json({
       success: true,
       message: `Endpoint ${endpoint.isActive ? 'activated' : 'deactivated'}`,
-      endpoint
+      endpoint,
+      realtime: true
     });
   } catch (error) {
     console.error('Toggle active error:', error);
@@ -333,10 +352,14 @@ router.post('/admin/endpoints-db/bulk-update-status', authenticate, authorize('a
       }
     );
 
+    // Emit real-time event for bulk update
+    endpointEventEmitter.notifyBulkChange('bulk_status_update', updated[0]);
+
     res.json({
       success: true,
       message: `${updated[0]} endpoints updated to ${status}`,
-      updated: updated[0]
+      updated: updated[0],
+      realtime: true
     });
   } catch (error) {
     console.error('Bulk update error:', error);
@@ -367,10 +390,14 @@ router.post('/admin/endpoints-db/sync', authenticate, authorize('admin'), async 
     const result = await syncService.syncRoutesToDatabase();
 
     if (result.success) {
+      // Emit real-time event for sync completion
+      endpointEventEmitter.notifySyncComplete(result);
+      
       res.json({
         success: true,
         message: 'Endpoints synced successfully',
-        result
+        result,
+        realtime: true
       });
     } else {
       res.status(500).json({

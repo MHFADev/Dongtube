@@ -1,8 +1,9 @@
 import { readdirSync } from 'fs';
 import path from 'path';
 import chalk from 'chalk';
-import { ApiEndpoint, EndpointCategory } from '../models/endpoint/index.js';
+import { ApiEndpoint, EndpointCategory } from '../models/index.js';
 import { Op } from 'sequelize';
+import endpointEventEmitter from './EndpointEventEmitter.js';
 
 class EndpointSyncService {
   constructor(routesPath) {

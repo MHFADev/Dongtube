@@ -1,4 +1,4 @@
-import endpointSequelize from '../../config/database-endpoints.js';
+import sequelize from '../../config/database.js';
 import ApiEndpoint from './ApiEndpoint.js';
 import EndpointCategory from './EndpointCategory.js';
 import EndpointUsageStats from './EndpointUsageStats.js';
@@ -15,13 +15,10 @@ EndpointUsageStats.belongsTo(ApiEndpoint, {
   as: 'endpoint'
 });
 
-// Initialize endpoint database
+// Initialize endpoint tables (now in main database)
 const initEndpointDatabase = async () => {
   try {
-    await endpointSequelize.authenticate();
-    console.log('✓ Endpoint Database connected');
-    
-    console.log('📊 Syncing endpoint database tables...');
+    console.log('📊 Syncing endpoint tables (in primary database)...');
     
     // Sync tables in order
     await EndpointCategory.sync({ alter: true });
@@ -33,7 +30,7 @@ const initEndpointDatabase = async () => {
     await EndpointUsageStats.sync({ alter: true });
     console.log('  ✓ EndpointUsageStats table synced');
     
-    console.log('✓ Endpoint database tables synced');
+    console.log('✓ Endpoint tables synced (in primary database)');
     
     // Create default categories if they don't exist
     const defaultCategories = [
@@ -114,13 +111,13 @@ const initEndpointDatabase = async () => {
     
     return true;
   } catch (error) {
-    console.error('✗ Endpoint database error:', error.message);
+    console.error('✗ Endpoint tables error:', error.message);
     return false;
   }
 };
 
 export {
-  endpointSequelize,
+  sequelize,
   ApiEndpoint,
   EndpointCategory,
   EndpointUsageStats,

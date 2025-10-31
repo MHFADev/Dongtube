@@ -11,6 +11,9 @@ class EndpointLoader {
     this.cache = null;
     this.cacheTimestamp = 0;
     this.CACHE_DURATION = 60000; // 1 minute cache
+    this.eventSource = null;
+    this.reconnectAttempts = 0;
+    this.maxReconnectAttempts = 5;
   }
 
   /**
@@ -322,6 +325,182 @@ class EndpointLoader {
     console.log('🔄 Refreshing endpoints...');
     return await this.loadEndpoints(true);
   }
+
+  /**
+   * Connect to real-time endpoint updates via SSE
+   */
+  connectRealtimeUpdates() {
+    if (this.eventSource) {
+      console.log('⚠️  SSE already connected');
+      return;
+    }
+
+    console.log('📡 Connecting to real-time endpoint updates...');
+
+    this.eventSource = new EventSource('/sse/endpoint-updates');
+
+    this.eventSource.onopen = () => {
+      console.log('✓ Connected to real-time endpoint updates');
+      this.reconnectAttempts = 0;
+    };
+
+    this.eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        this.handleRealtimeEvent(data);
+      } catch (error) {
+        console.error('Failed to parse SSE message:', error);
+      }
+    };
+
+    this.eventSource.onerror = (error) => {
+      console.error('SSE connection error:', error);
+      this.eventSource.close();
+      this.eventSource = null;
+
+      // Attempt to reconnect
+      if (this.reconnectAttempts < this.maxReconnectAttempts) {
+        this.reconnectAttempts++;
+        const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
+        console.log(`Reconnecting in ${delay / 1000}s... (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+        setTimeout(() => this.connectRealtimeUpdates(), delay);
+      } else {
+        console.error('Max reconnection attempts reached. Please refresh the page.');
+      }
+    };
+  }
+
+  /**
+   * Handle real-time events from SSE
+   */
+  async handleRealtimeEvent(event) {
+    console.log('📢 Real-time event received:', event);
+
+    switch (event.type) {
+      case 'connected':
+        console.log('✓', event.message);
+        break;
+
+      case 'endpoint_change':
+        await this.handleEndpointChange(event);
+        break;
+
+      case 'endpoint_bulk_change':
+        await this.handleBulkChange(event);
+        break;
+
+      case 'endpoint_sync_complete':
+        await this.handleSyncComplete(event);
+        break;
+
+      default:
+        console.log('Unknown event type:', event.type);
+    }
+  }
+
+  /**
+   * Handle individual endpoint change
+   */
+  async handleEndpointChange(event) {
+    const { action, data } = event;
+    
+    console.log(`🔄 Endpoint ${action}:`, data.path);
+
+    // Invalidate cache and reload
+    this.cache = null;
+    await this.loadEndpoints(true);
+
+    // Re-render if there's a render function available
+    if (typeof this.renderEndpoints === 'function') {
+      this.renderEndpoints();
+    }
+
+    // Show notification
+    this.showNotification(`Endpoint ${action}: ${data.name || data.path}`, 'info');
+  }
+
+  /**
+   * Handle bulk endpoint changes
+   */
+  async handleBulkChange(event) {
+    const { action, count } = event;
+    
+    console.log(`🔄 Bulk ${action}: ${count} endpoints`);
+
+    // Invalidate cache and reload
+    this.cache = null;
+    await this.loadEndpoints(true);
+
+    // Re-render if there's a render function available
+    if (typeof this.renderEndpoints === 'function') {
+      this.renderEndpoints();
+    }
+
+    // Show notification
+    this.showNotification(`${count} endpoints updated`, 'info');
+  }
+
+  /**
+   * Handle sync completion
+   */
+  async handleSyncComplete(event) {
+    const { stats } = event;
+    
+    console.log('🔄 Sync complete:', stats);
+
+    // Invalidate cache and reload
+    this.cache = null;
+    await this.loadEndpoints(true);
+
+    // Re-render if there's a render function available
+    if (typeof this.renderEndpoints === 'function') {
+      this.renderEndpoints();
+    }
+
+    // Show notification
+    this.showNotification(`Sync complete: ${stats.total} endpoints`, 'success');
+  }
+
+  /**
+   * Show notification to user
+   */
+  showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `endpoint-notification ${type}`;
+    notification.textContent = message;
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      background: ${type === 'success' ? '#4caf50' : type === 'error' ? '#f44336' : '#2196f3'};
+      color: white;
+      border-radius: 4px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      z-index: 10000;
+      animation: slideIn 0.3s ease;
+    `;
+
+    document.body.appendChild(notification);
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+      notification.style.animation = 'slideOut 0.3s ease';
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
+  }
+
+  /**
+   * Disconnect from SSE
+   */
+  disconnectRealtimeUpdates() {
+    if (this.eventSource) {
+      this.eventSource.close();
+      this.eventSource = null;
+      console.log('Disconnected from real-time updates');
+    }
+  }
 }
 
 // Create global instance
@@ -334,6 +513,9 @@ if (document.readyState === 'loading') {
       await window.endpointLoader.loadEndpoints();
       await window.endpointLoader.loadCategories();
       console.log('✓ Endpoints loaded successfully');
+      
+      // Connect to real-time updates
+      window.endpointLoader.connectRealtimeUpdates();
     } catch (error) {
       console.error('✗ Failed to auto-load endpoints:', error);
     }
@@ -345,8 +527,38 @@ if (document.readyState === 'loading') {
       await window.endpointLoader.loadEndpoints();
       await window.endpointLoader.loadCategories();
       console.log('✓ Endpoints loaded successfully');
+      
+      // Connect to real-time updates
+      window.endpointLoader.connectRealtimeUpdates();
     } catch (error) {
       console.error('✗ Failed to auto-load endpoints:', error);
     }
   })();
 }
+
+// Add CSS animation for notifications
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+`;
+document.head.appendChild(style);

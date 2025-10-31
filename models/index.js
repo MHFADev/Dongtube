@@ -6,6 +6,7 @@ import ActivityLog from './ActivityLog.js';
 import RateLimitConfig from './RateLimitConfig.js';
 import NotificationConfig from './NotificationConfig.js';
 import IpWhitelist from './IpWhitelist.js';
+import { ApiEndpoint, EndpointCategory, EndpointUsageStats, initEndpointDatabase } from './endpoint/index.js';
 import crypto from 'crypto';
 
 const initDatabase = async () => {
@@ -28,7 +29,11 @@ const initDatabase = async () => {
     console.log('  ✓ NotificationConfig table synced');
     await IpWhitelist.sync({ alter: true });
     console.log('  ✓ IpWhitelist table synced');
-    console.log('✓ Database tables synced');
+    
+    // Initialize endpoint tables
+    await initEndpointDatabase();
+    
+    console.log('✓ All database tables synced');
     
     const adminExists = await User.findOne({ where: { role: 'admin' } });
     if (!adminExists) {
@@ -66,5 +71,8 @@ export {
   RateLimitConfig,
   NotificationConfig,
   IpWhitelist,
+  ApiEndpoint,
+  EndpointCategory,
+  EndpointUsageStats,
   initDatabase 
 };

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { ApiEndpoint, EndpointCategory } from '../models/endpoint/index.js';
+import { ApiEndpoint, EndpointCategory } from '../models/index.js';
 import { Op } from 'sequelize';
 
 const router = Router();

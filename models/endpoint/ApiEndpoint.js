@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
-import endpointSequelize from '../../config/database-endpoints.js';
+import sequelize from '../../config/database.js';
 
-const ApiEndpoint = endpointSequelize.define('ApiEndpoint', {
+const ApiEndpoint = sequelize.define('ApiEndpoint', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,

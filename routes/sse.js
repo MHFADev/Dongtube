@@ -1,5 +1,6 @@
 import express from 'express';
 import { roleChangeEmitter } from '../services/EventEmitter.js';
+import endpointEventEmitter from '../services/EndpointEventEmitter.js';
 import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -41,6 +42,23 @@ router.get('/sse/role-updates', authenticate, (req, res) => {
     console.log(`🔌 SSE: User ${userId} disconnected from role update stream`);
     roleChangeEmitter.removeListener(`role-change:${userId}`, roleChangeHandler);
     clearInterval(heartbeatInterval);
+    res.end();
+  });
+});
+
+// SSE endpoint for endpoint updates (public - no auth required)
+router.get('/sse/endpoint-updates', (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
+
+  res.write('data: {"type":"connected","message":"Connected to endpoint update stream"}\n\n');
+
+  endpointEventEmitter.addClient(res);
+
+  req.on('close', () => {
+    endpointEventEmitter.removeClient(res);
     res.end();
   });
 });
