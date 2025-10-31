@@ -8,7 +8,7 @@ import jwt from "jsonwebtoken";
 import chokidar from "chokidar";
 import { readFileSync } from "fs";
 import { initDatabase, VIPEndpoint, User } from "./models/index.js";
-import { initEndpointDatabase } from "./models/endpoint/index.js";
+import { initEndpointDatabase, ApiEndpoint } from "./models/endpoint/index.js";
 import authRoutes from "./routes/auth.js";
 import adminRoutes from "./routes/admin.js";
 import sseRoutes from "./routes/sse.js";
@@ -218,8 +218,6 @@ async function startServer() {
     });
 
     app.get("/api/docs", async (req, res) => {
-      const allEndpoints = routeManager.getAllEndpoints();
-      
       // Check user authentication and role
       let hasPremiumAccess = false;
       try {
@@ -238,38 +236,32 @@ async function startServer() {
       }
       
       try {
+        // Query from SECOND DATABASE (endpoint database)
+        const dbEndpoints = await ApiEndpoint.findAll({
+          where: { isActive: true },
+          order: [['priority', 'DESC'], ['createdAt', 'ASC']],
+          attributes: [
+            'id', 'path', 'method', 'name', 'description', 'category',
+            'status', 'parameters', 'examples', 'responseType', 'responseBinary',
+            'priority', 'tags'
+          ]
+        });
+
         res.setHeader('Cache-Control', 'public, max-age=300');
-        res.setHeader('ETag', `"endpoints-${allEndpoints.length}"`);
+        res.setHeader('ETag', `"endpoints-${dbEndpoints.length}"`);
         
-        const vipEndpoints = await VIPEndpoint.findAll({
-          attributes: ['path', 'method', 'requiresVIP']
-        });
-        
-        // Build VIP map using composite key (method:path) to handle mixed-access endpoints
-        const vipMap = new Map();
-        vipEndpoints.forEach(ep => {
-          const compositeKey = `${ep.method}:${ep.path}`;
-          vipMap.set(compositeKey, ep.requiresVIP);
-        });
-        
-        const endpointsWithVIPStatus = allEndpoints.map(ep => {
-          // Check VIP status using composite key for each method
-          const methodString = ep.method || 'GET';
-          const methods = methodString.split(',').map(m => m.trim());
-          const isVIPForAnyMethod = methods.some(method => {
-            const compositeKey = `${method}:${ep.path}`;
-            return vipMap.get(compositeKey) === true;
-          });
-          const isVIPEndpoint = isVIPForAnyMethod;
+        // Map database endpoints to frontend format with VIP protection
+        const endpointsWithVIPStatus = dbEndpoints.map(dbEp => {
+          const isVIPEndpoint = dbEp.status === 'vip' || dbEp.status === 'premium';
           
           // Sanitize premium endpoint details for non-premium users
           if (isVIPEndpoint && !hasPremiumAccess) {
             return {
-              path: ep.path,
-              method: ep.method,
-              name: ep.name,
+              path: dbEp.path,
+              method: dbEp.method,
+              name: dbEp.name,
               description: 'Premium endpoint - VIP access required',
-              category: ep.category,
+              category: dbEp.category,
               requiresVIP: true,
               params: [],
               parameters: [],
@@ -280,8 +272,17 @@ async function startServer() {
           }
           
           return {
-            ...ep,
-            requiresVIP: isVIPEndpoint
+            path: dbEp.path,
+            method: dbEp.method,
+            name: dbEp.name,
+            description: dbEp.description,
+            category: dbEp.category,
+            requiresVIP: isVIPEndpoint,
+            params: dbEp.parameters || [],
+            parameters: dbEp.parameters || [],
+            examples: dbEp.examples,
+            responseBinary: dbEp.responseBinary || false,
+            tags: dbEp.tags || []
           };
         });
         
@@ -291,30 +292,30 @@ async function startServer() {
           endpoints: endpointsWithVIPStatus
         });
       } catch (error) {
-        console.error('Error fetching VIP endpoint status:', error);
+        console.error('Error fetching endpoints from database:', error);
         
-        // Even on error, sanitize premium endpoints for non-premium users
-        const sanitizedEndpoints = allEndpoints.map(ep => {
-          // Since we can't check VIP status from DB on error, treat all as free
-          // This is safer than leaking premium data
-          return {
-            path: ep.path,
-            method: ep.method,
-            name: ep.name,
-            description: ep.description || ep.name,
-            category: ep.category,
-            requiresVIP: false,
-            params: hasPremiumAccess ? (ep.params || ep.parameters || []) : [],
-            parameters: hasPremiumAccess ? (ep.parameters || ep.params || []) : [],
-            examples: hasPremiumAccess ? ep.examples : undefined,
-            responseBinary: ep.responseBinary || false
-          };
-        });
+        // Fallback to RouteManager if endpoint database is not available
+        const allEndpoints = routeManager.getAllEndpoints();
+        
+        // Even on error, treat all as free for safety
+        const sanitizedEndpoints = allEndpoints.map(ep => ({
+          path: ep.path,
+          method: ep.method,
+          name: ep.name,
+          description: ep.description || ep.name,
+          category: ep.category,
+          requiresVIP: false,
+          params: hasPremiumAccess ? (ep.params || ep.parameters || []) : [],
+          parameters: hasPremiumAccess ? (ep.parameters || ep.params || []) : [],
+          examples: hasPremiumAccess ? ep.examples : undefined,
+          responseBinary: ep.responseBinary || false
+        }));
         
         res.json({
           success: true,
           total: sanitizedEndpoints.length,
-          endpoints: sanitizedEndpoints
+          endpoints: sanitizedEndpoints,
+          fallback: true
         });
       }
     });
