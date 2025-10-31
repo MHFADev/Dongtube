@@ -528,6 +528,217 @@
         min-width: 100%;
       }
     }
+
+    /* Custom Notification System */
+    .toast-container {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 420px;
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOutRight {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+
+    .toast {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      animation: slideInRight 0.3s ease-out;
+      backdrop-filter: blur(10px);
+      min-width: 320px;
+    }
+
+    .toast.hiding {
+      animation: slideOutRight 0.3s ease-out;
+    }
+
+    .toast-icon {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .toast-content {
+      flex: 1;
+    }
+
+    .toast-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .toast-message {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .toast-close {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      cursor: pointer;
+      opacity: 0.5;
+      transition: opacity 0.2s;
+      background: none;
+      border: none;
+      padding: 0;
+      margin-top: 2px;
+    }
+
+    .toast-close:hover {
+      opacity: 1;
+    }
+
+    .toast.success {
+      border-color: rgba(0, 255, 136, 0.3);
+      background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 200, 100, 0.05) 100%);
+    }
+
+    .toast.success .toast-icon {
+      color: var(--success);
+    }
+
+    .toast.success .toast-title {
+      color: var(--success);
+    }
+
+    .toast.error {
+      border-color: rgba(255, 68, 68, 0.3);
+      background: linear-gradient(135deg, rgba(255, 68, 68, 0.1) 0%, rgba(200, 0, 0, 0.05) 100%);
+    }
+
+    .toast.error .toast-icon {
+      color: var(--error);
+    }
+
+    .toast.error .toast-title {
+      color: var(--error);
+    }
+
+    .toast.info {
+      border-color: rgba(255, 165, 0, 0.3);
+      background: linear-gradient(135deg, rgba(255, 165, 0, 0.1) 0%, rgba(255, 180, 0, 0.05) 100%);
+    }
+
+    .toast.info .toast-icon {
+      color: var(--primary);
+    }
+
+    .toast.info .toast-title {
+      color: var(--primary);
+    }
+
+    /* Custom Confirm Dialog */
+    .confirm-dialog {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 10001;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .confirm-dialog.active {
+      display: flex;
+    }
+
+    .confirm-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      max-width: 440px;
+      width: 90%;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+      animation: fadeInUp 0.3s ease-out;
+    }
+
+    .confirm-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 165, 0, 0.1);
+      border-radius: 50%;
+      color: var(--primary);
+    }
+
+    .confirm-title {
+      font-size: 20px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .confirm-message {
+      font-size: 14px;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .confirm-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .confirm-actions button {
+      flex: 1;
+    }
+
+    @media (max-width: 768px) {
+      .toast-container {
+        top: 16px;
+        right: 16px;
+        left: 16px;
+        max-width: none;
+      }
+
+      .toast {
+        min-width: auto;
+      }
+    }
   </style>
 </head>
 <body>
@@ -828,24 +1039,32 @@
     }
 
     async function revokeVip(userId, email) {
-      if (!confirm(`Revoke VIP access from ${email}?`)) {
-        return;
-      }
-      
-      try {
-        const response = await fetch(`/admin/users/${userId}/revoke-vip`, {
-          method: 'POST',
-          credentials: 'include'
-        });
-        
-        if (response.ok) {
-          await loadUsers();
-        } else {
-          alert('Failed to revoke VIP');
+      showConfirm(
+        `Apakah Anda yakin ingin mencabut akses VIP dari ${email}?`,
+        async () => {
+          try {
+            const response = await fetch(`/admin/users/${userId}/revoke-vip`, {
+              method: 'POST',
+              credentials: 'include'
+            });
+            
+            if (response.ok) {
+              await loadUsers();
+              showToast('Berhasil!', 'Akses VIP berhasil dicabut', 'success');
+            } else {
+              showToast('Gagal', 'Tidak dapat mencabut akses VIP', 'error');
+            }
+          } catch (error) {
+            showToast('Error', 'Terjadi kesalahan saat mencabut VIP', 'error');
+          }
+        },
+        {
+          title: 'Cabut Akses VIP',
+          confirmText: 'Ya, Cabut',
+          cancelText: 'Batal',
+          type: 'danger'
         }
-      } catch (error) {
-        alert('Error revoking VIP');
-      }
+      );
     }
 
     document.getElementById('grant-vip-form').addEventListener('submit', async (e) => {
@@ -865,12 +1084,12 @@
         if (response.ok) {
           closeModal('grant-vip-modal');
           await loadUsers();
-          alert('VIP access granted successfully!');
+          showToast('Berhasil!', 'Akses VIP berhasil diberikan', 'success');
         } else {
-          alert('Failed to grant VIP');
+          showToast('Gagal', 'Tidak dapat memberikan akses VIP', 'error');
         }
       } catch (error) {
-        alert('Error granting VIP');
+        showToast('Error', 'Terjadi kesalahan saat memberikan VIP', 'error');
       }
     });
 
@@ -894,12 +1113,12 @@
         if (response.ok) {
           closeModal('edit-user-modal');
           await loadUsers();
-          alert('User updated successfully!');
+          showToast('Berhasil!', 'Data user berhasil diperbarui', 'success');
         } else {
-          alert('Failed to update user');
+          showToast('Gagal', 'Tidak dapat memperbarui user', 'error');
         }
       } catch (error) {
-        alert('Error updating user');
+        showToast('Error', 'Terjadi kesalahan saat update user', 'error');
       }
     });
 
@@ -913,6 +1132,100 @@
     };
 
     loadUsers();
+
+    // Custom Notification System
+    function showToast(title, message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      
+      const icons = {
+        success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>',
+        error: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>',
+        info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>'
+      };
+      
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `
+        <div class="toast-icon">${icons[type]}</div>
+        <div class="toast-content">
+          <div class="toast-title">${title}</div>
+          ${message ? `<div class="toast-message">${message}</div>` : ''}
+        </div>
+        <button class="toast-close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      `;
+      
+      const closeBtn = toast.querySelector('.toast-close');
+      closeBtn.onclick = () => removeToast(toast);
+      
+      container.appendChild(toast);
+      
+      setTimeout(() => removeToast(toast), 5000);
+    }
+
+    function removeToast(toast) {
+      toast.classList.add('hiding');
+      setTimeout(() => toast.remove(), 300);
+    }
+
+    function showConfirm(message, onConfirm, options = {}) {
+      const dialog = document.getElementById('confirm-dialog');
+      const title = options.title || 'Konfirmasi';
+      const confirmText = options.confirmText || 'Ya';
+      const cancelText = options.cancelText || 'Batal';
+      const type = options.type || 'warning';
+      
+      const icons = {
+        warning: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>',
+        danger: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>'
+      };
+      
+      document.getElementById('confirm-icon').innerHTML = icons[type] || icons.warning;
+      document.getElementById('confirm-title').textContent = title;
+      document.getElementById('confirm-message').textContent = message;
+      document.getElementById('confirm-btn').textContent = confirmText;
+      document.getElementById('cancel-btn').textContent = cancelText;
+      
+      const confirmBtn = document.getElementById('confirm-btn');
+      const cancelBtn = document.getElementById('cancel-btn');
+      
+      confirmBtn.onclick = () => {
+        dialog.classList.remove('active');
+        if (onConfirm) onConfirm();
+      };
+      
+      cancelBtn.onclick = () => {
+        dialog.classList.remove('active');
+      };
+      
+      dialog.onclick = (e) => {
+        if (e.target === dialog) {
+          dialog.classList.remove('active');
+        }
+      };
+      
+      dialog.classList.add('active');
+    }
   </script>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Confirm Dialog -->
+  <div id="confirm-dialog" class="confirm-dialog">
+    <div class="confirm-box">
+      <div class="confirm-icon" id="confirm-icon"></div>
+      <div class="confirm-title" id="confirm-title">Konfirmasi</div>
+      <div class="confirm-message" id="confirm-message"></div>
+      <div class="confirm-actions">
+        <button class="btn btn-secondary" id="cancel-btn">Batal</button>
+        <button class="btn btn-danger" id="confirm-btn">Ya</button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
