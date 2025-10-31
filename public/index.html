@@ -3690,8 +3690,8 @@
       try {
         console.log('🔄 Loading endpoints from database...');
         
-        // Fetch dari DATABASE, bukan dari /api/docs
-        const res = await fetch(`${API_BASE}/api/endpoints?limit=1000&sortBy=priority&sortOrder=DESC${forceRefresh ? '&_=' + Date.now() : ''}`);
+        // Fetch dari DATABASE, hanya endpoint yang isActive = true (visible)
+        const res = await fetch(`${API_BASE}/api/endpoints?limit=1000&sortBy=priority&sortOrder=DESC&isActive=true${forceRefresh ? '&_=' + Date.now() : ''}`);
         const data = await res.json();
         
         if (data.success) {
