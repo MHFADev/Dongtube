@@ -22,14 +22,15 @@ Preferred communication style: Simple, everyday language.
 - **Enhanced Media Preview System**: Features a modern glassmorphism UI with animated gradients, responsive grid layouts, custom audio player, image gallery, and fullscreen modal. Includes advanced media type detection and actions.
 - **Accessibility**: Includes `prefers-reduced-motion` support.
 - **Social Media Integration**: Implements Open Graph, Twitter Card tags, and SEO meta tags.
-- **Smart VIP Popup Logic**: Differentiates between unauthenticated and authenticated non-VIP users, displaying context-sensitive messages based on authentication state.
+- **Smart VIP Popup Logic**: Differentiates between three states: unauthenticated users (login prompt), authenticated non-VIP users (upgrade prompt), and expired VIP users (renewal prompt with expiration date), displaying context-sensitive messages based on authentication and VIP status.
 - **UI Layer Management**: Ensures proper z-index hierarchy and prevents overlapping issues for interactive elements.
 - **Tab-Aware Audio Control**: Background music automatically pauses/resumes based on tab visibility using the Visibility API.
 - **Powerful Admin Panel**: Full-featured interface for managing API endpoints with CRUD operations, bulk actions, inline status toggling, advanced filtering, and a statistics dashboard.
 
 ## Feature Specifications
 - **Premium Route Management System**: Allows administrators to toggle VIP access for API endpoints via an admin panel with auto-registration, bulk operations, and real-time updates.
-- **VIP Access Protection**: Middleware checks for VIP status, providing error messages and upgrade options for non-VIP users.
+- **VIP Access Protection**: Middleware comprehensively validates VIP status including role checking and expiration date validation (`vipExpiresAt`). Provides contextual error messages differentiating between unauthenticated users, non-VIP users, and expired VIP users with tailored upgrade/renewal prompts.
+- **VIP Expiration Validation**: Utility function `isVIPValid()` validates VIP status considering both role and expiration date across backend and frontend, ensuring consistent access control.
 - **Unrestricted Admin Control**: Admin-set VIP statuses are never automatically reverted, admins bypass all VIP checks, can force-update user roles, perform bulk user updates, and grant permanent VIP access.
 - **Premium Content Security**: Backend sanitization prevents premium endpoint details from being sent to non-VIP users. Uses composite keys for method-specific access and JWT-based authentication for documentation access.
 - **VIP Endpoint Cache System**: In-memory caching with a 5-second TTL, automatic invalidation on admin changes, and debug logging.

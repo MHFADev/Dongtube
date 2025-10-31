@@ -3348,7 +3348,15 @@
     // Check if user has premium access
     function hasPremiumAccess() {
       if (!currentUser) return false;
-      return currentUser.role === 'vip' || currentUser.role === 'admin';
+      if (currentUser.role === 'admin') return true;
+      if (currentUser.role !== 'vip') return false;
+      
+      // Check VIP expiration
+      if (!currentUser.vipExpiresAt) return true;
+      
+      const now = new Date();
+      const expiresAt = new Date(currentUser.vipExpiresAt);
+      return expiresAt > now;
     }
     
     // Generate premium lock screen HTML
@@ -4366,7 +4374,8 @@ print(data)`;
             if (data && data.vipRequired === true) {
               console.log('Premium endpoint detected:', data);
               
-              const isAuthenticated = data.user?.isAuthenticated === true || currentUser !== null;
+              const isAuthenticated = data.isAuthenticated === true || data.user?.isAuthenticated === true || currentUser !== null;
+              const isVipExpired = data.vipExpired === true;
               
               const errorData = {
                 endpoint: {
@@ -4376,7 +4385,11 @@ print(data)`;
                 upgrade: {
                   whatsappUrl: data.whatsappUrl || data.upgrade?.whatsappUrl || 'https://wa.me/6281234567890?text=Halo,%20saya%20ingin%20upgrade%20ke%20VIP'
                 },
-                user: isAuthenticated ? (data.user || currentUser) : null
+                user: isAuthenticated ? (data.user || currentUser) : null,
+                isAuthenticated: isAuthenticated,
+                vipExpired: isVipExpired,
+                error: data.error,
+                message: data.message
               };
               
               setTimeout(() => {
@@ -4882,6 +4895,7 @@ print(data)`;
       const endpointPath = document.getElementById('modalEndpointPath');
       const whatsappBtn = document.getElementById('whatsappUpgradeBtn');
       const userInfo = document.getElementById('modalUserInfo');
+      const modalTitle = document.getElementById('modalTitle');
       
       if (errorData.endpoint) {
         endpointName.textContent = errorData.endpoint.name || errorData.endpoint.path;
@@ -4894,19 +4908,36 @@ print(data)`;
         };
       }
       
-      if (errorData.user) {
+      // Update modal based on authentication state
+      if (!errorData.isAuthenticated) {
+        // User not logged in
+        if (modalTitle) modalTitle.textContent = '🔒 Login Required';
+        userInfo.innerHTML = `
+          <p style="text-align: center; color: rgba(255,255,255,0.7); margin-bottom: 15px;">
+            <strong>⚠️ You need to login first to access premium endpoints</strong><br>
+            <a href="/login.html" style="color: #ffa500; text-decoration: underline;">Click here to login</a> or 
+            <a href="/signup.html" style="color: #ffa500; text-decoration: underline;">create an account</a>
+          </p>
+        `;
+      } else if (errorData.vipExpired) {
+        // VIP expired
+        if (modalTitle) modalTitle.textContent = '⏰ VIP Expired';
+        const expiresAt = errorData.user?.vipExpiresAt ? new Date(errorData.user.vipExpiresAt).toLocaleDateString() : 'Unknown';
+        userInfo.innerHTML = `
+          <p style="text-align: center; color: rgba(255,255,255,0.7); margin-bottom: 15px;">
+            Logged in as: <strong>${errorData.user?.email || 'Unknown'}</strong><br>
+            <strong style="color: #ff6b6b;">⏰ Your VIP access expired on ${expiresAt}</strong><br>
+            <span style="color: rgba(255,255,255,0.5);">Contact admin to renew your VIP access</span>
+          </p>
+        `;
+      } else if (errorData.user) {
+        // Logged in but not VIP
+        if (modalTitle) modalTitle.textContent = '⭐ Upgrade to VIP';
         userInfo.innerHTML = `
           <p style="text-align: center; color: rgba(255,255,255,0.7); margin-bottom: 15px;">
             Logged in as: <strong>${errorData.user.email}</strong><br>
-            Current role: <strong style="color: #ffa500;">${errorData.user.currentRole.toUpperCase()}</strong>
-          </p>
-        `;
-      } else {
-        userInfo.innerHTML = `
-          <p style="text-align: center; color: rgba(255,255,255,0.7); margin-bottom: 15px;">
-            <strong>⚠️ You need to login first</strong><br>
-            <a href="/login.html" style="color: #ffa500;">Click here to login</a> or 
-            <a href="/signup.html" style="color: #ffa500;">create an account</a>
+            Current role: <strong style="color: #ffa500;">${errorData.user.currentRole?.toUpperCase() || 'USER'}</strong><br>
+            <span style="color: rgba(255,255,255,0.5);">Upgrade to VIP for premium access</span>
           </p>
         `;
       }
@@ -4981,7 +5012,7 @@ print(data)`;
         text-align: center;
       ">
         <div style="font-size: 60px; margin-bottom: 10px;">⭐</div>
-        <h2 style="color: #fff; font-size: 28px; margin: 0;">Upgrade ke VIP</h2>
+        <h2 id="modalTitle" style="color: #fff; font-size: 28px; margin: 0;">Upgrade ke VIP</h2>
         <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 14px;">
           Akses Premium Required
         </p>

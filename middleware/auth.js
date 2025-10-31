@@ -9,11 +9,24 @@ export const generateToken = (user) => {
     {
       id: user.id,
       email: user.email,
-      role: user.role
+      role: user.role,
+      vipExpiresAt: user.vipExpiresAt
     },
     JWT_SECRET,
     { expiresIn: JWT_EXPIRES }
   );
+};
+
+export const isVIPValid = (user) => {
+  if (!user) return false;
+  if (user.role === 'admin') return true;
+  if (user.role !== 'vip') return false;
+  
+  if (!user.vipExpiresAt) return true;
+  
+  const now = new Date();
+  const expiresAt = new Date(user.vipExpiresAt);
+  return expiresAt > now;
 };
 
 export const authenticate = async (req, res, next) => {
@@ -143,12 +156,13 @@ export const checkVIPAccess = async (req, res, next) => {
     const adminWhatsApp = process.env.ADMIN_WHATSAPP_NUMBER || '6281234567890';
     const whatsappUrl = `https://wa.me/${adminWhatsApp}?text=${encodeURIComponent('Halo! Saya ingin upgrade ke VIP untuk akses premium API 🚀')}`;
     
-    if (!token) {
+    if (!token || !req.user) {
       return res.status(401).json({
         success: false,
         error: '🔒 Endpoint Premium - Login Required',
         message: 'Endpoint ini memerlukan akses VIP. Silakan login terlebih dahulu atau hubungi admin untuk upgrade ke VIP.',
         vipRequired: true,
+        isAuthenticated: false,
         endpoint: {
           path: vipEndpoint.path,
           name: vipEndpoint.name,
@@ -162,15 +176,15 @@ export const checkVIPAccess = async (req, res, next) => {
       });
     }
 
-    const decoded = jwt.verify(token, JWT_SECRET);
-    const user = await User.findByPk(decoded.id, {
+    const user = await User.findByPk(req.user.id, {
       attributes: ['id', 'email', 'role', 'vipExpiresAt']
     });
 
     if (!user) {
       return res.status(401).json({
         success: false,
-        error: 'User not found'
+        error: 'User not found',
+        isAuthenticated: false
       });
     }
 
@@ -179,12 +193,19 @@ export const checkVIPAccess = async (req, res, next) => {
       return next();
     }
 
-    if (user.role !== 'vip') {
+    const vipValid = isVIPValid(user);
+    
+    if (!vipValid) {
+      const isExpired = user.role === 'vip' && user.vipExpiresAt && new Date(user.vipExpiresAt) <= new Date();
+      
       return res.status(403).json({
         success: false,
-        error: '⭐ Upgrade ke VIP Required',
-        message: `Maaf, endpoint "${vipEndpoint.name || vipEndpoint.path}" hanya tersedia untuk member VIP. Upgrade sekarang untuk akses unlimited!`,
+        error: isExpired ? '⏰ VIP Expired - Renewal Required' : '⭐ Upgrade ke VIP Required',
+        message: isExpired 
+          ? `VIP Anda telah expired pada ${new Date(user.vipExpiresAt).toLocaleDateString()}. Hubungi admin untuk perpanjang akses VIP!`
+          : `Maaf, endpoint "${vipEndpoint.name || vipEndpoint.path}" hanya tersedia untuk member VIP. Upgrade sekarang untuk akses unlimited!`,
         vipRequired: true,
+        vipExpired: isExpired,
         endpoint: {
           path: vipEndpoint.path,
           name: vipEndpoint.name,
@@ -193,12 +214,13 @@ export const checkVIPAccess = async (req, res, next) => {
         user: {
           email: user.email,
           currentRole: user.role,
-          isAuthenticated: true
+          isAuthenticated: true,
+          vipExpiresAt: user.vipExpiresAt
         },
         upgrade: {
           whatsapp: adminWhatsApp,
           whatsappUrl: whatsappUrl,
-          message: 'Klik untuk chat admin dan upgrade VIP',
+          message: isExpired ? 'Klik untuk chat admin dan perpanjang VIP' : 'Klik untuk chat admin dan upgrade VIP',
           benefits: [
             '✅ Akses semua endpoint premium',
             '✅ Rate limit lebih tinggi',
