@@ -211,6 +211,9 @@ router.put('/admin/users/:id/force-update', authenticate, authorize('admin'), as
       });
     }
 
+    const oldRole = user.role;
+    const oldVipExpiresAt = user.vipExpiresAt;
+
     const updates = {};
     if (role !== undefined) {
       updates.role = role;
@@ -221,9 +224,17 @@ router.put('/admin/users/:id/force-update', authenticate, authorize('admin'), as
 
     await user.update(updates);
 
+    console.log(`👤 ADMIN: Force updated user ${user.email} - Role: ${oldRole} → ${user.role}`);
+    
+    if (role !== undefined && oldRole !== user.role) {
+      roleChangeEmitter.notifyRoleChange(user.id, oldRole, user.role, user.vipExpiresAt);
+    }
+
     res.json({
       success: true,
-      message: 'User forcefully updated by admin - no restrictions applied',
+      message: 'User forcefully updated by admin - Real-time notification sent!',
+      refreshTokenRequired: true,
+      realtimeUpdate: true,
       user: {
         id: user.id,
         email: user.email,
