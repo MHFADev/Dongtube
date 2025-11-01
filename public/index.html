@@ -5464,7 +5464,14 @@ print(data)`;
       const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
 
       try {
-        const response = await fetch('/auth/me');
+        const cacheBuster = `?_t=${Date.now()}`;
+        const response = await fetch(`/auth/me${cacheBuster}`, {
+          cache: 'no-cache',
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        });
         const data = await response.json();
 
         authLoading.style.display = 'none';
