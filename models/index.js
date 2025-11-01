@@ -6,6 +6,10 @@ import ActivityLog from './ActivityLog.js';
 import RateLimitConfig from './RateLimitConfig.js';
 import NotificationConfig from './NotificationConfig.js';
 import IpWhitelist from './IpWhitelist.js';
+import RequestLog from './RequestLog.js';
+import PerformanceMetric from './PerformanceMetric.js';
+import AnomalyAlert from './AnomalyAlert.js';
+import EndpointHealth from './EndpointHealth.js';
 import { ApiEndpoint, EndpointCategory, EndpointUsageStats, initEndpointDatabase } from './endpoint/index.js';
 import crypto from 'crypto';
 
@@ -30,9 +34,18 @@ const initDatabase = async () => {
     await IpWhitelist.sync({ alter: true });
     console.log('  ✓ IpWhitelist table synced');
     
+    await RequestLog.sync({ alter: true });
+    console.log('  ✓ RequestLog table synced');
+    await PerformanceMetric.sync({ alter: true });
+    console.log('  ✓ PerformanceMetric table synced');
+    await AnomalyAlert.sync({ alter: true });
+    console.log('  ✓ AnomalyAlert table synced');
+    await EndpointHealth.sync({ alter: true });
+    console.log('  ✓ EndpointHealth table synced');
+    
     // Note: Endpoint tables (ApiEndpoint, EndpointCategory, EndpointUsageStats) 
     // are synced separately via initEndpointDatabase() in server.js
-    console.log('✓ All database tables synced');
+    console.log('✓ All database tables synced (including analytics tables)');
     
     const adminExists = await User.findOne({ where: { role: 'admin' } });
     if (!adminExists) {
@@ -70,6 +83,10 @@ export {
   RateLimitConfig,
   NotificationConfig,
   IpWhitelist,
+  RequestLog,
+  PerformanceMetric,
+  AnomalyAlert,
+  EndpointHealth,
   ApiEndpoint,
   EndpointCategory,
   EndpointUsageStats,
