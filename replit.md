@@ -9,7 +9,7 @@ Preferred communication style: Simple, everyday language.
 # System Architecture
 
 ## Core Design Principles
-- **Single Database Architecture**: All data (users, endpoints, VIP settings, logs, etc.) stored in one primary PostgreSQL database for simplicity, reliability, and easier maintenance. Endpoint tables (ApiEndpoint, EndpointCategory, EndpointUsageStats) are synchronized from route files to database at startup.
+- **Single Database Architecture**: All data (users, endpoints, VIP settings, logs, etc.) stored in one primary PostgreSQL database for simplicity, reliability, and easier maintenance. Endpoint tables (ApiEndpoint, EndpointCategory, EndpointUsageStats) are synchronized from route files to database at startup. Database initialization sequence: primary database tables sync via `initDatabase()`, then endpoint tables sync via `initEndpointDatabase()` called once in server.js (duplicate call removed November 2025 to fix server hang issue).
 - **Real-Time Endpoint Updates**: Server-Sent Events (SSE) infrastructure broadcasts endpoint changes instantly to all connected users. When admins modify endpoint status/settings in admin panel, changes immediately reflect in user interface without page refresh. Features:
   - `EndpointEventEmitter` service for broadcasting endpoint CRUD events
   - SSE endpoint `/sse/endpoint-updates` with heartbeat and auto-reconnection
@@ -41,7 +41,7 @@ Preferred communication style: Simple, everyday language.
 - **VIP Expiration Validation**: Utility function `isVIPValid()` validates VIP status considering both role and expiration date across backend and frontend, ensuring consistent access control.
 - **Unrestricted Admin Control**: Admin-set VIP statuses are never automatically reverted, admins bypass all VIP checks, can force-update user roles, perform bulk user updates, and grant permanent VIP access.
 - **Premium Content Security**: Backend sanitization prevents premium endpoint details from being sent to non-VIP users. Uses composite keys for method-specific access and JWT-based authentication for documentation access.
-- **VIP Endpoint Cache System**: In-memory caching with a 5-second TTL, automatic invalidation on admin changes, and debug logging.
+- **VIP Endpoint Cache System**: In-memory caching with automatic invalidation on admin changes and debug logging. Cache is instantly cleared whenever admin creates, updates, deletes, or toggles VIP/Premium endpoint status via admin panel, ensuring frontend always displays current VIP status (fixed November 2025).
 - **Caching Strategy**: Implements in-memory Map-based caching with TTL for specific data to reduce database queries.
 - **Background Music**: Auto-plays background music with a visual vinyl disc animation and volume controls.
 - **Security**: Admin routes are protected by authentication, authorization middleware, JWT tokens, role-based access control (RBAC), and bcrypt password hashing.
