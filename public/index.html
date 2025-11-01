@@ -3848,22 +3848,29 @@
           pathLower.includes('/anilist') || pathLower.includes('/neko') ||
           pathLower.includes('/waifu') || pathLower.includes('/oploverz') ||
           pathLower.includes('/anichin') || pathLower.includes('/manga') ||
+          pathLower.includes('/otakudesu') || pathLower.includes('/samehadaku') ||
+          pathLower.includes('/anhmoe') || pathLower.includes('/auratail') ||
           nameLower.includes('anime') || nameLower.includes('manga')) {
         return 'Anime & Manga';
       }
       
-      // News & Information
+      // News & Media
       if (pathLower.includes('/news') || pathLower.includes('/kompas') ||
           pathLower.includes('/cnn') || pathLower.includes('/bbc') ||
+          pathLower.includes('/sindonews') || pathLower.includes('/merdeka') ||
+          pathLower.includes('/antara') || pathLower.includes('/suara') ||
+          pathLower.includes('/cnbc') || pathLower.includes('/justice-gov') ||
           nameLower.includes('news') || descLower.includes('news')) {
-        return 'News & Information';
+        return 'News & Media';
       }
       
       // Image Processing & Generator
       if (pathLower.includes('/image') || pathLower.includes('/ideogram') ||
           pathLower.includes('/brat') || pathLower.includes('/maker') ||
           pathLower.includes('/enhance') || pathLower.includes('/img') ||
-          pathLower.includes('/photo') || pathLower.includes('/edit')) {
+          pathLower.includes('/photo') || pathLower.includes('/edit') ||
+          pathLower.includes('/removebg') || pathLower.includes('/ocr') ||
+          pathLower.includes('/screenshot') || pathLower.includes('/text2img')) {
         return 'Image Processing';
       }
       
@@ -3882,18 +3889,52 @@
         return 'Games';
       }
       
-      // Search & Utilities
+      // Primbon & Ramalan (MUST BE BEFORE Search)
+      if (pathLower.includes('/primbon') || pathLower.includes('/zodiak') ||
+          pathLower.includes('/ramalanjodoh') || pathLower.includes('/tafsirmimpi') ||
+          pathLower.includes('/artinama') || pathLower.includes('/nomorhoki') ||
+          pathLower.includes('/kecocokan') || pathLower.includes('/rejeki') ||
+          pathLower.includes('/sifat_usaha') || nameLower.includes('primbon')) {
+        return 'Primbon';
+      }
+      
+      // Tools & Utilities
+      if (pathLower.includes('/tools/') || pathLower.includes('/qr') ||
+          pathLower.includes('/hash') || pathLower.includes('/base64') ||
+          pathLower.includes('/uuid') || pathLower.includes('/json') ||
+          pathLower.includes('/tts') || pathLower.includes('/translate') ||
+          pathLower.includes('/password') || pathLower.includes('/jwt') ||
+          pathLower.includes('/csv') || pathLower.includes('/color') ||
+          pathLower.includes('/timestamp') || pathLower.includes('/html-entity') ||
+          nameLower.includes('tool')) {
+        return 'Tools & Utilities';
+      }
+      
+      // Search & Info
       if (pathLower.includes('/search') || pathLower.includes('/apk') ||
           pathLower.includes('/wikipedia') || pathLower.includes('/google') ||
-          pathLower.includes('/find')) {
-        return 'Search & Tools';
+          pathLower.includes('/find') || pathLower.includes('/check/') ||
+          pathLower.includes('/info/') || pathLower.includes('/s/') ||
+          pathLower.includes('/cuaca') || pathLower.includes('/gempa') ||
+          pathLower.includes('/jadwaltv') || pathLower.includes('/pln') ||
+          pathLower.includes('/resi') || pathLower.includes('/npm')) {
+        return 'Search & Info';
       }
       
       // Random & Fun
       if (pathLower.includes('/random') || pathLower.includes('/meme') ||
           pathLower.includes('/r/') || pathLower.includes('/joke') ||
-          pathLower.includes('/fun')) {
+          pathLower.includes('/fun') || pathLower.includes('/cecan') ||
+          pathLower.includes('/cat') || pathLower.includes('/ba') ||
+          pathLower.includes('/china') || pathLower.includes('/imgflip')) {
         return 'Random & Fun';
+      }
+      
+      // Downloaders (more general)
+      if (pathLower.includes('/d/') || pathLower.includes('/download') ||
+          pathLower.includes('/gdrive') || pathLower.includes('/lahelu') ||
+          nameLower.includes('download')) {
+        return 'Downloaders';
       }
       
       // Religion & Islamic
