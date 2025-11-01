@@ -3691,7 +3691,14 @@
         console.log('🔄 Loading endpoints from database...');
         
         // Fetch dari DATABASE, hanya endpoint yang isActive = true (visible)
-        const res = await fetch(`${API_BASE}/api/endpoints?limit=1000&sortBy=priority&sortOrder=DESC&isActive=true${forceRefresh ? '&_=' + Date.now() : ''}`);
+        const res = await fetch(`${API_BASE}/api/endpoints?limit=1000&sortBy=priority&sortOrder=DESC&isActive=true${forceRefresh ? '&_=' + Date.now() : ''}`, {
+          cache: 'no-cache',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          }
+        });
         const data = await res.json();
         
         if (data.success) {

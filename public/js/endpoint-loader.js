@@ -10,10 +10,11 @@ class EndpointLoader {
     this.loading = false;
     this.cache = null;
     this.cacheTimestamp = 0;
-    this.CACHE_DURATION = 60000; // 1 minute cache
+    this.CACHE_DURATION = 5000; // 5 seconds cache (reduced for faster updates)
     this.eventSource = null;
     this.reconnectAttempts = 0;
     this.maxReconnectAttempts = 5;
+    this.containerSelector = null; // Store container selector for re-rendering
   }
 
   /**
@@ -131,9 +132,17 @@ class EndpointLoader {
    * Render endpoints to DOM
    */
   renderEndpoints(containerSelector) {
-    const container = document.querySelector(containerSelector);
+    // Store container selector for future re-renders
+    if (containerSelector) {
+      this.containerSelector = containerSelector;
+    }
+    
+    // Use stored selector if not provided
+    const selector = containerSelector || this.containerSelector || '#endpointsContainer';
+    
+    const container = document.querySelector(selector);
     if (!container) {
-      console.error('Container not found:', containerSelector);
+      console.error('Container not found:', selector);
       return;
     }
 
@@ -410,9 +419,9 @@ class EndpointLoader {
     this.cache = null;
     await this.loadEndpoints(true);
 
-    // Re-render if there's a render function available
+    // Re-render with stored container selector
     if (typeof this.renderEndpoints === 'function') {
-      this.renderEndpoints();
+      this.renderEndpoints(); // Will use stored containerSelector
     }
 
     // Show notification
@@ -431,9 +440,9 @@ class EndpointLoader {
     this.cache = null;
     await this.loadEndpoints(true);
 
-    // Re-render if there's a render function available
+    // Re-render with stored container selector
     if (typeof this.renderEndpoints === 'function') {
-      this.renderEndpoints();
+      this.renderEndpoints(); // Will use stored containerSelector
     }
 
     // Show notification
@@ -452,9 +461,9 @@ class EndpointLoader {
     this.cache = null;
     await this.loadEndpoints(true);
 
-    // Re-render if there's a render function available
+    // Re-render with stored container selector
     if (typeof this.renderEndpoints === 'function') {
-      this.renderEndpoints();
+      this.renderEndpoints(); // Will use stored containerSelector
     }
 
     // Show notification
