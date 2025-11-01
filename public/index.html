@@ -3398,13 +3398,6 @@
     // Global user state
     let currentUser = null;
     
-    // Check if endpoint requires VIP/Premium access
-    function isVIPEndpoint(endpoint) {
-      if (!endpoint || !endpoint.status) return false;
-      const status = endpoint.status.toLowerCase();
-      return status === 'vip' || status === 'premium';
-    }
-    
     // Check if user has premium access
     function hasPremiumAccess() {
       if (!currentUser) return false;
@@ -3579,107 +3572,45 @@
       const nameLower = (name || '').toLowerCase();
       const descLower = (description || '').toLowerCase();
       
-      // AI & Generation - use very specific patterns to avoid false positives
-      if (pathLower.includes('/ai/') || pathLower.includes('/gpt') || 
-          pathLower.includes('/gemini') || pathLower.includes('/claude') ||
-          pathLower.includes('/openai') || pathLower.includes('/chatgpt') ||
-          pathLower.includes('/llm') || pathLower.includes('/chat-bot') ||
-          nameLower.includes('gpt') || nameLower.includes('gemini') ||
-          nameLower.includes('claude') || nameLower.includes('openai') ||
-          nameLower.startsWith('ai ') || nameLower.endsWith(' ai') ||
-          nameLower.includes(' ai ') || nameLower === 'ai' ||
-          descLower.includes('artificial intelligence') || 
-          descLower.includes('language model')) {
-        return 'AI & Generation';
-      }
-      
-      // Downloader - Social Media
-      if ((pathLower.includes('/d/') || pathLower.includes('/download')) &&
-          (pathLower.includes('tiktok') || pathLower.includes('instagram') || 
-           pathLower.includes('facebook') || pathLower.includes('youtube') ||
-           pathLower.includes('twitter') || pathLower.includes('video'))) {
-        return 'Downloader';
-      }
-      
-      // Social Media & API
+      // Social Media & Downloads
       if (pathLower.includes('/tiktok') || pathLower.includes('/instagram') || 
           pathLower.includes('/facebook') || pathLower.includes('/youtube') ||
-          pathLower.includes('/twitter') || pathLower.includes('/x/') ||
           pathLower.includes('/xiaohongshu') || pathLower.includes('/snackvideo') ||
-          pathLower.includes('/story') || pathLower.includes('/threads')) {
+          pathLower.includes('/story')) {
         return 'Social Media';
       }
       
-      // Anime & Manga
+      // Anime
       if (pathLower.includes('/anime') || pathLower.includes('/mal') || 
           pathLower.includes('/anilist') || pathLower.includes('/neko') ||
           pathLower.includes('/waifu') || pathLower.includes('/oploverz') ||
-          pathLower.includes('/anichin') || pathLower.includes('/manga') ||
-          nameLower.includes('anime') || nameLower.includes('manga')) {
-        return 'Anime & Manga';
+          pathLower.includes('/anichin') || nameLower.includes('anime')) {
+        return 'Anime';
       }
       
-      // News & Information
+      // News
       if (pathLower.includes('/news') || pathLower.includes('/kompas') ||
-          pathLower.includes('/cnn') || pathLower.includes('/bbc') ||
           nameLower.includes('news') || descLower.includes('news')) {
-        return 'News & Information';
+        return 'News';
       }
       
-      // Image Processing & Generator
+      // Image Processing
       if (pathLower.includes('/image') || pathLower.includes('/ideogram') ||
           pathLower.includes('/brat') || pathLower.includes('/maker') ||
-          pathLower.includes('/enhance') || pathLower.includes('/img') ||
-          pathLower.includes('/photo') || pathLower.includes('/edit')) {
+          pathLower.includes('/enhance')) {
         return 'Image Processing';
       }
       
-      // Music & Audio
-      if (pathLower.includes('/music') || pathLower.includes('/spotify') ||
-          pathLower.includes('/soundcloud') || pathLower.includes('/lyrics') ||
-          pathLower.includes('/audio') || nameLower.includes('music') ||
-          nameLower.includes('spotify')) {
-        return 'Music & Audio';
-      }
-      
-      // Games & Entertainment
-      if (pathLower.includes('/game') || pathLower.includes('/steam') ||
-          pathLower.includes('/epic') || pathLower.includes('/mobile-legends') ||
-          pathLower.includes('/ml') || nameLower.includes('game')) {
-        return 'Games';
-      }
-      
-      // Search & Utilities
+      // Search & Tools
       if (pathLower.includes('/search') || pathLower.includes('/apk') ||
-          pathLower.includes('/wikipedia') || pathLower.includes('/google') ||
-          pathLower.includes('/find')) {
+          pathLower.includes('/lyrics') || pathLower.includes('/wikipedia')) {
         return 'Search & Tools';
       }
       
       // Random & Fun
       if (pathLower.includes('/random') || pathLower.includes('/meme') ||
-          pathLower.includes('/r/') || pathLower.includes('/joke') ||
-          pathLower.includes('/fun')) {
+          pathLower.includes('/r/')) {
         return 'Random & Fun';
-      }
-      
-      // Religion & Islamic
-      if (pathLower.includes('/quran') || pathLower.includes('/hadith') ||
-          pathLower.includes('/islam') || pathLower.includes('/prayer') ||
-          pathLower.includes('/doa') || pathLower.includes('/sholat')) {
-        return 'Religion';
-      }
-      
-      // Education & Learning
-      if (pathLower.includes('/education') || pathLower.includes('/learn') ||
-          pathLower.includes('/tutorial') || pathLower.includes('/course')) {
-        return 'Education';
-      }
-      
-      // Weather & Location
-      if (pathLower.includes('/weather') || pathLower.includes('/location') ||
-          pathLower.includes('/maps') || pathLower.includes('/geo')) {
-        return 'Weather & Location';
       }
       
       // Default
@@ -3690,8 +3621,8 @@
       try {
         console.log('🔄 Loading endpoints from database...');
         
-        // Fetch dari DATABASE, hanya endpoint yang isActive = true (visible)
-        const res = await fetch(`${API_BASE}/api/endpoints?limit=1000&sortBy=priority&sortOrder=DESC&isActive=true${forceRefresh ? '&_=' + Date.now() : ''}`);
+        // Fetch dari DATABASE, bukan dari /api/docs
+        const res = await fetch(`${API_BASE}/api/endpoints?limit=1000&sortBy=priority&sortOrder=DESC${forceRefresh ? '&_=' + Date.now() : ''}`);
         const data = await res.json();
         
         if (data.success) {
@@ -3834,25 +3765,23 @@
                 const id = `ep-${globalIdx}`;
                 actuallyRenderedIds.push(id);
                 
-                const isVIP = isVIPEndpoint(ep);
-                
                 return `
                   <li class="endpoint-list-item">
-                    <div class="endpoint ${isVIP ? 'premium' : ''}" id="${id}">
-                      <div class="endpoint-header ${isVIP ? 'premium' : ''}" onclick="toggle('${id}')">
+                    <div class="endpoint ${ep.requiresVIP ? 'premium' : ''}" id="${id}">
+                      <div class="endpoint-header ${ep.requiresVIP ? 'premium' : ''}" onclick="toggle('${id}')">
                         <div class="endpoint-number"></div>
                         <div class="method">${ep.method}</div>
                         <div class="endpoint-info">
                           <div class="endpoint-title-row">
                             <div class="endpoint-path" title="${ep.path}">${ep.path}</div>
-                            ${isVIP ? '<span class="premium-icon" title="Premium Endpoint - VIP Access Required"></span>' : ''}
+                            ${ep.requiresVIP ? '<span class="premium-icon" title="Premium Endpoint"></span>' : ''}
                           </div>
                           <div class="endpoint-desc" title="${ep.description || ep.name}">${ep.description || ep.name}</div>
                         </div>
                         <div class="endpoint-arrow">▼</div>
                       </div>
                       <div class="endpoint-body">
-                        ${isVIP && !hasPremiumAccess() ? 
+                        ${ep.requiresVIP && !hasPremiumAccess() ? 
                           // Show premium lock screen for non-VIP users
                           generatePremiumLockScreen()
                         : 
