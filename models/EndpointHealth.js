@@ -14,7 +14,6 @@ const EndpointHealth = sequelize.define('EndpointHealth', {
   endpoint: {
     type: DataTypes.STRING(500),
     allowNull: false,
-    unique: true,
     comment: 'API endpoint path'
   },
   method: {

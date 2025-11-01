@@ -132,6 +132,40 @@ router.get('/api/endpoints/categories', async (req, res) => {
 });
 
 /**
+ * GET /api/endpoints/version
+ * Get current data version for polling/change detection
+ */
+router.get('/api/endpoints/version', async (req, res) => {
+  try {
+    // Calculate version based on latest update timestamp
+    const latestEndpoint = await ApiEndpoint.findOne({
+      order: [['updatedAt', 'DESC']],
+      attributes: ['updatedAt']
+    });
+
+    const version = latestEndpoint 
+      ? new Date(latestEndpoint.updatedAt).getTime()
+      : Date.now();
+
+    const total = await ApiEndpoint.count({ where: { isActive: true } });
+
+    res.json({
+      success: true,
+      version,
+      timestamp: new Date().toISOString(),
+      totalEndpoints: total
+    });
+  } catch (error) {
+    console.error('Get version error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch version',
+      message: error.message
+    });
+  }
+});
+
+/**
  * GET /api/endpoints/stats
  * Get endpoint statistics
  */

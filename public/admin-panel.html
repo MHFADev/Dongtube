@@ -2612,31 +2612,34 @@
       const endpoint = endpoints.find(e => e.id === id);
       if (!endpoint) return;
 
-      const newStatus = !endpoint.requiresVIP;
-      const statusText = newStatus ? 'PREMIUM/VIP' : 'FREE';
-      const icon = newStatus ? '⭐' : '🌐';
+      const currentStatus = endpoint.status || (endpoint.requiresVIP ? 'vip' : 'free');
+      const newStatus = (currentStatus === 'free') ? 'vip' : 'free';
+      const statusText = newStatus === 'vip' ? 'VIP' : 'FREE';
+      const icon = newStatus === 'vip' ? '⭐' : '🌐';
 
       showConfirm(
-        `Ubah endpoint "${endpoint.path}" menjadi ${statusText}?\n\nPerubahan akan langsung diterapkan ke sistem.`,
+        `Ubah endpoint "${endpoint.path}" menjadi ${statusText}?\n\nPerubahan akan langsung diterapkan ke sistem dan frontend akan update otomatis via SSE.`,
         async () => {
           try {
-            const response = await fetch(`/admin/endpoints/${id}/toggle-premium`, {
+            const response = await fetch(`/admin/endpoints-db/${id}/toggle-status`, {
               method: 'PUT',
-              credentials: 'include'
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              credentials: 'include',
+              body: JSON.stringify({ status: newStatus })
             });
 
             if (response.ok) {
-              await fetch('/admin/cache/refresh', {
-                method: 'POST',
-                credentials: 'include'
-              });
               await loadEndpoints();
               await refreshStats();
-              showToast('Berhasil!', `${icon} Endpoint "${endpoint.path}" berhasil diubah menjadi ${statusText}. Perubahan sudah aktif!`, 'success');
+              showToast('Berhasil!', `${icon} Endpoint "${endpoint.path}" berhasil diubah menjadi ${statusText}. Perubahan sudah broadcast ke semua user via SSE! 📡`, 'success');
             } else {
-              showToast('Gagal', 'Gagal memperbarui endpoint', 'error');
+              const errorData = await response.json();
+              showToast('Gagal', `Gagal memperbarui endpoint: ${errorData.error || 'Unknown error'}`, 'error');
             }
           } catch (error) {
+            console.error('Error updating endpoint:', error);
             showToast('Error', 'Terjadi kesalahan saat memperbarui endpoint', 'error');
           }
         },
@@ -2644,7 +2647,7 @@
           title: `${icon} Toggle Status Endpoint`,
           confirmText: 'Ya, Ubah',
           cancelText: 'Batal',
-          type: newStatus ? 'warning' : 'info'
+          type: newStatus === 'vip' ? 'warning' : 'info'
         }
       );
     }
@@ -3908,6 +3911,164 @@
       
       dialog.classList.add('active');
     }
+
+    // ==================== REAL-TIME ENDPOINT UPDATES VIA SSE ====================
+    let endpointEventSource = null;
+    let sseReconnectAttempts = 0;
+    const MAX_SSE_RECONNECT_ATTEMPTS = 5;
+
+    function connectEndpointSSE() {
+      if (endpointEventSource) {
+        console.log('📡 SSE already connected');
+        return;
+      }
+
+      console.log('📡 Connecting to endpoint SSE stream...');
+      endpointEventSource = new EventSource('/sse/endpoint-updates');
+
+      endpointEventSource.onopen = () => {
+        console.log('✅ Connected to endpoint SSE stream');
+        sseReconnectAttempts = 0;
+        
+        // Show subtle indicator that real-time updates are active
+        const indicator = document.createElement('div');
+        indicator.id = 'sse-indicator';
+        indicator.style.cssText = `
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          padding: 8px 16px;
+          background: rgba(76, 175, 80, 0.9);
+          color: white;
+          border-radius: 20px;
+          font-size: 12px;
+          font-weight: 600;
+          z-index: 9999;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        `;
+        indicator.innerHTML = '<span style="width: 8px; height: 8px; background: #4caf50; border-radius: 50%; animation: pulse 2s infinite;"></span> Real-time Updates Active';
+        document.body.appendChild(indicator);
+
+        // Add pulse animation
+        const style = document.createElement('style');
+        style.textContent = `
+          @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+          }
+        `;
+        document.head.appendChild(style);
+      };
+
+      endpointEventSource.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          handleEndpointSSEEvent(data);
+        } catch (error) {
+          console.error('❌ Failed to parse SSE message:', error);
+        }
+      };
+
+      endpointEventSource.onerror = (error) => {
+        console.error('❌ SSE connection error:', error);
+        endpointEventSource.close();
+        endpointEventSource = null;
+
+        // Remove indicator
+        const indicator = document.getElementById('sse-indicator');
+        if (indicator) indicator.remove();
+
+        // Attempt to reconnect
+        if (sseReconnectAttempts < MAX_SSE_RECONNECT_ATTEMPTS) {
+          sseReconnectAttempts++;
+          const delay = Math.min(1000 * Math.pow(2, sseReconnectAttempts), 30000);
+          console.log(`🔄 Reconnecting in ${delay / 1000}s... (attempt ${sseReconnectAttempts}/${MAX_SSE_RECONNECT_ATTEMPTS})`);
+          setTimeout(() => connectEndpointSSE(), delay);
+        } else {
+          console.error('❌ Max SSE reconnection attempts reached');
+          showToast('Koneksi Terputus', 'Real-time updates tidak aktif. Refresh halaman untuk reconnect.', 'error');
+        }
+      };
+    }
+
+    function handleEndpointSSEEvent(event) {
+      console.log('📢 SSE Event received:', event);
+
+      switch (event.type) {
+        case 'connected':
+          console.log('✅', event.message);
+          break;
+
+        case 'endpoint_change':
+          handleEndpointChange(event);
+          break;
+
+        case 'endpoint_bulk_change':
+          handleBulkChange(event);
+          break;
+
+        case 'endpoint_sync_complete':
+          handleSyncComplete(event);
+          break;
+
+        default:
+          console.log('ℹ️ Unknown SSE event type:', event.type);
+      }
+    }
+
+    function handleEndpointChange(event) {
+      const { action, data } = event;
+      console.log(`🔄 Endpoint ${action}:`, data.path || data.name);
+
+      // Reload endpoints to reflect changes
+      loadEndpoints();
+      
+      // Show notification based on action
+      const actionMessages = {
+        'status_changed': `Status endpoint "${data.name || data.path}" diubah menjadi ${data.status.toUpperCase()}`,
+        'active_toggled': `Endpoint "${data.name || data.path}" ${data.isActive ? 'diaktifkan' : 'dinonaktifkan'}`,
+        'updated': `Endpoint "${data.name || data.path}" diperbarui`,
+        'created': `Endpoint baru "${data.name || data.path}" ditambahkan`,
+        'deleted': `Endpoint "${data.name || data.path}" dihapus`
+      };
+
+      const message = actionMessages[action] || `Endpoint "${data.name || data.path}" ${action}`;
+      showToast('Update Real-time 📡', message, 'info');
+    }
+
+    function handleBulkChange(event) {
+      const { action, count } = event;
+      console.log(`🔄 Bulk ${action}:`, count, 'endpoints');
+
+      // Reload endpoints
+      loadEndpoints();
+      
+      showToast('Bulk Update 📡', `${count} endpoints telah diperbarui`, 'info');
+    }
+
+    function handleSyncComplete(event) {
+      const { stats } = event;
+      console.log('🔄 Sync complete:', stats);
+
+      // Reload endpoints
+      loadEndpoints();
+      
+      showToast('Sync Selesai 📡', `${stats.total || 0} endpoints telah disinkronkan`, 'success');
+    }
+
+    // Connect to SSE on page load
+    connectEndpointSSE();
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+      if (endpointEventSource) {
+        endpointEventSource.close();
+        endpointEventSource = null;
+      }
+    });
   </script>
 
   <!-- Toast Container -->

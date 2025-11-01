@@ -1,6 +1,13 @@
 /**
- * Dynamic Endpoint Loader
- * Loads API endpoints from database instead of hardcoded values
+ * Dynamic Endpoint Loader with Advanced Real-time Synchronization
+ * Features:
+ * - SSE with smart reconnection
+ * - Polling fallback
+ * - Optimistic updates
+ * - Cross-tab sync via BroadcastChannel
+ * - Granular DOM updates
+ * - Version tracking
+ * - Status reconciliation
  */
 
 class EndpointLoader {
@@ -13,8 +20,263 @@ class EndpointLoader {
     this.CACHE_DURATION = 0; // No cache for real-time updates
     this.eventSource = null;
     this.reconnectAttempts = 0;
-    this.maxReconnectAttempts = 5;
-    this.containerSelector = null; // Store container selector for re-rendering
+    this.maxReconnectAttempts = 10;
+    this.containerSelector = null;
+    
+    // Advanced sync features
+    this.version = 0; // Track data version
+    this.pendingUpdates = new Map(); // Optimistic updates
+    this.updateHistory = []; // Track update history
+    this.lastSSEActivity = Date.now();
+    this.sseHealthCheckInterval = null;
+    this.pollingInterval = null;
+    this.pollingEnabled = false;
+    this.pollingFrequency = 10000; // 10 seconds
+    this.broadcastChannel = null;
+    this.connectionStatus = 'disconnected'; // disconnected, connecting, connected, degraded
+    this.statusIndicator = null;
+    
+    // Initialize cross-tab sync
+    this.initCrossTabSync();
+    
+    // Initialize connection health monitoring
+    this.initHealthMonitoring();
+  }
+
+  /**
+   * Initialize cross-tab synchronization
+   */
+  initCrossTabSync() {
+    if ('BroadcastChannel' in window) {
+      this.broadcastChannel = new BroadcastChannel('endpoint-sync');
+      
+      this.broadcastChannel.onmessage = (event) => {
+        const { type, data } = event.data;
+        
+        console.log('📡 Cross-tab message received:', type, data);
+        
+        switch (type) {
+          case 'endpoint_updated':
+            this.handleCrossTabUpdate(data);
+            break;
+          case 'status_changed':
+            this.handleCrossTabStatusChange(data);
+            break;
+          case 'full_reload':
+            this.handleCrossTabFullReload();
+            break;
+        }
+      };
+      
+      console.log('✓ Cross-tab sync initialized');
+    }
+  }
+
+  /**
+   * Broadcast update to other tabs
+   */
+  broadcastToOtherTabs(type, data) {
+    if (this.broadcastChannel) {
+      this.broadcastChannel.postMessage({ type, data });
+      console.log('📤 Broadcasted to other tabs:', type);
+    }
+  }
+
+  /**
+   * Handle cross-tab endpoint update
+   */
+  async handleCrossTabUpdate(endpointData) {
+    console.log('🔄 Processing cross-tab update:', endpointData);
+    
+    // Update in local cache
+    const index = this.endpoints.findIndex(ep => ep.id === endpointData.id);
+    if (index !== -1) {
+      this.endpoints[index] = endpointData;
+      this.updateEndpointInDOM(endpointData);
+      this.showNotification('Updated from another tab', 'info');
+    } else {
+      // New endpoint, reload all
+      await this.loadEndpoints(true);
+      this.renderEndpoints();
+    }
+  }
+
+  /**
+   * Handle cross-tab status change
+   */
+  handleCrossTabStatusChange(data) {
+    const { endpointId, status } = data;
+    console.log(`🔄 Cross-tab status change: ${endpointId} -> ${status}`);
+    
+    const index = this.endpoints.findIndex(ep => ep.id === endpointId);
+    if (index !== -1) {
+      this.endpoints[index].status = status;
+      this.updateEndpointStatusInDOM(endpointId, status);
+    }
+  }
+
+  /**
+   * Handle cross-tab full reload
+   */
+  async handleCrossTabFullReload() {
+    console.log('🔄 Cross-tab triggered full reload');
+    await this.loadEndpoints(true);
+    this.renderEndpoints();
+  }
+
+  /**
+   * Initialize connection health monitoring
+   */
+  initHealthMonitoring() {
+    // Check SSE health every 45 seconds
+    this.sseHealthCheckInterval = setInterval(() => {
+      this.checkSSEHealth();
+    }, 45000);
+  }
+
+  /**
+   * Check SSE connection health
+   */
+  checkSSEHealth() {
+    const timeSinceLastActivity = Date.now() - this.lastSSEActivity;
+    
+    // If no activity for 90 seconds, connection might be dead
+    if (timeSinceLastActivity > 90000 && this.eventSource) {
+      console.warn('⚠️ SSE appears inactive, reconnecting...');
+      this.updateConnectionStatus('degraded');
+      this.disconnectRealtimeUpdates();
+      this.connectRealtimeUpdates();
+    }
+    
+    // Enable polling as fallback if SSE is unreliable
+    if (timeSinceLastActivity > 120000 && !this.pollingEnabled) {
+      console.warn('⚠️ SSE unreliable, enabling polling fallback');
+      this.enablePolling();
+    }
+  }
+
+  /**
+   * Enable polling as fallback
+   */
+  enablePolling() {
+    if (this.pollingEnabled) return;
+    
+    console.log('📊 Enabling polling fallback');
+    this.pollingEnabled = true;
+    
+    this.pollingInterval = setInterval(async () => {
+      try {
+        await this.pollForUpdates();
+      } catch (error) {
+        console.error('Polling error:', error);
+      }
+    }, this.pollingFrequency);
+  }
+
+  /**
+   * Disable polling
+   */
+  disablePolling() {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+      this.pollingInterval = null;
+      this.pollingEnabled = false;
+      console.log('📊 Polling disabled');
+    }
+  }
+
+  /**
+   * Poll for updates
+   */
+  async pollForUpdates() {
+    try {
+      const response = await fetch('/api/endpoints/version');
+      const data = await response.json();
+      
+      if (data.success && data.version > this.version) {
+        console.log(`🔄 Polling detected update: v${this.version} -> v${data.version}`);
+        await this.loadEndpoints(true);
+        this.renderEndpoints();
+        this.showNotification('Updates detected (polling)', 'info');
+      }
+    } catch (error) {
+      console.error('Poll error:', error);
+    }
+  }
+
+  /**
+   * Update connection status
+   */
+  updateConnectionStatus(status) {
+    this.connectionStatus = status;
+    this.updateStatusIndicator();
+    console.log(`📡 Connection status: ${status}`);
+  }
+
+  /**
+   * Update status indicator in UI
+   */
+  updateStatusIndicator() {
+    if (!this.statusIndicator) {
+      this.createStatusIndicator();
+    }
+    
+    const indicator = this.statusIndicator;
+    const statusMap = {
+      connected: { color: '#4caf50', text: '● Live', title: 'Real-time updates active' },
+      connecting: { color: '#ff9800', text: '◐ Connecting', title: 'Connecting to server...' },
+      degraded: { color: '#ff9800', text: '◑ Degraded', title: 'Connection issues, using fallback' },
+      disconnected: { color: '#f44336', text: '○ Offline', title: 'Disconnected, updates may be delayed' }
+    };
+    
+    const config = statusMap[this.connectionStatus] || statusMap.disconnected;
+    indicator.style.color = config.color;
+    indicator.textContent = config.text;
+    indicator.title = config.title;
+  }
+
+  /**
+   * Create status indicator element
+   */
+  createStatusIndicator() {
+    this.statusIndicator = document.createElement('div');
+    this.statusIndicator.id = 'endpoint-status-indicator';
+    this.statusIndicator.style.cssText = `
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 8px 12px;
+      background: rgba(0, 0, 0, 0.8);
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      z-index: 9999;
+      backdrop-filter: blur(10px);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    `;
+    
+    this.statusIndicator.addEventListener('click', () => {
+      this.showConnectionInfo();
+    });
+    
+    document.body.appendChild(this.statusIndicator);
+  }
+
+  /**
+   * Show connection info dialog
+   */
+  showConnectionInfo() {
+    const info = `
+Connection Status: ${this.connectionStatus}
+SSE Connected: ${this.eventSource ? 'Yes' : 'No'}
+Polling Enabled: ${this.pollingEnabled ? 'Yes' : 'No'}
+Last Activity: ${new Date(this.lastSSEActivity).toLocaleTimeString()}
+Version: ${this.version}
+Endpoints Cached: ${this.endpoints.length}
+    `.trim();
+    
+    alert(info);
   }
 
   /**
@@ -49,8 +311,15 @@ class EndpointLoader {
       this.endpoints = data.endpoints;
       this.cache = data;
       this.cacheTimestamp = currentTime;
+      
+      // Update version if provided
+      if (data.version !== undefined) {
+        this.version = data.version;
+      } else {
+        this.version++;
+      }
 
-      console.log(`✓ Loaded ${this.endpoints.length} endpoints from database`);
+      console.log(`✓ Loaded ${this.endpoints.length} endpoints (v${this.version})`);
 
       this.loading = false;
       return data;
@@ -205,16 +474,10 @@ class EndpointLoader {
     div.className = 'endpoint';
     div.dataset.endpointId = endpoint.id;
     div.dataset.status = endpoint.status;
+    div.dataset.version = this.version;
 
     // Status badge
-    let statusBadge = '';
-    if (endpoint.status === 'vip' || endpoint.status === 'premium') {
-      statusBadge = `<span class="vip-badge">⭐ ${endpoint.status.toUpperCase()}</span>`;
-    } else if (endpoint.status === 'disabled') {
-      statusBadge = '<span class="disabled-badge">🚫 DISABLED</span>';
-    } else {
-      statusBadge = '<span class="free-badge">✓ FREE</span>';
-    }
+    const statusBadge = this.createStatusBadge(endpoint.status);
 
     div.innerHTML = `
       <div class="endpoint-header">
@@ -247,6 +510,172 @@ class EndpointLoader {
     });
 
     return div;
+  }
+
+  /**
+   * Create status badge HTML
+   */
+  createStatusBadge(status) {
+    let badgeHTML = '';
+    if (status === 'vip' || status === 'premium') {
+      badgeHTML = `<span class="vip-badge status-badge" data-status="${status}">⭐ ${status.toUpperCase()}</span>`;
+    } else if (status === 'disabled') {
+      badgeHTML = '<span class="disabled-badge status-badge" data-status="disabled">🚫 DISABLED</span>';
+    } else {
+      badgeHTML = '<span class="free-badge status-badge" data-status="free">✓ FREE</span>';
+    }
+    return badgeHTML;
+  }
+
+  /**
+   * Update single endpoint in DOM (granular update)
+   */
+  updateEndpointInDOM(endpoint) {
+    const endpointEl = document.querySelector(`[data-endpoint-id="${endpoint.id}"]`);
+    
+    if (!endpointEl) {
+      console.warn('Endpoint element not found in DOM, full re-render needed');
+      this.renderEndpoints();
+      return;
+    }
+
+    console.log(`🔄 Updating endpoint in DOM: ${endpoint.path}`);
+
+    // Update status attribute
+    endpointEl.dataset.status = endpoint.status;
+    endpointEl.dataset.version = this.version;
+
+    // Update status badge
+    const statusBadgeContainer = endpointEl.querySelector('.endpoint-header');
+    const oldBadge = statusBadgeContainer.querySelector('.status-badge');
+    
+    if (oldBadge) {
+      const newBadge = document.createElement('span');
+      newBadge.outerHTML = this.createStatusBadge(endpoint.status);
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = this.createStatusBadge(endpoint.status);
+      
+      // Add update animation
+      oldBadge.style.transition = 'all 0.3s ease';
+      oldBadge.style.opacity = '0';
+      oldBadge.style.transform = 'scale(0.8)';
+      
+      setTimeout(() => {
+        oldBadge.replaceWith(tempDiv.firstChild);
+        const newBadgeEl = statusBadgeContainer.querySelector('.status-badge');
+        newBadgeEl.style.opacity = '0';
+        newBadgeEl.style.transform = 'scale(1.2)';
+        
+        requestAnimationFrame(() => {
+          newBadgeEl.style.transition = 'all 0.3s ease';
+          newBadgeEl.style.opacity = '1';
+          newBadgeEl.style.transform = 'scale(1)';
+        });
+      }, 300);
+    }
+
+    // Add flash effect to show update
+    endpointEl.classList.add('endpoint-updated');
+    setTimeout(() => {
+      endpointEl.classList.remove('endpoint-updated');
+    }, 1000);
+  }
+
+  /**
+   * Update endpoint status in DOM (even more granular)
+   */
+  updateEndpointStatusInDOM(endpointId, status) {
+    const endpointEl = document.querySelector(`[data-endpoint-id="${endpointId}"]`);
+    
+    if (!endpointEl) {
+      console.warn('Endpoint element not found in DOM');
+      return;
+    }
+
+    console.log(`🎨 Updating status badge: ${endpointId} -> ${status}`);
+
+    // Update in local cache
+    const endpoint = this.endpoints.find(ep => ep.id === endpointId);
+    if (endpoint) {
+      endpoint.status = status;
+    }
+
+    // Update DOM
+    endpointEl.dataset.status = status;
+    
+    const statusBadgeContainer = endpointEl.querySelector('.endpoint-header');
+    const oldBadge = statusBadgeContainer.querySelector('.status-badge');
+    
+    if (oldBadge) {
+      oldBadge.style.transition = 'all 0.3s ease';
+      oldBadge.style.opacity = '0';
+      oldBadge.style.transform = 'scale(0.8)';
+      
+      setTimeout(() => {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = this.createStatusBadge(status);
+        oldBadge.replaceWith(tempDiv.firstChild);
+        
+        const newBadgeEl = statusBadgeContainer.querySelector('.status-badge');
+        newBadgeEl.style.opacity = '0';
+        newBadgeEl.style.transform = 'scale(1.2)';
+        
+        requestAnimationFrame(() => {
+          newBadgeEl.style.transition = 'all 0.3s ease';
+          newBadgeEl.style.opacity = '1';
+          newBadgeEl.style.transform = 'scale(1)';
+        });
+      }, 300);
+    }
+
+    // Flash effect
+    endpointEl.classList.add('endpoint-updated');
+    setTimeout(() => {
+      endpointEl.classList.remove('endpoint-updated');
+    }, 1000);
+  }
+
+  /**
+   * Optimistic update - update UI immediately, then confirm
+   */
+  async applyOptimisticUpdate(endpointId, newStatus) {
+    console.log(`⚡ Optimistic update: ${endpointId} -> ${newStatus}`);
+    
+    // Store pending update
+    this.pendingUpdates.set(endpointId, {
+      status: newStatus,
+      timestamp: Date.now()
+    });
+
+    // Update UI immediately
+    this.updateEndpointStatusInDOM(endpointId, newStatus);
+    
+    // Broadcast to other tabs
+    this.broadcastToOtherTabs('status_changed', { endpointId, status: newStatus });
+
+    // Confirm with server after short delay
+    setTimeout(async () => {
+      try {
+        const response = await fetch(`/api/endpoints/${endpointId}`);
+        const data = await response.json();
+        
+        if (data.success && data.endpoint) {
+          const actualStatus = data.endpoint.status;
+          
+          if (actualStatus !== newStatus) {
+            console.warn(`⚠️ Status mismatch detected, reconciling: ${newStatus} -> ${actualStatus}`);
+            this.updateEndpointStatusInDOM(endpointId, actualStatus);
+            this.showNotification('Status corrected', 'warning');
+          } else {
+            console.log('✓ Optimistic update confirmed');
+          }
+        }
+        
+        this.pendingUpdates.delete(endpointId);
+      } catch (error) {
+        console.error('Failed to confirm optimistic update:', error);
+      }
+    }, 2000);
   }
 
   /**
@@ -345,16 +774,25 @@ class EndpointLoader {
     }
 
     console.log('📡 Connecting to real-time endpoint updates...');
+    this.updateConnectionStatus('connecting');
 
     this.eventSource = new EventSource('/sse/endpoint-updates');
 
     this.eventSource.onopen = () => {
       console.log('✓ Connected to real-time endpoint updates');
       this.reconnectAttempts = 0;
+      this.lastSSEActivity = Date.now();
+      this.updateConnectionStatus('connected');
+      
+      // Disable polling if it was enabled
+      if (this.pollingEnabled) {
+        this.disablePolling();
+      }
     };
 
     this.eventSource.onmessage = (event) => {
       try {
+        this.lastSSEActivity = Date.now();
         const data = JSON.parse(event.data);
         this.handleRealtimeEvent(data);
       } catch (error) {
@@ -364,17 +802,21 @@ class EndpointLoader {
 
     this.eventSource.onerror = (error) => {
       console.error('SSE connection error:', error);
+      this.updateConnectionStatus('disconnected');
       this.eventSource.close();
       this.eventSource = null;
 
-      // Attempt to reconnect
+      // Attempt to reconnect with exponential backoff
       if (this.reconnectAttempts < this.maxReconnectAttempts) {
         this.reconnectAttempts++;
         const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
         console.log(`Reconnecting in ${delay / 1000}s... (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+        
         setTimeout(() => this.connectRealtimeUpdates(), delay);
       } else {
-        console.error('Max reconnection attempts reached. Please refresh the page.');
+        console.error('Max reconnection attempts reached. Enabling polling fallback.');
+        this.updateConnectionStatus('degraded');
+        this.enablePolling();
       }
     };
   }
@@ -384,6 +826,19 @@ class EndpointLoader {
    */
   async handleRealtimeEvent(event) {
     console.log('📢 Real-time event received:', event);
+    this.lastSSEActivity = Date.now();
+
+    // Add to update history
+    this.updateHistory.unshift({
+      type: event.type,
+      timestamp: event.timestamp || new Date().toISOString(),
+      data: event
+    });
+    
+    // Keep only last 50 updates in history
+    if (this.updateHistory.length > 50) {
+      this.updateHistory = this.updateHistory.slice(0, 50);
+    }
 
     switch (event.type) {
       case 'connected':
@@ -415,17 +870,39 @@ class EndpointLoader {
     
     console.log(`🔄 Endpoint ${action}:`, data.path);
 
-    // Invalidate cache and reload
-    this.cache = null;
-    await this.loadEndpoints(true);
-
-    // Re-render with stored container selector
-    if (typeof this.renderEndpoints === 'function') {
-      this.renderEndpoints(); // Will use stored containerSelector
+    // Check if this is a pending optimistic update
+    if (this.pendingUpdates.has(data.id)) {
+      console.log('⚡ Confirming optimistic update');
+      this.pendingUpdates.delete(data.id);
     }
 
-    // Show notification
-    this.showNotification(`Endpoint ${action}: ${data.name || data.path}`, 'info');
+    // For status changes, use granular update
+    if (action === 'status_changed' || action === 'active_toggled') {
+      // Update in cache
+      const index = this.endpoints.findIndex(ep => ep.id === data.id);
+      if (index !== -1) {
+        this.endpoints[index] = data;
+      }
+      
+      // Granular DOM update
+      this.updateEndpointInDOM(data);
+      
+      // Broadcast to other tabs
+      this.broadcastToOtherTabs('endpoint_updated', data);
+      
+      // Show notification
+      this.showNotification(`${data.name || data.path}: ${action}`, 'success');
+    } else {
+      // For other changes, reload and re-render
+      this.cache = null;
+      await this.loadEndpoints(true);
+      this.renderEndpoints();
+      
+      // Broadcast to other tabs
+      this.broadcastToOtherTabs('full_reload', {});
+      
+      this.showNotification(`Endpoint ${action}: ${data.name || data.path}`, 'info');
+    }
   }
 
   /**
@@ -442,8 +919,11 @@ class EndpointLoader {
 
     // Re-render with stored container selector
     if (typeof this.renderEndpoints === 'function') {
-      this.renderEndpoints(); // Will use stored containerSelector
+      this.renderEndpoints();
     }
+
+    // Broadcast to other tabs
+    this.broadcastToOtherTabs('full_reload', {});
 
     // Show notification
     this.showNotification(`${count} endpoints updated`, 'info');
@@ -463,8 +943,11 @@ class EndpointLoader {
 
     // Re-render with stored container selector
     if (typeof this.renderEndpoints === 'function') {
-      this.renderEndpoints(); // Will use stored containerSelector
+      this.renderEndpoints();
     }
+
+    // Broadcast to other tabs
+    this.broadcastToOtherTabs('full_reload', {});
 
     // Show notification
     this.showNotification(`Sync complete: ${stats.total} endpoints`, 'success');
@@ -483,12 +966,14 @@ class EndpointLoader {
       top: 20px;
       right: 20px;
       padding: 15px 20px;
-      background: ${type === 'success' ? '#4caf50' : type === 'error' ? '#f44336' : '#2196f3'};
+      background: ${type === 'success' ? '#4caf50' : type === 'error' ? '#f44336' : type === 'warning' ? '#ff9800' : '#2196f3'};
       color: white;
       border-radius: 4px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.2);
       z-index: 10000;
       animation: slideIn 0.3s ease;
+      font-size: 14px;
+      max-width: 300px;
     `;
 
     document.body.appendChild(notification);
@@ -507,7 +992,28 @@ class EndpointLoader {
     if (this.eventSource) {
       this.eventSource.close();
       this.eventSource = null;
+      this.updateConnectionStatus('disconnected');
       console.log('Disconnected from real-time updates');
+    }
+  }
+  
+  /**
+   * Cleanup on destroy
+   */
+  destroy() {
+    this.disconnectRealtimeUpdates();
+    this.disablePolling();
+    
+    if (this.sseHealthCheckInterval) {
+      clearInterval(this.sseHealthCheckInterval);
+    }
+    
+    if (this.broadcastChannel) {
+      this.broadcastChannel.close();
+    }
+    
+    if (this.statusIndicator) {
+      this.statusIndicator.remove();
     }
   }
 }
@@ -545,7 +1051,14 @@ if (document.readyState === 'loading') {
   })();
 }
 
-// Add CSS animation for notifications
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+  if (window.endpointLoader) {
+    window.endpointLoader.destroy();
+  }
+});
+
+// Add CSS animations
 const style = document.createElement('style');
 style.textContent = `
   @keyframes slideIn {
@@ -568,6 +1081,29 @@ style.textContent = `
       transform: translateX(100%);
       opacity: 0;
     }
+  }
+  
+  .endpoint-updated {
+    animation: flashUpdate 1s ease;
+    position: relative;
+  }
+  
+  @keyframes flashUpdate {
+    0%, 100% {
+      background: transparent;
+    }
+    50% {
+      background: rgba(76, 175, 80, 0.2);
+    }
+  }
+  
+  .status-badge {
+    transition: all 0.3s ease;
+  }
+  
+  #endpoint-status-indicator:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
   }
 `;
 document.head.appendChild(style);
