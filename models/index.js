@@ -30,9 +30,8 @@ const initDatabase = async () => {
     await IpWhitelist.sync({ alter: true });
     console.log('  ✓ IpWhitelist table synced');
     
-    // Initialize endpoint tables
-    await initEndpointDatabase();
-    
+    // Note: Endpoint tables (ApiEndpoint, EndpointCategory, EndpointUsageStats) 
+    // are synced separately via initEndpointDatabase() in server.js
     console.log('✓ All database tables synced');
     
     const adminExists = await User.findOne({ where: { role: 'admin' } });

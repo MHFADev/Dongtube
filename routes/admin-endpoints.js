@@ -1,6 +1,6 @@
 import express from 'express';
 import { ApiEndpoint, EndpointCategory, EndpointUsageStats } from '../models/index.js';
-import { authenticate, authorize } from '../middleware/auth.js';
+import { authenticate, authorize, refreshVIPCache } from '../middleware/auth.js';
 import { Op } from 'sequelize';
 import endpointEventEmitter from '../services/EndpointEventEmitter.js';
 
@@ -142,6 +142,11 @@ router.post('/admin/endpoints-db', authenticate, authorize('admin'), async (req,
       metadata: metadata || {}
     });
 
+    // Invalidate VIP cache if new endpoint is VIP/Premium
+    if (endpoint.status === 'vip' || endpoint.status === 'premium') {
+      refreshVIPCache();
+    }
+
     // Emit real-time event
     endpointEventEmitter.notifyEndpointChange('created', endpoint);
 
@@ -178,7 +183,18 @@ router.put('/admin/endpoints-db/:id', authenticate, authorize('admin'), async (r
       });
     }
 
+    const oldStatus = endpoint.status;
+    const oldIsActive = endpoint.isActive;
+    
     await endpoint.update(updateData);
+
+    // Invalidate VIP cache if status or isActive changed and involves VIP/Premium
+    if (
+      (updateData.status && updateData.status !== oldStatus) ||
+      (updateData.isActive !== undefined && updateData.isActive !== oldIsActive && (endpoint.status === 'vip' || endpoint.status === 'premium'))
+    ) {
+      refreshVIPCache();
+    }
 
     // Emit real-time event
     endpointEventEmitter.notifyEndpointChange('updated', endpoint);
@@ -217,6 +233,11 @@ router.delete('/admin/endpoints-db/:id', authenticate, authorize('admin'), async
 
     const deletedEndpoint = endpoint.toJSON();
     await endpoint.destroy();
+
+    // Invalidate VIP cache if deleted endpoint was VIP/Premium
+    if (endpoint.status === 'vip' || endpoint.status === 'premium') {
+      refreshVIPCache();
+    }
 
     // Emit real-time event
     endpointEventEmitter.notifyEndpointChange('deleted', deletedEndpoint);
@@ -262,6 +283,9 @@ router.put('/admin/endpoints-db/:id/toggle-status', authenticate, authorize('adm
 
     await endpoint.update({ status });
 
+    // Invalidate VIP cache immediately
+    refreshVIPCache();
+
     // Emit real-time event
     endpointEventEmitter.notifyEndpointChange('status_changed', endpoint);
 
@@ -299,6 +323,11 @@ router.put('/admin/endpoints-db/:id/toggle-active', authenticate, authorize('adm
     }
 
     await endpoint.update({ isActive: !endpoint.isActive });
+
+    // Invalidate VIP cache if endpoint is VIP/Premium (isActive affects VIP access)
+    if (endpoint.status === 'vip' || endpoint.status === 'premium') {
+      refreshVIPCache();
+    }
 
     // Emit real-time event
     endpointEventEmitter.notifyEndpointChange('active_toggled', endpoint);
@@ -351,6 +380,9 @@ router.post('/admin/endpoints-db/bulk-update-status', authenticate, authorize('a
         }
       }
     );
+
+    // Invalidate VIP cache immediately
+    refreshVIPCache();
 
     // Emit real-time event for bulk update
     endpointEventEmitter.notifyBulkChange('bulk_status_update', updated[0]);
