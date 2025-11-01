@@ -65,6 +65,10 @@ router.get('/api/endpoints', async (req, res) => {
       ]
     });
 
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, private');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
     res.json({
       success: true,
       total: count,
