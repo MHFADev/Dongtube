@@ -10,7 +10,7 @@ class EndpointLoader {
     this.loading = false;
     this.cache = null;
     this.cacheTimestamp = 0;
-    this.CACHE_DURATION = 5000; // 5 seconds cache (reduced for faster updates)
+    this.CACHE_DURATION = 0; // No cache for real-time updates
     this.eventSource = null;
     this.reconnectAttempts = 0;
     this.maxReconnectAttempts = 5;
