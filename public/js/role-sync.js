@@ -98,12 +98,14 @@ class RoleSync {
       if (refreshed) {
         console.log(`✅ Token refreshed! Role updated: ${oldRole || 'unknown'} → ${newRole}`);
         
+        this.invalidateAllCaches();
+        
         this.showNotification(data);
         
         console.log('⏳ Reloading page in 2 seconds to apply all changes...');
         setTimeout(() => {
           console.log('🔄 Reloading now...');
-          window.location.reload();
+          window.location.reload(true);
         }, 2000);
       } else {
         console.warn('⚠️ Token refresh failed, please login again');
@@ -162,6 +164,21 @@ class RoleSync {
       // Silent fail
     }
     return null;
+  }
+
+  invalidateAllCaches() {
+    console.log('🗑️ Invalidating all frontend caches...');
+    
+    if (window.endpointLoader) {
+      window.endpointLoader.cache = null;
+      window.endpointLoader.cacheTimestamp = 0;
+      console.log('✓ Endpoint loader cache cleared');
+    }
+    
+    localStorage.removeItem('currentUser');
+    console.log('✓ LocalStorage user cache cleared');
+    
+    console.log('✅ All caches invalidated - fresh data will be loaded');
   }
 
   showNotification(data) {
