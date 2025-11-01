@@ -145,6 +145,10 @@ router.post('/auth/logout', (req, res) => {
 
 router.get('/auth/me', authenticate, async (req, res) => {
   try {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, private');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    
     res.json({
       success: true,
       user: {
@@ -186,6 +190,10 @@ router.post('/auth/refresh-token', authenticate, async (req, res) => {
     });
 
     console.log(`🔄 Token refreshed for user ${freshUser.email} - Current role: ${freshUser.role}`);
+
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, private');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
 
     res.json({
       success: true,
