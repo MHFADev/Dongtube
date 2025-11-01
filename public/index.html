@@ -3979,6 +3979,8 @@
           // Map endpoints dengan category
           allEndpoints = data.endpoints.map(ep => ({
             ...ep,
+            // Normalize parameters field - database returns 'parameters', support legacy 'params'
+            parameters: ep.parameters || ep.params || [],
             // Gunakan category dari database, fallback ke determineCategory
             category: ep.category || determineCategory(ep.path, ep.name, ep.description)
           }));
@@ -4288,7 +4290,7 @@
                           `).join('')}
                         </div>
 
-                        ${ep.params && ep.params.length > 0 ? ep.params.map(p => `
+                        ${ep.parameters && ep.parameters.length > 0 ? ep.parameters.map(p => `
                           <div class="param">
                             <div class="param-label">
                               ${p.name}${p.required ? '<span class="required">*</span>' : ''}
