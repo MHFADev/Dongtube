@@ -4,6 +4,7 @@ import chalk from "chalk";
 import path from "path";
 import { fileURLToPath } from "url";
 import cookieParser from "cookie-parser";
+import passport from "passport";
 import jwt from "jsonwebtoken";
 import chokidar from "chokidar";
 import { readFileSync } from "fs";
@@ -43,6 +44,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(passport.initialize());
 
 // CORS
 app.use((req, res, next) => {

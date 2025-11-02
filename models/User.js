@@ -36,6 +36,12 @@ const User = sequelize.define('User', {
     type: DataTypes.DATE,
     allowNull: true,
     field: 'last_login'
+  },
+  googleId: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    unique: true,
+    field: 'google_id'
   }
 }, {
   tableName: 'users',

@@ -1,9 +1,49 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
+import passport from 'passport';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { User } from '../models/index.js';
 import { generateToken, authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
+
+passport.use(new GoogleStrategy({
+  clientID: process.env.GOOGLE_CLIENT_ID || 'dummy-client-id',
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'dummy-secret',
+  callbackURL: `/auth/google/callback`,
+  passReqToCallback: true
+}, async (req, accessToken, refreshToken, profile, done) => {
+  try {
+    const email = profile.emails[0].value;
+    let user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      user = await User.create({
+        email,
+        password: await bcrypt.hash(Math.random().toString(36), 12),
+        role: 'user',
+        googleId: profile.id
+      });
+    } else if (!user.googleId) {
+      await user.update({ googleId: profile.id });
+    }
+
+    await user.update({ lastLogin: new Date() });
+    return done(null, user);
+  } catch (error) {
+    return done(error, null);
+  }
+}));
+
+passport.serializeUser((user, done) => done(null, user.id));
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findByPk(id);
+    done(null, user);
+  } catch (error) {
+    done(error, null);
+  }
+});
 
 router.post('/auth/signup', async (req, res) => {
   try {
@@ -216,5 +256,37 @@ router.post('/auth/refresh-token', authenticate, async (req, res) => {
     });
   }
 });
+
+router.get('/auth/google', passport.authenticate('google', {
+  scope: ['profile', 'email'],
+  session: false
+}));
+
+router.get('/auth/google/callback', 
+  passport.authenticate('google', { session: false, failureRedirect: '/login.html?error=auth_failed' }),
+  async (req, res) => {
+    try {
+      const token = generateToken(req.user);
+      
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000
+      });
+
+      console.log(`✅ Google OAuth successful for ${req.user.email}`);
+
+      if (req.user.role === 'admin') {
+        res.redirect('/admin-panel.html');
+      } else {
+        res.redirect('/');
+      }
+    } catch (error) {
+      console.error('Google OAuth callback error:', error);
+      res.redirect('/login.html?error=auth_error');
+    }
+  }
+);
 
 export default router;
