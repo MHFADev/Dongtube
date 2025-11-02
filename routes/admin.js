@@ -1,5 +1,6 @@
 import express from 'express';
-import { User, VIPEndpoint, VersionHistory, ActivityLog, RateLimitConfig, NotificationConfig, IpWhitelist } from '../models/index.js';
+import { User, VersionHistory, ActivityLog, RateLimitConfig, NotificationConfig, IpWhitelist } from '../models/index.js';
+import { ApiEndpoint } from '../models/endpoint/index.js';
 import { authenticate, authorize, refreshVIPCache } from '../middleware/auth.js';
 import { roleChangeEmitter } from '../services/EventEmitter.js';
 import { logActivity } from '../middleware/activityLogger.js';
@@ -412,7 +413,7 @@ router.get('/admin/vip-endpoints', authenticate, authorize('admin'), async (req,
     }
     
     if (requiresVIP !== undefined) {
-      where.requiresVIP = requiresVIP === 'true';
+      where.status = requiresVIP === 'true' ? { [Op.in]: ['vip', 'premium'] } : 'free';
     }
     
     if (category) {
@@ -425,7 +426,7 @@ router.get('/admin/vip-endpoints', authenticate, authorize('admin'), async (req,
     
     const offset = (parseInt(page) - 1) * parseInt(limit);
     
-    const { count, rows } = await VIPEndpoint.findAndCountAll({
+    const { count, rows } = await ApiEndpoint.findAndCountAll({
       where,
       order: [['createdAt', 'DESC']],
       limit: parseInt(limit),
@@ -462,13 +463,14 @@ router.post('/admin/vip-endpoints', authenticate, authorize('admin'), async (req
 
     const endpointMethod = method || 'GET';
 
-    const existingEndpoint = await VIPEndpoint.findOne({ 
+    const existingEndpoint = await ApiEndpoint.findOne({ 
       where: { path, method: endpointMethod } 
     });
 
     if (existingEndpoint) {
+      const status = requiresVIP !== undefined ? (requiresVIP ? 'vip' : 'free') : 'vip';
       await existingEndpoint.update({ 
-        requiresVIP: requiresVIP !== undefined ? requiresVIP : true,
+        status: status,
         description: description || existingEndpoint.description,
         name: name !== undefined ? name : existingEndpoint.name,
         category: category !== undefined ? category : existingEndpoint.category
@@ -483,11 +485,12 @@ router.post('/admin/vip-endpoints', authenticate, authorize('admin'), async (req
       });
     }
 
-    const endpoint = await VIPEndpoint.create({
+    const status = requiresVIP !== undefined ? (requiresVIP ? 'vip' : 'free') : 'vip';
+    const endpoint = await ApiEndpoint.create({
       path,
       method: endpointMethod,
       description: description || null,
-      requiresVIP: requiresVIP !== undefined ? requiresVIP : true,
+      status: status,
       name: name || null,
       category: category || null
     });
@@ -512,7 +515,7 @@ router.delete('/admin/vip-endpoints/:id', authenticate, authorize('admin'), asyn
   try {
     const { id } = req.params;
 
-    const endpoint = await VIPEndpoint.findByPk(id);
+    const endpoint = await ApiEndpoint.findByPk(id);
 
     if (!endpoint) {
       return res.status(404).json({
@@ -543,8 +546,8 @@ router.get('/admin/stats', authenticate, authorize('admin'), async (req, res) =>
     const vipUsers = await User.count({ where: { role: 'vip' } });
     const adminUsers = await User.count({ where: { role: 'admin' } });
     const regularUsers = await User.count({ where: { role: 'user' } });
-    const totalVIPEndpoints = await VIPEndpoint.count({ where: { requiresVIP: true } });
-    const totalEndpoints = await VIPEndpoint.count();
+    const totalVIPEndpoints = await ApiEndpoint.count({ where: { status: { [Op.in]: ['vip', 'premium'] } } });
+    const totalEndpoints = await ApiEndpoint.count();
 
     res.json({
       success: true,
@@ -574,11 +577,10 @@ router.get('/admin/endpoints/all', authenticate, authorize('admin'), async (req,
     const where = {};
     
     if (premium !== undefined) {
-      where.requiresVIP = premium === 'true';
+      where.status = premium === 'true' ? { [Op.in]: ['vip', 'premium'] } : 'free';
     }
     
     if (search) {
-      const { Op } = await import('sequelize');
       where[Op.or] = [
         { path: { [Op.like]: `%${search}%` } },
         { name: { [Op.like]: `%${search}%` } },
@@ -592,12 +594,17 @@ router.get('/admin/endpoints/all', authenticate, authorize('admin'), async (req,
     
     const offset = (parseInt(page) - 1) * parseInt(limit);
     
-    const { count, rows } = await VIPEndpoint.findAndCountAll({
+    const { count, rows } = await ApiEndpoint.findAndCountAll({
       where,
       limit: parseInt(limit),
       offset,
       order: [['createdAt', 'DESC']]
     });
+    
+    const endpointsWithRequiresVIP = rows.map(ep => ({
+      ...ep.toJSON(),
+      requiresVIP: ['vip', 'premium'].includes(ep.status)
+    }));
     
     res.json({
       success: true,
@@ -605,7 +612,7 @@ router.get('/admin/endpoints/all', authenticate, authorize('admin'), async (req,
       page: parseInt(page),
       limit: parseInt(limit),
       pages: Math.ceil(count / parseInt(limit)),
-      endpoints: rows
+      endpoints: endpointsWithRequiresVIP
     });
   } catch (error) {
     console.error('Get all endpoints error:', error);
@@ -620,7 +627,7 @@ router.put('/admin/endpoints/:id/toggle-premium', authenticate, authorize('admin
   try {
     const { id } = req.params;
     
-    const endpoint = await VIPEndpoint.findByPk(id);
+    const endpoint = await ApiEndpoint.findByPk(id);
     
     if (!endpoint) {
       return res.status(404).json({
@@ -629,25 +636,26 @@ router.put('/admin/endpoints/:id/toggle-premium', authenticate, authorize('admin
       });
     }
     
-    const oldStatus = endpoint.requiresVIP;
+    const oldStatus = endpoint.status;
+    const newStatus = ['vip', 'premium'].includes(endpoint.status) ? 'free' : 'vip';
     await endpoint.update({
-      requiresVIP: !endpoint.requiresVIP
+      status: newStatus
     });
     
-    const newStatus = endpoint.requiresVIP;
     console.log(`\n🔧 ADMIN: Toggled endpoint "${endpoint.path}" (${endpoint.method})`);
-    console.log(`   Status changed: ${oldStatus ? 'VIP' : 'FREE'} → ${newStatus ? 'VIP' : 'FREE'}`);
+    console.log(`   Status changed: ${oldStatus.toUpperCase()} → ${newStatus.toUpperCase()}`);
     
     refreshVIPCache();
     
     res.json({
       success: true,
-      message: `Endpoint ${endpoint.requiresVIP ? 'set to PREMIUM' : 'set to FREE'}`,
+      message: `Endpoint ${['vip', 'premium'].includes(newStatus) ? 'set to PREMIUM' : 'set to FREE'}`,
       endpoint: {
         id: endpoint.id,
         path: endpoint.path,
         name: endpoint.name,
-        requiresVIP: endpoint.requiresVIP
+        status: newStatus,
+        requiresVIP: ['vip', 'premium'].includes(newStatus)
       }
     });
   } catch (error) {
@@ -664,7 +672,7 @@ router.put('/admin/endpoints/:id', authenticate, authorize('admin'), async (req,
     const { id } = req.params;
     const { requiresVIP, description, category, name } = req.body;
     
-    const endpoint = await VIPEndpoint.findByPk(id);
+    const endpoint = await ApiEndpoint.findByPk(id);
     
     if (!endpoint) {
       return res.status(404).json({
@@ -674,7 +682,7 @@ router.put('/admin/endpoints/:id', authenticate, authorize('admin'), async (req,
     }
     
     const updates = {};
-    if (requiresVIP !== undefined) updates.requiresVIP = requiresVIP;
+    if (requiresVIP !== undefined) updates.status = requiresVIP ? 'vip' : 'free';
     if (description !== undefined) updates.description = description;
     if (category !== undefined) updates.category = category;
     if (name !== undefined) updates.name = name;
@@ -715,8 +723,9 @@ router.post('/admin/endpoints/bulk-premium', authenticate, authorize('admin'), a
       });
     }
     
-    const updated = await VIPEndpoint.update(
-      { requiresVIP },
+    const status = requiresVIP ? 'vip' : 'free';
+    const updated = await ApiEndpoint.update(
+      { status },
       { where: { id: ids } }
     );
     
@@ -756,8 +765,7 @@ router.post('/admin/cache/refresh', authenticate, authorize('admin'), async (req
 
 router.get('/admin/categories', authenticate, authorize('admin'), async (req, res) => {
   try {
-    const { Op } = await import('sequelize');
-    const categories = await VIPEndpoint.findAll({
+    const categories = await ApiEndpoint.findAll({
       attributes: ['category'],
       where: {
         category: { [Op.ne]: null }
@@ -787,7 +795,7 @@ router.get('/admin/endpoints/category/:category', authenticate, authorize('admin
     
     const offset = (parseInt(page) - 1) * parseInt(limit);
     
-    const { count, rows } = await VIPEndpoint.findAndCountAll({
+    const { count, rows } = await ApiEndpoint.findAndCountAll({
       where: { category },
       limit: parseInt(limit),
       offset,
@@ -1163,8 +1171,8 @@ router.get('/admin/analytics', authenticate, authorize('admin'), async (req, res
       }
     });
 
-    const totalEndpoints = await VIPEndpoint.count();
-    const premiumEndpoints = await VIPEndpoint.count({ where: { requiresVIP: true } });
+    const totalEndpoints = await ApiEndpoint.count();
+    const premiumEndpoints = await ApiEndpoint.count({ where: { status: { [Op.in]: ['vip', 'premium'] } } });
 
     const topActions = await ActivityLog.findAll({
       attributes: [
@@ -1558,24 +1566,28 @@ router.post('/admin/bulk/endpoints/import', authenticate, authorize('admin'), as
         }
 
         const method = endpointData.method || 'GET';
-        const existingEndpoint = await VIPEndpoint.findOne({
+        const existingEndpoint = await ApiEndpoint.findOne({
           where: { path: endpointData.path, method }
         });
 
         if (existingEndpoint) {
-          await existingEndpoint.update({
-            requiresVIP: endpointData.requiresVIP !== undefined ? endpointData.requiresVIP : existingEndpoint.requiresVIP,
+          const updateData = {
             description: endpointData.description || existingEndpoint.description,
             name: endpointData.name || existingEndpoint.name,
             category: endpointData.category || existingEndpoint.category
-          });
+          };
+          if (endpointData.requiresVIP !== undefined) {
+            updateData.status = endpointData.requiresVIP ? 'vip' : 'free';
+          }
+          await existingEndpoint.update(updateData);
           createdEndpoints.push(existingEndpoint);
         } else {
-          const newEndpoint = await VIPEndpoint.create({
+          const status = endpointData.requiresVIP !== undefined ? (endpointData.requiresVIP ? 'vip' : 'free') : 'vip';
+          const newEndpoint = await ApiEndpoint.create({
             path: endpointData.path,
             method,
             description: endpointData.description || null,
-            requiresVIP: endpointData.requiresVIP !== undefined ? endpointData.requiresVIP : true,
+            status: status,
             name: endpointData.name || null,
             category: endpointData.category || null
           });
@@ -1885,7 +1897,7 @@ router.get('/admin/health', authenticate, authorize('admin'), async (req, res) =
       databaseStatus = 'unhealthy';
     }
 
-    const endpointStats = await VIPEndpoint.count();
+    const endpointStats = await ApiEndpoint.count();
     const userCount = await User.count();
 
     const recentLogs = await ActivityLog.count({
