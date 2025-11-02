@@ -7,7 +7,7 @@ import cookieParser from "cookie-parser";
 import jwt from "jsonwebtoken";
 import chokidar from "chokidar";
 import { readFileSync } from "fs";
-import { initDatabase, VIPEndpoint, User } from "./models/index.js";
+import { initDatabase, User } from "./models/index.js";
 import { initEndpointDatabase, ApiEndpoint } from "./models/endpoint/index.js";
 import authRoutes from "./routes/auth.js";
 import adminRoutes from "./routes/admin.js";
