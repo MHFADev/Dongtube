@@ -68,6 +68,7 @@ Preferred communication style: Simple, everyday language.
 - **Caching Strategy**: Implements in-memory Map-based caching with TTL for specific data to reduce database queries.
 - **Background Music**: Auto-plays background music with a visual vinyl disc animation and volume controls.
 - **Security**: Admin routes are protected by authentication, authorization middleware, JWT tokens, role-based access control (RBAC), and bcrypt password hashing.
+- **GitHub OAuth Integration** (November 2025): Users can authenticate using GitHub OAuth via passport-github2 strategy. User model includes `githubId` field for linking GitHub accounts. OAuth flow handles both new user creation and existing user linking by email, with automatic JWT token issuance and cookie management. Replaces previous Google OAuth implementation.
 - **Instant VIP Access System**: `refresh-token` endpoint allows users to get updated access immediately after role changes without logout/login, with real-time database checks for VIP status.
 - **Real-Time VIP Access System**: Server-Sent Events (SSE) infrastructure broadcasts role changes instantly to connected users, eliminating the need for manual refresh or logout/login. Features include:
   - EventEmitter-based pub/sub system for role change notifications
