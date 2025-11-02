@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import { readdirSync } from 'fs';
 import path from 'path';
 import express from 'express';
-import { VIPEndpoint } from '../models/index.js';
+import { ApiEndpoint } from '../models/endpoint/index.js';
 import sequelize from '../config/database.js';
 import { refreshVIPCache } from '../middleware/auth.js';
 
@@ -211,7 +211,7 @@ class RouteManager {
             return { status: 'skipped' };
           }
 
-          const [record, isCreated] = await VIPEndpoint.findOrCreate({
+          const [record, isCreated] = await ApiEndpoint.findOrCreate({
             where: { path, method },
             defaults: {
               path,
@@ -220,7 +220,7 @@ class RouteManager {
               description: endpoint.description || endpoint.desc || null,
               category: endpoint.category || null,
               parameters: endpoint.parameters || endpoint.params || null,
-              requiresVIP: false
+              status: 'free'
             },
             transaction
           });

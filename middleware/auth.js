@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { User, VIPEndpoint, ApiEndpoint } from '../models/index.js';
+import { User, ApiEndpoint } from '../models/index.js';
 import { Op } from 'sequelize';
 
 const JWT_SECRET = process.env.JWT_SECRET;

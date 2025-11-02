@@ -1,6 +1,5 @@
 import sequelize from '../config/database.js';
 import User from './User.js';
-import VIPEndpoint from './VIPEndpoint.js';
 import VersionHistory from './VersionHistory.js';
 import ActivityLog from './ActivityLog.js';
 import RateLimitConfig from './RateLimitConfig.js';
@@ -21,8 +20,6 @@ const initDatabase = async () => {
     console.log('📊 Syncing database tables...');
     await User.sync({ alter: true });
     console.log('  ✓ User table synced');
-    await VIPEndpoint.sync({ alter: true });
-    console.log('  ✓ VIPEndpoint table synced');
     await VersionHistory.sync({ alter: true });
     console.log('  ✓ VersionHistory table synced');
     await ActivityLog.sync({ alter: true });
@@ -77,7 +74,6 @@ const initDatabase = async () => {
 export { 
   sequelize, 
   User, 
-  VIPEndpoint, 
   VersionHistory,
   ActivityLog,
   RateLimitConfig,
