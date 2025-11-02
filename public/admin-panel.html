@@ -1655,7 +1655,21 @@
       <div id="bulk-actions" class="bulk-actions">
         <span class="bulk-info"><span id="selected-count">0</span> endpoint(s) selected</span>
         <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-          <button class="btn btn-success" onclick="bulkSetStatus(true)">
+          <button class="btn btn-success" onclick="bulkSetActive(true)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            Enable Selected
+          </button>
+          <button class="btn btn-danger" onclick="bulkSetActive(false)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Disable Selected
+          </button>
+          <button class="btn btn-success" onclick="bulkSetStatus(true)" style="margin-left: 12px;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor"/>
             </svg>
@@ -2466,17 +2480,17 @@
                   </span>
                 </td>
                 <td>
-                  <span class="badge ${ep.isActive ? 'badge-success' : 'badge-warning'}" 
-                    style="cursor: pointer;" 
+                  <span class="badge ${ep.isActive ? 'badge-success' : 'badge-error'}" 
+                    style="cursor: pointer; ${!ep.isActive ? 'font-weight: 700; animation: pulse 2s infinite;' : ''}" 
                     onclick="toggleActiveStatus(${ep.id})"
-                    title="Click to ${ep.isActive ? 'hide' : 'show'} endpoint">
+                    title="Click to ${ep.isActive ? 'disable' : 'enable'} endpoint">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       ${ep.isActive ? 
                         '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>' :
                         '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
                       }
                     </svg>
-                    ${ep.isActive ? 'Visible' : 'Hidden'}
+                    ${ep.isActive ? '✓ ENABLED' : '✗ DISABLED'}
                   </span>
                 </td>
                 <td>
@@ -2604,6 +2618,66 @@
           confirmText: 'Ya, Ubah Sekarang',
           cancelText: 'Batal',
           type: requiresVIP ? 'warning' : 'info'
+        }
+      );
+    }
+
+    async function bulkSetActive(isActive) {
+      if (selectedEndpoints.size === 0) {
+        showToast('Error', 'Tidak ada endpoint yang dipilih', 'error');
+        return;
+      }
+
+      const actionText = isActive ? 'ENABLE (Tampil di index.html)' : 'DISABLE (Tidak tampil di index.html)';
+      const icon = isActive ? '👁️' : '🔒';
+      
+      showConfirm(
+        `${icon} Apakah Anda yakin ingin ${actionText} ${selectedEndpoints.size} endpoint(s)?\n\nPerubahan akan langsung terlihat oleh user dan data akan update di database.`,
+        async () => {
+          try {
+            let successCount = 0;
+            let failCount = 0;
+            
+            for (const id of selectedEndpoints) {
+              try {
+                const response = await fetch(`/admin/endpoints-db/${id}`, {
+                  method: 'PUT',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  credentials: 'include',
+                  body: JSON.stringify({ isActive })
+                });
+
+                if (response.ok) {
+                  successCount++;
+                } else {
+                  failCount++;
+                }
+              } catch (error) {
+                failCount++;
+                console.error(`Failed to update endpoint ${id}:`, error);
+              }
+            }
+
+            await loadEndpoints();
+            await refreshStats();
+            clearSelection();
+            
+            if (failCount === 0) {
+              showToast('Berhasil!', `${icon} Berhasil ${isActive ? 'enable' : 'disable'} ${successCount} endpoint(s). Perubahan sudah tersimpan di database!`, 'success');
+            } else {
+              showToast('Selesai dengan Error', `${successCount} berhasil, ${failCount} gagal. Periksa console untuk detail.`, 'warning');
+            }
+          } catch (error) {
+            showToast('Error', 'Terjadi kesalahan saat bulk update endpoints', 'error');
+          }
+        },
+        {
+          title: `${icon} Bulk ${isActive ? 'Enable' : 'Disable'} Endpoints`,
+          confirmText: 'Ya, Lanjutkan',
+          cancelText: 'Batal',
+          type: isActive ? 'success' : 'danger'
         }
       );
     }
