@@ -14,6 +14,7 @@ import adminRoutes from "./routes/admin.js";
 import sseRoutes from "./routes/sse.js";
 import endpointsRoutes from "./routes/endpoints.js";
 import adminEndpointsRoutes from "./routes/admin-endpoints.js";
+import endpointsFromRoutesRoutes from "./routes/endpoints-from-routes.js";
 import { checkVIPAccess, optionalAuth } from "./middleware/auth.js";
 import RouteManager from "./services/RouteManager.js";
 import EndpointSyncService from "./services/EndpointSyncService.js";
@@ -175,11 +176,13 @@ async function startServer() {
     app.use(authRoutes);
     app.use(adminRoutes);
     app.use(sseRoutes);
+    app.use(endpointsFromRoutesRoutes);
     app.use(endpointsRoutes);
     app.use(adminEndpointsRoutes);
     console.log(chalk.green("✓ Auth & admin routes registered\n"));
     console.log(chalk.cyan("📡 SSE real-time updates enabled\n"));
     console.log(chalk.cyan("📊 Endpoint management routes enabled\n"));
+    console.log(chalk.cyan("📁 Route-based endpoint loading enabled\n"));
     
     // STEP 2: Register core routes
     console.log(chalk.cyan("⚙️  Registering core routes...\n"));

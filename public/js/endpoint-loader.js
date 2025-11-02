@@ -298,10 +298,9 @@ Endpoints Cached: ${this.endpoints.length}
     this.loading = true;
 
     try {
-      console.log('🔄 Loading endpoints from database...');
+      console.log('🔄 Loading endpoints directly from route files...');
 
-      // Fetch endpoints from database
-      const response = await fetch('/api/endpoints?limit=1000&sortBy=priority&sortOrder=DESC');
+      const response = await fetch('/api/endpoints/from-routes?sortBy=priority&sortOrder=DESC');
       const data = await response.json();
 
       if (!data.success) {
@@ -312,14 +311,10 @@ Endpoints Cached: ${this.endpoints.length}
       this.cache = data;
       this.cacheTimestamp = currentTime;
       
-      // Update version if provided
-      if (data.version !== undefined) {
-        this.version = data.version;
-      } else {
-        this.version++;
-      }
+      this.version++;
 
-      console.log(`✓ Loaded ${this.endpoints.length} endpoints (v${this.version})`);
+      console.log(`✓ Loaded ${this.endpoints.length} endpoints from route files (v${this.version})`);
+      console.log(`📁 Source: ${data.source}, Loaded at: ${data.loadedAt}`);
 
       this.loading = false;
       return data;
@@ -383,7 +378,7 @@ Endpoints Cached: ${this.endpoints.length}
    */
   async getStats() {
     try {
-      const response = await fetch('/api/endpoints/stats');
+      const response = await fetch('/api/endpoints/from-routes/stats');
       const data = await response.json();
 
       if (!data.success) {
@@ -477,7 +472,7 @@ Endpoints Cached: ${this.endpoints.length}
     div.dataset.version = this.version;
 
     // Status badge
-    const statusBadge = this.createStatusBadge(endpoint.status);
+    const statusBadge = this.createStatusBadge(endpoint.status, endpoint);
 
     div.innerHTML = `
       <div class="endpoint-header">
@@ -515,16 +510,109 @@ Endpoints Cached: ${this.endpoints.length}
   /**
    * Create status badge HTML
    */
-  createStatusBadge(status) {
+  createStatusBadge(status, endpoint = null) {
     let badgeHTML = '';
     if (status === 'vip' || status === 'premium') {
-      badgeHTML = `<span class="vip-badge status-badge" data-status="${status}">⭐ ${status.toUpperCase()}</span>`;
+      const icon = status === 'premium' ? '👑' : '⭐';
+      const vipClass = status === 'premium' ? 'premium-badge' : 'vip-badge';
+      badgeHTML = `<span class="${vipClass} status-badge vip-glow" data-status="${status}" onclick="window.endpointLoader.showVIPModal('${status}', ${endpoint ? `'${endpoint.name}'` : 'null'}, ${endpoint ? `'${endpoint.path}'` : 'null'})">${icon} ${status.toUpperCase()} <span class="vip-sparkle">✨</span></span>`;
     } else if (status === 'disabled') {
       badgeHTML = '<span class="disabled-badge status-badge" data-status="disabled">🚫 DISABLED</span>';
     } else {
       badgeHTML = '<span class="free-badge status-badge" data-status="free">✓ FREE</span>';
     }
     return badgeHTML;
+  }
+
+  /**
+   * Show VIP Modal with complex design and animations
+   */
+  showVIPModal(status, endpointName, endpointPath) {
+    const existingModal = document.getElementById('vip-modal');
+    if (existingModal) {
+      existingModal.remove();
+    }
+
+    const modalHTML = `
+      <div id="vip-modal" class="vip-modal-overlay" onclick="if(event.target === this) this.remove();">
+        <div class="vip-modal-content">
+          <div class="vip-modal-header">
+            <div class="vip-icon-container">
+              ${status === 'premium' ? '<div class="vip-crown">👑</div>' : '<div class="vip-star">⭐</div>'}
+              <div class="vip-sparkles">
+                <span class="sparkle">✨</span>
+                <span class="sparkle">✨</span>
+                <span class="sparkle">✨</span>
+              </div>
+            </div>
+            <h2 class="vip-modal-title">${status === 'premium' ? '🌟 Premium Feature' : '⭐ VIP Feature'}</h2>
+            <p class="vip-modal-subtitle">Upgrade untuk akses unlimited!</p>
+          </div>
+          
+          <div class="vip-modal-body">
+            <div class="vip-endpoint-info">
+              <h3>📍 Endpoint yang Anda coba akses:</h3>
+              <div class="vip-endpoint-detail">
+                <code>${endpointPath || 'Unknown'}</code>
+                <p>${endpointName || 'Premium Endpoint'}</p>
+              </div>
+            </div>
+
+            <div class="vip-benefits">
+              <h3>🎁 Keuntungan ${status === 'premium' ? 'Premium' : 'VIP'} Member:</h3>
+              <ul class="vip-benefits-list">
+                <li class="benefit-item">
+                  <span class="benefit-icon">⚡</span>
+                  <span>Akses semua endpoint ${status.toUpperCase()}</span>
+                </li>
+                <li class="benefit-item">
+                  <span class="benefit-icon">🚀</span>
+                  <span>Rate limit lebih tinggi (unlimited requests)</span>
+                </li>
+                <li class="benefit-item">
+                  <span class="benefit-icon">💎</span>
+                  <span>Priority support & fast response</span>
+                </li>
+                <li class="benefit-item">
+                  <span class="benefit-icon">🔥</span>
+                  <span>Akses fitur terbaru & eksklusif</span>
+                </li>
+                <li class="benefit-item">
+                  <span class="benefit-icon">🎯</span>
+                  <span>API documentation lengkap</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="vip-cta">
+              <a href="https://wa.me/6281234567890?text=${encodeURIComponent('Halo! Saya ingin upgrade ke ' + status.toUpperCase() + ' untuk akses premium API 🚀')}" 
+                 target="_blank" 
+                 class="vip-upgrade-btn">
+                <span class="btn-icon">💬</span>
+                <span>Chat Admin untuk Upgrade</span>
+                <span class="btn-arrow">→</span>
+              </a>
+              <p class="vip-note">💡 Response cepat, proses mudah!</p>
+            </div>
+          </div>
+
+          <button class="vip-modal-close" onclick="document.getElementById('vip-modal').remove();">
+            <span>✕</span>
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    setTimeout(() => {
+      const modal = document.getElementById('vip-modal');
+      if (modal) {
+        modal.classList.add('vip-modal-show');
+      }
+    }, 10);
+
+    console.log(`🌟 VIP Modal shown for ${status} endpoint: ${endpointPath}`);
   }
 
   /**

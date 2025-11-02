@@ -288,9 +288,28 @@ export const optionalAuth = async (req, res, next) => {
   next();
 };
 
-export const refreshVIPCache = () => {
+export const refreshVIPCache = async () => {
   const oldCacheSize = vipEndpointsCache ? vipEndpointsCache.length : 0;
   vipEndpointsCache = null;
   cacheTimestamp = 0;
-  console.log(`🔄 VIP Cache cleared! Previous cache had ${oldCacheSize} VIP endpoint(s). Next request will reload from database.`);
+  
+  try {
+    vipEndpointsCache = await ApiEndpoint.findAll({
+      where: { 
+        status: { [Op.in]: ['vip', 'premium'] },
+        isActive: true
+      },
+      attributes: ['path', 'method', 'name', 'description', 'status']
+    });
+    cacheTimestamp = Date.now();
+    console.log(`🔄 VIP Cache refreshed! Changed from ${oldCacheSize} to ${vipEndpointsCache.length} VIP/Premium endpoint(s).`);
+  } catch (error) {
+    console.error('Error refreshing VIP cache:', error.message);
+  }
+  
+  return vipEndpointsCache;
+};
+
+export const getVIPEndpointsCache = () => {
+  return vipEndpointsCache || [];
 };
