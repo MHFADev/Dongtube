@@ -117,27 +117,15 @@ export const checkVIPAccess = async (req, res, next) => {
     if (!vipEndpointsCache || (currentTime - cacheTimestamp) > CACHE_DURATION) {
       const wasNull = !vipEndpointsCache;
       
-      // Query from primary database (ApiEndpoint table)
-      try {
-        vipEndpointsCache = await ApiEndpoint.findAll({
-          where: { 
-            status: { [Op.in]: ['vip', 'premium'] },
-            isActive: true
-          },
-          attributes: ['path', 'method', 'name', 'description', 'status']
-        });
-        cacheTimestamp = currentTime;
-        console.log(`📥 VIP Cache ${wasNull ? 'loaded' : 'refreshed'}: ${vipEndpointsCache.length} VIP/Premium endpoint(s)`);
-      } catch (endpointDbError) {
-        // Fallback to old VIPEndpoint table if ApiEndpoint is not available
-        console.log('⚠️  ApiEndpoint table not available, falling back to VIPEndpoint table');
-        vipEndpointsCache = await VIPEndpoint.findAll({
-          where: { requiresVIP: true },
-          attributes: ['path', 'method', 'name', 'description']
-        });
-        cacheTimestamp = currentTime;
-        console.log(`📥 VIP Cache ${wasNull ? 'loaded' : 'refreshed'} from fallback: ${vipEndpointsCache.length} VIP endpoint(s)`);
-      }
+      vipEndpointsCache = await ApiEndpoint.findAll({
+        where: { 
+          status: { [Op.in]: ['vip', 'premium'] },
+          isActive: true
+        },
+        attributes: ['path', 'method', 'name', 'description', 'status']
+      });
+      cacheTimestamp = currentTime;
+      console.log(`📥 VIP Cache ${wasNull ? 'loaded' : 'refreshed'}: ${vipEndpointsCache.length} VIP/Premium endpoint(s)`);
     }
 
     const requestPath = req.path;
