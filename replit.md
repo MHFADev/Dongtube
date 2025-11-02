@@ -10,11 +10,18 @@ Preferred communication style: Simple, everyday language.
 
 ## Core Design Principles
 - **Single Database Architecture**: All data (users, endpoints, VIP settings, logs, etc.) stored in one primary PostgreSQL database for simplicity, reliability, and easier maintenance. Endpoint tables (ApiEndpoint, EndpointCategory, EndpointUsageStats) are synchronized from route files to database at startup. Database initialization sequence: primary database tables sync via `initDatabase()`, then endpoint tables sync via `initEndpointDatabase()` called once in server.js (duplicate call removed November 2025 to fix server hang issue).
+- **Route-Based Endpoint Loading Architecture** (November 2025): Frontend loads endpoint data directly from route files via `/api/endpoints/from-routes` instead of querying database. The `RouteMetadataReader` service dynamically reads metadata from route files and enriches it with status information (free/vip/premium/disabled) from database. This hybrid approach ensures:
+  - Frontend always gets fresh data from source files (routes folder)
+  - VIP/Premium status and configuration pulled from database in real-time
+  - No database queries needed for basic endpoint listing
+  - Admin panel changes to VIP status instantly reflected via SSE
+  - 5-second cache window balances freshness and performance
 - **Real-Time Endpoint Updates**: Server-Sent Events (SSE) infrastructure broadcasts endpoint changes instantly to all connected users. When admins modify endpoint status/settings in admin panel, changes immediately reflect in user interface without page refresh. Features:
   - `EndpointEventEmitter` service for broadcasting endpoint CRUD events
   - SSE endpoint `/sse/endpoint-updates` with heartbeat and auto-reconnection
   - Frontend listeners that auto-reload endpoint data on change events
   - Visual notifications for real-time updates
+  - VIP cache auto-refresh when status changes (via `refreshVIPCache()` in middleware)
 - **Route Auto-Loading**: Dynamically discovers and registers route modules, promoting modularity and simplifying endpoint management.
 - **Hot-Reload System**: Automatically detects changes to route files and reloads them without restarting the server, ensuring zero-downtime. This system uses a centralized `RouteManager` service with mutex locking, Chokidar-based file watching, atomic router swapping, and database synchronization for endpoint metadata. It also provides admin control for manual triggers and status monitoring, and integrates with cache refreshing.
 - **Optimized for Low-End Devices**: Implements a 4-tier adaptive performance system based on device detection, dynamically adjusting animations, CSS effects, and resource loading for smooth performance on devices with 2-4GB RAM.
@@ -28,6 +35,22 @@ Preferred communication style: Simple, everyday language.
 - **Enhanced Media Preview System**: Features a modern glassmorphism UI with animated gradients, responsive grid layouts, custom audio player, image gallery, and fullscreen modal. Includes advanced media type detection and actions.
 - **Accessibility**: Includes `prefers-reduced-motion` support.
 - **Social Media Integration**: Implements Open Graph, Twitter Card tags, and SEO meta tags.
+- **Complex VIP Modal System** (November 2025): Interactive premium upgrade modal with sophisticated design featuring:
+  - Animated crown/star icons with floating and glow effects
+  - Sparkle particles with rotation and scaling animations
+  - Gradient text with shimmer effect on title
+  - Benefit list with hover animations and icons
+  - WhatsApp CTA button with shine animation
+  - Glassmorphism background with backdrop blur
+  - Mobile-responsive design with reduced motion support
+  - Performance-optimized animations for low-end devices (potato/low modes disable complex effects)
+- **Dynamic VIP Badges** (November 2025): Interactive status badges with visual effects:
+  - VIP badge: Golden gradient with star icon and sparkle effect
+  - Premium badge: Orange-red gradient with crown icon
+  - Continuous glow pulse animation (2s loop)
+  - Rotating sparkle icon (2s rotation)
+  - Onclick handler to show VIP upgrade modal
+  - Hover effects with scale transform
 - **Smart VIP Popup Logic**: Differentiates between three states: unauthenticated users (login prompt), authenticated non-VIP users (upgrade prompt), and expired VIP users (renewal prompt with expiration date), displaying context-sensitive messages based on authentication and VIP status.
 - **UI Layer Management**: Ensures proper z-index hierarchy and prevents overlapping issues for interactive elements.
 - **Tab-Aware Audio Control**: Background music automatically pauses/resumes based on tab visibility using the Visibility API.
