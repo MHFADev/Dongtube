@@ -7,10 +7,42 @@ import { generateToken, authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
 
+// Function to get the base URL for OAuth callbacks
+function getBaseUrl() {
+  // Priority 1: Custom environment variable (set this in Vercel/production)
+  if (process.env.BASE_URL) {
+    return process.env.BASE_URL;
+  }
+  
+  // Priority 2: Vercel URL
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  
+  // Priority 3: Replit domains
+  if (process.env.REPLIT_DOMAINS) {
+    const domains = process.env.REPLIT_DOMAINS.split(',');
+    return `https://${domains[0]}`;
+  }
+  
+  // Priority 4: Construct from Replit slug and owner
+  if (process.env.REPL_SLUG && process.env.REPL_OWNER) {
+    return `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`;
+  }
+  
+  // Fallback for local development
+  return 'http://localhost:3000';
+}
+
+const baseUrl = getBaseUrl();
+const callbackURL = `${baseUrl}/auth/github/callback`;
+
+console.log(`🔐 GitHub OAuth Callback URL: ${callbackURL}`);
+
 passport.use(new GitHubStrategy({
   clientID: process.env.GITHUB_CLIENT_ID || 'dummy-client-id',
   clientSecret: process.env.GITHUB_CLIENT_SECRET || 'dummy-secret',
-  callbackURL: `/auth/github/callback`,
+  callbackURL: callbackURL,
   passReqToCallback: true
 }, async (req, accessToken, refreshToken, profile, done) => {
   try {
