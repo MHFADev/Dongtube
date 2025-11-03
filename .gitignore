@@ -9,3 +9,14 @@ yarn-error.log*
 *.log
 .replit
 replit.nix
+
+# Vercel
+.vercel
+.vercel.json.bak
+
+# Development
+.cache/
+.local/
+
+# Logs
+/tmp/logs/

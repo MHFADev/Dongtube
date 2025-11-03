@@ -137,57 +137,90 @@ function startFileWatcher() {
   }
 }
 
+// Detect if running in serverless environment (Vercel)
+const isServerless = !!(process.env.VERCEL || process.env.VERCEL_URL);
+
 // Export routeManager and endpointSyncService for admin endpoints
 export { routeManager, endpointSyncService };
 
-// ==================== START SERVER ====================
-async function startServer() {
+// ==================== INITIALIZE APP ====================
+let isInitialized = false;
+
+async function initializeApp() {
+  if (isInitialized) {
+    if (!isServerless) {
+      console.log(chalk.yellow("⚠️  App already initialized, skipping...\n"));
+    }
+    return true;
+  }
+  
   try {
     // STEP 0: Initialize primary database
-    console.log(chalk.cyan("🗄️  Initializing primary database...\n"));
+    if (!isServerless) {
+      console.log(chalk.cyan("🗄️  Initializing primary database...\n"));
+    }
     const dbInitialized = await initDatabase();
     
     if (!dbInitialized) {
       console.error(chalk.red("Failed to initialize primary database. Exiting..."));
-      process.exit(1);
+      if (!isServerless) {
+        process.exit(1);
+      }
+      return false;
     }
     
-    console.log(chalk.green("✓ Primary database initialized\n"));
+    if (!isServerless) {
+      console.log(chalk.green("✓ Primary database initialized\n"));
+    }
     
     // STEP 0.5: Initialize endpoint database (second database)
-    console.log(chalk.cyan("🗄️  Initializing endpoint database (Database #2)...\n"));
+    if (!isServerless) {
+      console.log(chalk.cyan("🗄️  Initializing endpoint database (Database #2)...\n"));
+    }
     const endpointDbInitialized = await initEndpointDatabase();
     
     if (!endpointDbInitialized) {
-      console.error(chalk.red("Failed to initialize endpoint database. Continuing with primary database only..."));
-      console.log(chalk.yellow("⚠️  Endpoint management features will be disabled\n"));
+      if (!isServerless) {
+        console.error(chalk.red("Failed to initialize endpoint database. Continuing with primary database only..."));
+        console.log(chalk.yellow("⚠️  Endpoint management features will be disabled\n"));
+      }
     } else {
-      console.log(chalk.green("✓ Endpoint database initialized\n"));
+      if (!isServerless) {
+        console.log(chalk.green("✓ Endpoint database initialized\n"));
+      }
       
-      // STEP 0.6: Schedule async sync (non-blocking)
-      console.log(chalk.cyan("📅 Scheduled async endpoint sync after server start\n"));
-      setTimeout(async () => {
-        console.log(chalk.cyan("🔄 Starting background endpoint sync...\n"));
-        await endpointSyncService.syncRoutesToDatabase();
-        console.log(chalk.green("✓ Background endpoint sync completed\n"));
-      }, 5000); // Sync 5 seconds after server starts
+      // STEP 0.6: Schedule async sync (non-blocking) - only in non-serverless mode
+      if (!isServerless) {
+        console.log(chalk.cyan("📅 Scheduled async endpoint sync after server start\n"));
+        setTimeout(async () => {
+          console.log(chalk.cyan("🔄 Starting background endpoint sync...\n"));
+          await endpointSyncService.syncRoutesToDatabase();
+          console.log(chalk.green("✓ Background endpoint sync completed\n"));
+        }, 5000); // Sync 5 seconds after server starts
+      }
     }
     
     // STEP 1: Register auth and admin routes
-    console.log(chalk.cyan("🔐 Registering authentication routes...\n"));
+    if (!isServerless) {
+      console.log(chalk.cyan("🔐 Registering authentication routes...\n"));
+    }
     app.use(authRoutes);
     app.use(adminRoutes);
     app.use(sseRoutes);
     app.use(endpointsFromRoutesRoutes);
     app.use(endpointsRoutes);
     app.use(adminEndpointsRoutes);
-    console.log(chalk.green("✓ Auth & admin routes registered\n"));
-    console.log(chalk.cyan("📡 SSE real-time updates enabled\n"));
-    console.log(chalk.cyan("📊 Endpoint management routes enabled\n"));
-    console.log(chalk.cyan("📁 Route-based endpoint loading enabled\n"));
+    if (!isServerless) {
+      console.log(chalk.green("✓ Auth & admin routes registered\n"));
+      console.log(chalk.cyan("📡 SSE real-time updates enabled\n"));
+      console.log(chalk.cyan("📊 Endpoint management routes enabled\n"));
+      console.log(chalk.cyan("📁 Route-based endpoint loading enabled\n"));
+    }
     
     // STEP 2: Register core routes
-    console.log(chalk.cyan("⚙️  Registering core routes...\n"));
+    if (!isServerless) {
+      console.log(chalk.cyan("⚙️  Registering core routes...\n"));
+    }
     
     app.get("/health", (req, res) => {
       res.json({
@@ -356,15 +389,23 @@ async function startServer() {
       });
     });
     
-    console.log(chalk.green("✓ Core routes registered\n"));
+    if (!isServerless) {
+      console.log(chalk.green("✓ Core routes registered\n"));
+    }
     
     // STEP 3: Apply VIP protection middleware (before loading routes)
-    console.log(chalk.cyan("🔒 Applying VIP protection middleware...\n"));
+    if (!isServerless) {
+      console.log(chalk.cyan("🔒 Applying VIP protection middleware...\n"));
+    }
     app.use(checkVIPAccess);
-    console.log(chalk.green("✓ VIP middleware active\n"));
+    if (!isServerless) {
+      console.log(chalk.green("✓ VIP middleware active\n"));
+    }
     
     // STEP 4: Mount dynamic router proxy
-    console.log(chalk.cyan("🔧 Mounting dynamic route proxy...\n"));
+    if (!isServerless) {
+      console.log(chalk.cyan("🔧 Mounting dynamic route proxy...\n"));
+    }
     app.use((req, res, next) => {
       const activeRouter = routeManager.getActiveRouter();
       if (activeRouter) {
@@ -373,10 +414,14 @@ async function startServer() {
         next();
       }
     });
-    console.log(chalk.green("✓ Dynamic router proxy mounted\n"));
+    if (!isServerless) {
+      console.log(chalk.green("✓ Dynamic router proxy mounted\n"));
+    }
     
     // STEP 5: Register 404 handler (MUST BE LAST!)
-    console.log(chalk.cyan("⚙️  Registering error handlers...\n"));
+    if (!isServerless) {
+      console.log(chalk.cyan("⚙️  Registering error handlers...\n"));
+    }
     
     app.use((req, res) => {
       res.status(404).json({
@@ -397,34 +442,63 @@ async function startServer() {
       });
     });
     
-    console.log(chalk.green("✓ Error handlers registered\n"));
+    if (!isServerless) {
+      console.log(chalk.green("✓ Error handlers registered\n"));
+    }
     
-    // STEP 6: Start listening FIRST (before route load)
-    const PORT = process.env.PORT || 5000;
-    
-    app.listen(PORT, '0.0.0.0', async () => {
-      console.log(chalk.bgGreen.black(`\n ✓ Server running on port ${PORT} `));
-      console.log(chalk.cyan(`\n📚 Home: http://localhost:${PORT}`));
-      console.log(chalk.cyan(`📚 API Docs: http://localhost:${PORT}/api/docs`));
-      console.log(chalk.cyan(`📚 Debug: http://localhost:${PORT}/debug/routes`));
-      console.log(chalk.yellow(`\n🔥 Test endpoint: http://localhost:${PORT}/api/test\n`));
-      
-      // STEP 6.5: Load routes asynchronously AFTER server is listening
-      console.log(chalk.cyan("📦 Loading initial routes (async)...\n"));
-      await routeManager.reload();
+    // STEP 6: Load routes (synchronously in serverless, after server start in regular mode)
+    if (!isServerless) {
+      console.log(chalk.cyan("📦 Loading initial routes...\n"));
+    }
+    await routeManager.reload();
+    if (!isServerless) {
       console.log(chalk.green("✓ Initial routes loaded\n"));
       console.log(chalk.bgBlue.white(` ℹ Total endpoints: ${routeManager.getAllEndpoints().length} `));
-      
-      // STEP 6.6: Start file watcher for hot-reload
-      startFileWatcher();
-    });
+    }
+    
+    isInitialized = true;
+    return true;
     
   } catch (err) {
     console.error(chalk.bgRed.white(` Failed: ${err.message} `));
-    process.exit(1);
+    if (!isServerless) {
+      process.exit(1);
+    }
+    return false;
   }
 }
 
-startServer();
+// ==================== START SERVER ====================
+async function startServer() {
+  // Initialize app first
+  const initialized = await initializeApp();
+  
+  if (!initialized) {
+    console.error(chalk.red("Failed to initialize app. Exiting..."));
+    process.exit(1);
+  }
+  
+  // Start HTTP server (not needed in serverless)
+  const PORT = process.env.PORT || 5000;
+  
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(chalk.bgGreen.black(`\n ✓ Server running on port ${PORT} `));
+    console.log(chalk.cyan(`\n📚 Home: http://localhost:${PORT}`));
+    console.log(chalk.cyan(`📚 API Docs: http://localhost:${PORT}/api/docs`));
+    console.log(chalk.cyan(`📚 Debug: http://localhost:${PORT}/debug/routes`));
+    console.log(chalk.yellow(`\n🔥 Test endpoint: http://localhost:${PORT}/api/test\n`));
+    
+    // Start file watcher for hot-reload (only in non-serverless mode)
+    if (!isServerless) {
+      startFileWatcher();
+    }
+  });
+}
+
+// Only start server if not in serverless mode
+if (!isServerless) {
+  startServer();
+}
 
 export default app;
+export { initializeApp };

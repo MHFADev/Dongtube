@@ -30,8 +30,10 @@ function getBaseUrl() {
     return `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`;
   }
   
-  // Fallback for local development
-  return 'http://localhost:3000';
+  // Fallback for local development (use same port as server)
+  const port = process.env.PORT || 5000;
+  console.warn(`⚠️  Using localhost fallback for OAuth. Set BASE_URL environment variable for production.`);
+  return `http://localhost:${port}`;
 }
 
 const baseUrl = getBaseUrl();
